@@ -15,6 +15,9 @@ import {
   Car,
   Clock,
   ShieldAlert,
+  Gauge,
+  Key,
+  CreditCard,
 } from "lucide-react";
 
 type VacantRoom = {
@@ -397,6 +400,87 @@ export default function NewContractForm({
                 max="28"
                 defaultValue={defaultSettings.defaultDueDay}
                 className="w-full px-3 py-2 rounded-xl bg-[#0c0a18] border border-violet-950/80 text-xs text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* 4. ตรวจรับห้องพักและมิเตอร์เริ่มต้น (Check-in Checklist) */}
+        <div className="space-y-4 pt-3 border-t border-violet-950/60">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-violet-300 uppercase tracking-wider flex items-center gap-2">
+              <Gauge className="w-4 h-4 text-cyan-400" />
+              ตรวจรับห้องพักและเลขมิเตอร์เริ่มต้น ณ วันเข้าอยู่
+            </h3>
+            <span className="text-[11px] text-zinc-500">
+              ใช้สำหรับคิดค่าน้ำ-ไฟงวดแรกและตรวจสอบตอนย้ายออก
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 p-4 rounded-2xl bg-[#0d0a1c] border border-violet-950/70">
+            {/* มิเตอร์น้ำเริ่มต้น */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+                เลขมิเตอร์น้ำเริ่มต้น (หน่วย)
+              </label>
+              <input
+                type="number"
+                name="startWaterMeter"
+                required
+                min="0"
+                defaultValue={0}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#090714] border border-violet-950/80 text-sm text-cyan-300 font-bold focus:outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+              <p className="text-[11px] text-zinc-500">จดจากมาตรวัดน้ำหน้าห้อง ณ วันส่งมอบ</p>
+            </div>
+
+            {/* มิเตอร์ไฟเริ่มต้น */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                เลขมิเตอร์ไฟฟ้าเริ่มต้น (หน่วย)
+              </label>
+              <input
+                type="number"
+                name="startElectricMeter"
+                required
+                min="0"
+                defaultValue={0}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#090714] border border-violet-950/80 text-sm text-amber-300 font-bold focus:outline-none focus:ring-2 focus:ring-amber-500"
+              />
+              <p className="text-[11px] text-zinc-500">จดจากมาตรวัดไฟฟ้าหน้าห้อง ณ วันส่งมอบ</p>
+            </div>
+
+            {/* จำนวนกุญแจห้อง */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+                <Key className="w-3.5 h-3.5 text-violet-400" />
+                จำนวนกุญแจห้องที่ส่งมอบ (ดอก)
+              </label>
+              <input
+                type="number"
+                name="keyCount"
+                required
+                min="1"
+                defaultValue={1}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#090714] border border-violet-950/80 text-sm text-white font-bold focus:outline-none focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+
+            {/* จำนวนคีย์การ์ด */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+                <CreditCard className="w-3.5 h-3.5 text-fuchsia-400" />
+                จำนวนคีย์การ์ด / เหรียญสแกน (ใบ)
+              </label>
+              <input
+                type="number"
+                name="keyCardCount"
+                required
+                min="0"
+                defaultValue={0}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#090714] border border-violet-950/80 text-sm text-white font-bold focus:outline-none focus:ring-2 focus:ring-fuchsia-500"
               />
             </div>
           </div>

@@ -29,6 +29,10 @@ export async function createContract(
   const electricRate = parseFloat(formData.get("electricRate")?.toString() || "8");
   const lateFee = parseFloat(formData.get("lateFee")?.toString() || "50");
   const dueDay = parseInt(formData.get("dueDay")?.toString() || "5", 10);
+  const startWaterMeter = parseInt(formData.get("startWaterMeter")?.toString() || "0", 10);
+  const startElectricMeter = parseInt(formData.get("startElectricMeter")?.toString() || "0", 10);
+  const keyCount = parseInt(formData.get("keyCount")?.toString() || "1", 10);
+  const keyCardCount = parseInt(formData.get("keyCardCount")?.toString() || "0", 10);
 
   const fieldErrors: Record<string, string> = {};
 
@@ -102,6 +106,10 @@ export async function createContract(
           electricRate,
           lateFee,
           dueDay,
+          startWaterMeter: isNaN(startWaterMeter) ? 0 : Math.max(0, startWaterMeter),
+          startElectricMeter: isNaN(startElectricMeter) ? 0 : Math.max(0, startElectricMeter),
+          keyCount: isNaN(keyCount) ? 1 : Math.max(0, keyCount),
+          keyCardCount: isNaN(keyCardCount) ? 0 : Math.max(0, keyCardCount),
           status: "active",
         },
       });
@@ -295,4 +303,108 @@ export async function cancelContract(contractId: number): Promise<ContractFormSt
   revalidatePath("/dashboard");
   revalidatePath("/");
   redirect("/contracts");
+}
+
+// -----------------------------------------------------------------------------
+// 4. ต่ออายุสัญญาเช่า (Renew Contract)
+// -----------------------------------------------------------------------------
+export async function renewContract(
+  contractId: number,
+  formData: FormData
+): Promise<ContractFormState> {
+  const startDateStr = formData.get("startDate")?.toString().trim() || "";
+  const endDateStr = formData.get("endDate")?.toString().trim() || "";
+  const monthlyRent = parseFloat(formData.get("monthlyRent")?.toString() || "0");
+  const deposit = parseFloat(formData.get("deposit")?.toString() || "0");
+  const waterRate = parseFloat(formData.get("waterRate")?.toString() || "18");
+  const electricRate = parseFloat(formData.get("electricRate")?.toString() || "8");
+  const lateFee = parseFloat(formData.get("lateFee")?.toString() || "50");
+  const dueDay = parseInt(formData.get("dueDay")?.toString() || "5", 10);
+  const startWaterMeter = parseInt(formData.get("startWaterMeter")?.toString() || "0", 10);
+  const startElectricMeter = parseInt(formData.get("startElectricMeter")?.toString() || "0", 10);
+  const keyCount = parseInt(formData.get("keyCount")?.toString() || "1", 10);
+  const keyCardCount = parseInt(formData.get("keyCardCount")?.toString() || "0", 10);
+  const renewNote = formData.get("renewNote")?.toString().trim() || "";
+
+  if (!startDateStr || !endDateStr) {
+    return { error: "กรุณาระบุวันเริ่มต้นและสิ้นสุดสัญญาใหม่" };
+  }
+  const startDate = new Date(startDateStr);
+  const endDate = new Date(endDateStr);
+  if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+    return { error: "รูปแบบวันที่ไม่ถูกต้อง" };
+  }
+  if (endDate <= startDate) {
+    return { error: "วันสิ้นสุดสัญญาใหม่ต้องมากกว่าวันเริ่มต้น" };
+  }
+  if (isNaN(monthlyRent) || monthlyRent <= 0) {
+    return { error: "ค่าเช่ารายเดือนต้องมากกว่า 0 บาท" };
+  }
+
+  let newContractId: number;
+
+  try {
+    const oldContract = await prisma.contract.findUnique({
+      where: { id: contractId },
+      include: { room: true, tenant: true },
+    });
+
+    if (!oldContract || oldContract.status !== "active") {
+      return { error: "สามารถต่ออายุได้เฉพาะสัญญาที่กำลัง Active อยู่เท่านั้น" };
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      // 1. ปิดสัญญาเดิมเป็น ended (ระบุเหตุผลว่าต่อสัญญาฉบับใหม่)
+      await tx.contract.update({
+        where: { id: contractId },
+        data: {
+          status: "ended",
+          movedOutDate: startDate,
+          exitNote: `ต่ออายุสัญญาใหม่ (ต่อเนื่องไปยังสัญญาใหม่)`,
+        },
+      });
+
+      // 2. สร้างสัญญาใหม่สำหรับห้องและผู้เช่าเดิม
+      const newContract = await tx.contract.create({
+        data: {
+          roomId: oldContract.roomId,
+          tenantId: oldContract.tenantId,
+          startDate,
+          endDate,
+          monthlyRent,
+          deposit: isNaN(deposit) ? oldContract.deposit : deposit,
+          waterRate: isNaN(waterRate) ? oldContract.waterRate : waterRate,
+          electricRate: isNaN(electricRate) ? oldContract.electricRate : electricRate,
+          lateFee: isNaN(lateFee) ? oldContract.lateFee : lateFee,
+          dueDay: isNaN(dueDay) ? oldContract.dueDay : dueDay,
+          startWaterMeter: isNaN(startWaterMeter) ? (oldContract.startWaterMeter || 0) : startWaterMeter,
+          startElectricMeter: isNaN(startElectricMeter) ? (oldContract.startElectricMeter || 0) : startElectricMeter,
+          keyCount: isNaN(keyCount) ? (oldContract.keyCount || 1) : keyCount,
+          keyCardCount: isNaN(keyCardCount) ? (oldContract.keyCardCount || 0) : keyCardCount,
+          exitNote: renewNote ? `ต่ออายุมาจากสัญญาเดิม #${oldContract.id} (${renewNote})` : `ต่ออายุมาจากสัญญาเดิม #${oldContract.id}`,
+          status: "active",
+        },
+      });
+
+      // 3. คงสถานะห้องพักเป็น occupied
+      await tx.room.update({
+        where: { id: oldContract.roomId },
+        data: { status: "occupied" },
+      });
+
+      return newContract;
+    });
+
+    newContractId = result.id;
+  } catch (err: any) {
+    return { error: err.message || "เกิดข้อผิดพลาดในการต่ออายุสัญญา" };
+  }
+
+  revalidatePath("/contracts");
+  revalidatePath(`/contracts/${contractId}`);
+  revalidatePath(`/contracts/${newContractId}`);
+  revalidatePath("/rooms");
+  revalidatePath("/dashboard");
+  revalidatePath("/");
+  redirect(`/contracts/${newContractId}`);
 }

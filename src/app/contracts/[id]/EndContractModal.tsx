@@ -21,6 +21,10 @@ type ContractInfo = {
   deposit: number;
   unpaidBalance: number;
   hasInvoices: boolean;
+  startWaterMeter?: number | null;
+  startElectricMeter?: number | null;
+  keyCount?: number | null;
+  keyCardCount?: number | null;
 };
 
 export default function EndContractModal({
@@ -133,6 +137,31 @@ export default function EndContractModal({
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-5">
+              {/* Check-in Checklist Reference */}
+              <div className="p-3.5 rounded-2xl bg-[#0b0918] border border-violet-950/70 text-xs space-y-1.5">
+                <span className="font-bold text-violet-300 flex items-center gap-1.5 text-[11px]">
+                  📋 ข้อมูลส่งมอบตอนเข้าพัก (ใช้ตรวจสอบตอนคืนห้อง)
+                </span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-zinc-300 pt-1">
+                  <div className="p-2 rounded-lg bg-[#120f24] border border-violet-950">
+                    <span className="text-zinc-500 block text-[10px]">มิเตอร์น้ำตอนเข้า</span>
+                    <strong className="text-cyan-300">{contract.startWaterMeter ?? 0} หน่วย</strong>
+                  </div>
+                  <div className="p-2 rounded-lg bg-[#120f24] border border-violet-950">
+                    <span className="text-zinc-500 block text-[10px]">มิเตอร์ไฟตอนเข้า</span>
+                    <strong className="text-amber-300">{contract.startElectricMeter ?? 0} หน่วย</strong>
+                  </div>
+                  <div className="p-2 rounded-lg bg-[#120f24] border border-violet-950">
+                    <span className="text-zinc-500 block text-[10px]">กุญแจที่ต้องคืน</span>
+                    <strong className="text-white">{contract.keyCount ?? 1} ดอก</strong>
+                  </div>
+                  <div className="p-2 rounded-lg bg-[#120f24] border border-violet-950">
+                    <span className="text-zinc-500 block text-[10px]">คีย์การ์ดที่ต้องคืน</span>
+                    <strong className="text-white">{contract.keyCardCount ?? 0} ใบ</strong>
+                  </div>
+                </div>
+              </div>
+
               {error && (
                 <div className="p-3.5 rounded-xl bg-red-950/40 border border-red-800/40 text-red-300 text-xs flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0" />

@@ -136,6 +136,10 @@ model Contract {
   depositApplied Decimal?        @default(0) @map("deposit_applied") @db.Decimal(10, 2)
   depositRefund  Decimal?        @default(0) @map("deposit_refund") @db.Decimal(10, 2)
   exitNote       String?         @map("exit_note") @db.Text
+  startWaterMeter    Int?        @default(0) @map("start_water_meter")
+  startElectricMeter Int?        @default(0) @map("start_electric_meter")
+  keyCount           Int?        @default(1) @map("key_count")
+  keyCardCount       Int?        @default(0) @map("key_card_count")
   createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz()
   updatedAt      DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
   createdBy      String?         @map("created_by") @db.Uuid

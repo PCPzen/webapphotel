@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import AppLayout from "@/components/AppLayout";
 import EndContractModal from "./EndContractModal";
+import RenewContractModal from "./RenewContractModal";
 import {
   FileText,
   ArrowLeft,
@@ -20,6 +21,10 @@ import {
   Car,
   DollarSign,
   ArrowRight,
+  Printer,
+  Gauge,
+  Key,
+  RefreshCw,
 } from "lucide-react";
 
 async function ContractDetailContent({
@@ -82,6 +87,27 @@ async function ContractDetailContent({
     deposit: Number(contract.deposit),
     unpaidBalance: totalUnpaidBalance,
     hasInvoices: contract.invoices.length > 0,
+    startWaterMeter: contract.startWaterMeter,
+    startElectricMeter: contract.startElectricMeter,
+    keyCount: contract.keyCount,
+    keyCardCount: contract.keyCardCount,
+  };
+
+  const renewModalData = {
+    id: contract.id,
+    roomNo: contract.room.roomNo,
+    tenantName: `${contract.tenant.firstName} ${contract.tenant.lastName}`,
+    currentEndDate: contract.endDate.toISOString().split("T")[0],
+    monthlyRent: Number(contract.monthlyRent),
+    deposit: Number(contract.deposit),
+    waterRate: Number(contract.waterRate),
+    electricRate: Number(contract.electricRate),
+    lateFee: Number(contract.lateFee),
+    dueDay: contract.dueDay,
+    startWaterMeter: contract.startWaterMeter,
+    startElectricMeter: contract.startElectricMeter,
+    keyCount: contract.keyCount,
+    keyCardCount: contract.keyCardCount,
   };
 
   return (
@@ -130,13 +156,26 @@ async function ContractDetailContent({
             </div>
           </div>
 
-          {/* Action Button for Active Contract */}
-          {isActive && (
-            <EndContractModal
-              contract={contractModalData}
-              initiallyOpen={action === "end"}
-            />
-          )}
+          {/* Action Buttons for Active Contract */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <Link
+              href={`/contracts/${contract.id}/print`}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 text-xs font-bold border border-violet-800/40 shadow-sm transition-all hover:scale-105"
+            >
+              <Printer className="w-4 h-4 text-violet-400" />
+              พิมพ์หนังสือสัญญา A4
+            </Link>
+
+            {isActive && (
+              <>
+                <RenewContractModal contract={renewModalData} />
+                <EndContractModal
+                  contract={contractModalData}
+                  initiallyOpen={action === "end"}
+                />
+              </>
+            )}
+          </div>
         </div>
 
         {/* Contract Key Attributes Grid */}
@@ -168,6 +207,51 @@ async function ContractDetailContent({
             <p className="text-sm font-bold text-zinc-200">
               วันที่ {contract.dueDay} (ปรับ ฿{Number(contract.lateFee)})
             </p>
+          </div>
+        </div>
+
+        {/* Check-in Inspection & Meters Checklist */}
+        <div className="p-4 rounded-2xl bg-[#0d0a1d] border border-violet-950/80 space-y-2.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-bold text-violet-300 flex items-center gap-1.5">
+              <Gauge className="w-4 h-4 text-cyan-400" />
+              ตรวจรับห้องพักและมิเตอร์เริ่มต้น ณ วันเข้าอยู่ (Check-in Checklist)
+            </span>
+            <span className="text-[11px] text-zinc-500">บันทึกเป็นฐานข้อมูลเริ่มต้นสำหรับคิดค่าน้ำ-ไฟ</span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div className="p-3 rounded-xl bg-[#080612] border border-violet-950/60 flex items-center justify-between">
+              <div>
+                <span className="text-[11px] text-zinc-500 block">มิเตอร์น้ำเริ่มต้น</span>
+                <strong className="text-cyan-400 font-mono text-sm">{contract.startWaterMeter ?? 0} หน่วย</strong>
+              </div>
+              <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-[#080612] border border-violet-950/60 flex items-center justify-between">
+              <div>
+                <span className="text-[11px] text-zinc-500 block">มิเตอร์ไฟฟ้าเริ่มต้น</span>
+                <strong className="text-amber-400 font-mono text-sm">{contract.startElectricMeter ?? 0} หน่วย</strong>
+              </div>
+              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+            </div>
+
+            <div className="p-3 rounded-xl bg-[#080612] border border-violet-950/60 flex items-center justify-between">
+              <div>
+                <span className="text-[11px] text-zinc-500 block">กุญแจห้องพัก</span>
+                <strong className="text-white font-mono text-sm">{contract.keyCount ?? 1} ดอก</strong>
+              </div>
+              <Key className="w-4 h-4 text-violet-400" />
+            </div>
+
+            <div className="p-3 rounded-xl bg-[#080612] border border-violet-950/60 flex items-center justify-between">
+              <div>
+                <span className="text-[11px] text-zinc-500 block">คีย์การ์ด / เหรียญสแกน</span>
+                <strong className="text-white font-mono text-sm">{contract.keyCardCount ?? 0} ใบ</strong>
+              </div>
+              <CreditCard className="w-4 h-4 text-fuchsia-400" />
+            </div>
           </div>
         </div>
 
