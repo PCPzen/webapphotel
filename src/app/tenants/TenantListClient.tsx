@@ -26,6 +26,8 @@ type TenantItem = {
   maskedIdCard: string;
   phone: string;
   email: string | null;
+  lineId?: string | null;
+  vehicleInfo?: string | null;
   currentRoom: {
     id: number;
     roomNo: string;
@@ -54,8 +56,11 @@ export default function TenantListClient({ initialTenants }: { initialTenants: T
       const matchPhone = tenant.phone.includes(q);
       const matchRoom = tenant.currentRoom?.roomNo.toLowerCase().includes(q);
       const matchIdLast4 = tenant.idCardNo.slice(-4).includes(q);
+      const matchLine = Boolean(tenant.lineId && tenant.lineId.toLowerCase().includes(q));
+      const matchVehicle = Boolean(tenant.vehicleInfo && tenant.vehicleInfo.toLowerCase().includes(q));
 
-      const matchSearch = !q || matchName || matchPhone || matchRoom || matchIdLast4;
+      const matchSearch =
+        !q || matchName || matchPhone || matchRoom || matchIdLast4 || matchLine || matchVehicle;
 
       if (!matchSearch) return false;
 

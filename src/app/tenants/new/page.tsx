@@ -3,7 +3,7 @@
 import { useState, useActionState } from "react";
 import Link from "next/link";
 import { createTenant, TenantFormState } from "@/actions/tenants";
-import { validateThaiId, calculateAge, cleanPhoneNumber } from "@/lib/thaiId";
+import { validateThaiId, calculateAge } from "@/lib/thaiId";
 import {
   UserPlus,
   ArrowLeft,
@@ -16,6 +16,10 @@ import {
   Sparkles,
   AlertTriangle,
   ExternalLink,
+  MessageCircle,
+  Car,
+  Users,
+  ArrowRight,
 } from "lucide-react";
 import AppLayout from "@/components/AppLayout";
 
@@ -67,7 +71,7 @@ export default function NewTenantPage() {
             <div>
               <h1 className="text-xl font-black text-white">ลงทะเบียนประวัติผู้เช่าใหม่</h1>
               <p className="text-xs text-zinc-400 mt-0.5">
-                บันทึกข้อมูลส่วนบุคคล ตรวจสอบเลขบัตร 13 หลัก (BR-01) และคำนวณอายุอัตโนมัติ
+                บันทึกข้อมูลส่วนบุคคล ตรวจสอบเลขบัตร 13 หลัก (BR-01) ยานพาหนะ และช่องทางติดต่อ
               </p>
             </div>
           </div>
@@ -222,14 +226,14 @@ export default function NewTenantPage() {
               </div>
             </div>
 
-            {/* 2. ข้อมูลการติดต่อ */}
+            {/* 2. ข้อมูลการติดต่อ & LINE ID */}
             <div className="space-y-4 pt-4 border-t border-violet-950/60">
               <h3 className="text-xs font-bold text-violet-300 uppercase tracking-wider flex items-center gap-2">
                 <Phone className="w-4 h-4 text-emerald-400" />
-                ข้อมูลการติดต่อและที่อยู่
+                ข้อมูลการติดต่อและโซเชียล
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {/* เบอร์โทรศัพท์ (BR-14) */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-zinc-300">
@@ -248,10 +252,23 @@ export default function NewTenantPage() {
                   {state?.fieldErrors?.phone && (
                     <p className="text-[11px] text-red-400">{state.fieldErrors.phone}</p>
                   )}
-                  <p className="text-[11px] text-zinc-500">10 หลักขึ้นต้นด้วย 0 ตามกฎ BR-14</p>
                 </div>
 
-                {/* อีเมล (ไม่บังคับ) */}
+                {/* LINE ID (ใช้งานจริง) */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+                    <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+                    LINE ID (สำหรับส่งบิล)
+                  </label>
+                  <input
+                    type="text"
+                    name="lineId"
+                    placeholder="เช่น somchai_line"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#0c0a18] border border-violet-950/80 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  />
+                </div>
+
+                {/* อีเมล */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-zinc-300">อีเมล (ถ้ามี)</label>
                   <input
@@ -281,7 +298,47 @@ export default function NewTenantPage() {
               </div>
             </div>
 
-            {/* 3. ผู้ติดต่อฉุกเฉิน */}
+            {/* 3. ยานพาหนะ & ผู้พักอาศัยร่วม (Real-World Dormitory Features) */}
+            <div className="space-y-4 pt-4 border-t border-violet-950/60">
+              <h3 className="text-xs font-bold text-violet-300 uppercase tracking-wider flex items-center gap-2">
+                <Car className="w-4 h-4 text-cyan-400" />
+                ยานพาหนะและผู้พักอาศัยร่วม
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* ยานพาหนะ / ทะเบียนรถ */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+                    <Car className="w-3.5 h-3.5 text-cyan-400" />
+                    ยานพาหนะและทะเบียนรถ (ถ้ามี)
+                  </label>
+                  <input
+                    type="text"
+                    name="vehicleInfo"
+                    placeholder="เช่น Honda Wave 110i ทะเบียน 1กข 1234 ชม."
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#0c0a18] border border-violet-950/80 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  />
+                  <p className="text-[11px] text-zinc-500">สำหรับจัดสติ๊กเกอร์ที่จอดรถและติดต่อกรณีฉุกเฉิน</p>
+                </div>
+
+                {/* ผู้พักอาศัยร่วม / รูมเมท */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+                    <Users className="w-3.5 h-3.5 text-violet-400" />
+                    ผู้พักอาศัยร่วม / รูมเมท (ถ้ามี)
+                  </label>
+                  <input
+                    type="text"
+                    name="coTenantName"
+                    placeholder="เช่น สมศรี ใจดี (เพื่อนร่วมห้อง โทร 082-xxx-xxxx)"
+                    className="w-full px-4 py-2.5 rounded-xl bg-[#0c0a18] border border-violet-950/80 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  />
+                  <p className="text-[11px] text-zinc-500">ระบุชื่อและเบอร์โทรสำรองของผู้ร่วมพักอาศัย</p>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. ผู้ติดต่อฉุกเฉิน */}
             <div className="space-y-4 pt-4 border-t border-violet-950/60">
               <h3 className="text-xs font-bold text-violet-300 uppercase tracking-wider flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 text-fuchsia-400" />
@@ -326,22 +383,40 @@ export default function NewTenantPage() {
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="pt-4 border-t border-violet-950/60 flex items-center justify-end gap-3">
+            {/* Action Buttons: 2 ปุ่มรองรับ Workflow จริง */}
+            <div className="pt-6 border-t border-violet-950/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <Link
                 href="/tenants"
-                className="px-5 py-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 text-xs font-bold border border-zinc-700/40 transition-colors"
+                className="px-5 py-2.5 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 text-zinc-300 text-xs font-bold border border-zinc-700/40 transition-colors text-center"
               >
                 ยกเลิก
               </Link>
-              <button
-                type="submit"
-                disabled={isPending}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-bold shadow-lg shadow-violet-950/60 ring-1 ring-violet-400/40 transition-all disabled:opacity-50"
-              >
-                <Save className="w-4 h-4" />
-                {isPending ? "กำลังบันทึกข้อมูล..." : "บันทึกผู้เช่าใหม่"}
-              </button>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+                {/* ปุ่มที่ 1: บันทึกข้อมูลปกติ */}
+                <button
+                  type="submit"
+                  name="_action"
+                  value="save"
+                  disabled={isPending}
+                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 text-violet-200 text-xs font-bold border border-violet-800/40 transition-all disabled:opacity-50"
+                >
+                  <Save className="w-4 h-4" />
+                  {isPending ? "กำลังบันทึก..." : "บันทึกข้อมูลผู้เช่า"}
+                </button>
+
+                {/* ปุ่มที่ 2: บันทึกและไปทำสัญญาเช่าทันที */}
+                <button
+                  type="submit"
+                  name="_action"
+                  value="save_and_contract"
+                  disabled={isPending}
+                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-500 hover:from-emerald-500 hover:to-teal-400 text-white text-xs font-black shadow-lg shadow-emerald-950/60 ring-1 ring-emerald-400/40 transition-all hover:scale-[1.02] disabled:opacity-50"
+                >
+                  <Sparkles className="w-4 h-4 text-emerald-200" />
+                  {isPending ? "กำลังบันทึก..." : "บันทึกและไปทำสัญญาเช่าต่อ ⚡"}
+                </button>
+              </div>
             </div>
           </form>
         </div>

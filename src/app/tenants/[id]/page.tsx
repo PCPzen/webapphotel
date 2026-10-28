@@ -166,6 +166,39 @@ async function TenantDetailContent({ params }: { params: Promise<{ id: string }>
           </div>
         </div>
 
+        {/* Real-world Dormitory Attributes: LINE, Vehicle, Roommate */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+          {/* LINE ID */}
+          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-1">
+            <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5">
+              LINE ID
+            </span>
+            <p className="text-sm font-bold text-white">
+              {tenant.lineId || "- ไม่ได้ระบุ -"}
+            </p>
+          </div>
+
+          {/* Vehicle / License Plate */}
+          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-1">
+            <span className="text-[11px] font-bold text-cyan-400 flex items-center gap-1.5">
+              ยานพาหนะ / ทะเบียนรถ
+            </span>
+            <p className="text-sm font-bold text-white">
+              {tenant.vehicleInfo || "- ไม่มีรถ / ไม่ได้ระบุ -"}
+            </p>
+          </div>
+
+          {/* Co-tenant / Roommate */}
+          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-1">
+            <span className="text-[11px] font-bold text-violet-400 flex items-center gap-1.5">
+              ผู้พักอาศัยร่วม / รูมเมท
+            </span>
+            <p className="text-sm font-bold text-white">
+              {tenant.coTenantName || "- พักคนเดียว -"}
+            </p>
+          </div>
+        </div>
+
         {/* Address & Emergency Info */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-1">

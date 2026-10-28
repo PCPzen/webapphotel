@@ -19,7 +19,7 @@ export type TenantFormState = {
 };
 
 // -----------------------------------------------------------------------------
-// 1. ลงทะเบียนผู้เช่าใหม่ (UR-2.5, BR-01, BR-14)
+// 1. ลงทะเบียนผู้เช่าใหม่ (UR-2.5, BR-01, BR-14 + Real-world Fields)
 // -----------------------------------------------------------------------------
 export async function createTenant(
   prevState: TenantFormState,
@@ -33,10 +33,14 @@ export async function createTenant(
   const rawPhone = formData.get("phone")?.toString().trim() || "";
   const phone = cleanPhoneNumber(rawPhone);
   const email = formData.get("email")?.toString().trim() || null;
+  const lineId = formData.get("lineId")?.toString().trim() || null;
+  const vehicleInfo = formData.get("vehicleInfo")?.toString().trim() || null;
+  const coTenantName = formData.get("coTenantName")?.toString().trim() || null;
   const address = formData.get("address")?.toString().trim() || "";
   const emergencyName = formData.get("emergencyName")?.toString().trim() || "";
   const rawEmergencyPhone = formData.get("emergencyPhone")?.toString().trim() || "";
   const emergencyPhone = cleanPhoneNumber(rawEmergencyPhone);
+  const actionType = formData.get("_action")?.toString() || "save";
 
   const fieldErrors: Record<string, string> = {};
 
@@ -83,6 +87,8 @@ export async function createTenant(
     };
   }
 
+  let createdId: number;
+
   try {
     // กฎ UR-2.8: ตรวจสอบข้อมูลซ้ำซ้อนด้วยเลขบัตรประชาชน
     const existing = await prisma.tenant.findUnique({
@@ -97,7 +103,7 @@ export async function createTenant(
 
     const birthDate = new Date(birthDateStr);
 
-    await prisma.tenant.create({
+    const newTenant = await prisma.tenant.create({
       data: {
         idCardNo,
         firstName,
@@ -105,11 +111,16 @@ export async function createTenant(
         birthDate,
         phone,
         email,
+        lineId,
+        vehicleInfo,
+        coTenantName,
         address,
         emergencyName,
         emergencyPhone,
       },
     });
+
+    createdId = newTenant.id;
   } catch (err: any) {
     return { error: err.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูลผู้เช่า" };
   }
@@ -117,6 +128,12 @@ export async function createTenant(
   revalidatePath("/tenants");
   revalidatePath("/dashboard");
   revalidatePath("/");
+
+  // ถ้าเลือก "บันทึกและไปทำสัญญาเช่าทันที" ให้วาร์ปไปหน้าทำสัญญาพร้อมแนบ ID ผู้เช่า
+  if (actionType === "save_and_contract") {
+    redirect(`/contracts/new?tenantId=${createdId}`);
+  }
+
   redirect("/tenants");
 }
 
@@ -133,6 +150,9 @@ export async function updateTenant(
   const rawPhone = formData.get("phone")?.toString().trim() || "";
   const phone = cleanPhoneNumber(rawPhone);
   const email = formData.get("email")?.toString().trim() || null;
+  const lineId = formData.get("lineId")?.toString().trim() || null;
+  const vehicleInfo = formData.get("vehicleInfo")?.toString().trim() || null;
+  const coTenantName = formData.get("coTenantName")?.toString().trim() || null;
   const address = formData.get("address")?.toString().trim() || "";
   const emergencyName = formData.get("emergencyName")?.toString().trim() || "";
   const rawEmergencyPhone = formData.get("emergencyPhone")?.toString().trim() || "";
@@ -163,6 +183,9 @@ export async function updateTenant(
         lastName,
         phone,
         email,
+        lineId,
+        vehicleInfo,
+        coTenantName,
         address,
         emergencyName,
         emergencyPhone,

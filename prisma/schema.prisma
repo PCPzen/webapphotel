@@ -98,6 +98,9 @@ model Tenant {
   birthDate      DateTime        @map("birth_date") @db.Date
   phone          String          @db.VarChar(10)
   email          String?         @db.VarChar(120)
+  lineId         String?         @map("line_id") @db.VarChar(50)
+  vehicleInfo    String?         @map("vehicle_info") @db.VarChar(100)
+  coTenantName   String?         @map("co_tenant_name") @db.VarChar(120)
   address        String          @db.Text
   emergencyName  String          @map("emergency_name") @db.VarChar(120)
   emergencyPhone String          @map("emergency_phone") @db.VarChar(10)

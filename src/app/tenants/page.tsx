@@ -32,6 +32,8 @@ async function TenantsData() {
       maskedIdCard: maskThaiId(t.idCardNo),
       phone: t.phone,
       email: t.email,
+      lineId: t.lineId,
+      vehicleInfo: t.vehicleInfo,
       currentRoom: activeContract
         ? {
             id: activeContract.room.id,

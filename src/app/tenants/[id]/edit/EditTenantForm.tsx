@@ -13,6 +13,9 @@ type Tenant = {
   birthDate: string;
   phone: string;
   email: string | null;
+  lineId?: string | null;
+  vehicleInfo?: string | null;
+  coTenantName?: string | null;
   address: string;
   emergencyName: string;
   emergencyPhone: string;
@@ -91,8 +94,8 @@ export default function EditTenantForm({ tenant }: { tenant: Tenant }) {
             </div>
           </div>
 
-          {/* เบอร์โทรศัพท์ และ อีเมล */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* เบอร์โทรศัพท์, LINE ID, และ อีเมล */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-zinc-300">
                 เบอร์โทรศัพท์ (10 หลัก) <span className="text-fuchsia-400">*</span>
@@ -108,11 +111,47 @@ export default function EditTenantForm({ tenant }: { tenant: Tenant }) {
             </div>
 
             <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-300">LINE ID</label>
+              <input
+                type="text"
+                name="lineId"
+                defaultValue={tenant.lineId || ""}
+                placeholder="เช่น somchai_line"
+                className="w-full px-4 py-2.5 rounded-xl bg-[#0c0a18] border border-violet-950/80 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+
+            <div className="space-y-1.5">
               <label className="text-xs font-bold text-zinc-300">อีเมล</label>
               <input
                 type="email"
                 name="email"
                 defaultValue={tenant.email || ""}
+                className="w-full px-4 py-2.5 rounded-xl bg-[#0c0a18] border border-violet-950/80 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+          </div>
+
+          {/* ยานพาหนะ และ ผู้พักอาศัยร่วม */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-300">ยานพาหนะและทะเบียนรถ</label>
+              <input
+                type="text"
+                name="vehicleInfo"
+                defaultValue={tenant.vehicleInfo || ""}
+                placeholder="เช่น Honda Wave 110i ทะเบียน 1กข 1234 ชม."
+                className="w-full px-4 py-2.5 rounded-xl bg-[#0c0a18] border border-violet-950/80 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-300">ผู้พักอาศัยร่วม / รูมเมท</label>
+              <input
+                type="text"
+                name="coTenantName"
+                defaultValue={tenant.coTenantName || ""}
+                placeholder="เช่น สมศรี ใจดี (เพื่อนร่วมห้อง)"
                 className="w-full px-4 py-2.5 rounded-xl bg-[#0c0a18] border border-violet-950/80 text-sm text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
               />
             </div>
