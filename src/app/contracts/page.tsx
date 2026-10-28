@@ -1,28 +1,70 @@
-import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { Suspense } from "react";
+import prisma from "@/lib/prisma";
+import ContractListClient from "./ContractListClient";
+import AppLayout from "@/components/AppLayout";
 
-export default function Page() {
+async function ContractsData() {
+  const contracts = await prisma.contract.findMany({
+    orderBy: { startDate: "desc" },
+    include: {
+      room: {
+        select: { id: true, roomNo: true, floor: true },
+      },
+      tenant: {
+        select: { id: true, firstName: true, lastName: true, phone: true, coTenantName: true },
+      },
+    },
+  });
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const serializedContracts = contracts.map((c) => {
+    const end = new Date(c.endDate);
+    end.setHours(0, 0, 0, 0);
+
+    const diffTime = end.getTime() - today.getTime();
+    const daysRemaining = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const isExpiringSoon = daysRemaining <= 30 && daysRemaining >= 0;
+
+    return {
+      id: c.id,
+      roomId: c.room.id,
+      roomNo: c.room.roomNo,
+      floor: c.room.floor,
+      tenantId: c.tenant.id,
+      tenantName: `${c.tenant.firstName} ${c.tenant.lastName}`,
+      tenantPhone: c.tenant.phone,
+      coTenantName: c.tenant.coTenantName,
+      startDate: c.startDate.toISOString(),
+      endDate: c.endDate.toISOString(),
+      monthlyRent: Number(c.monthlyRent),
+      deposit: Number(c.deposit),
+      status: c.status as "active" | "ended" | "cancelled",
+      isExpiringSoon,
+      daysRemaining,
+    };
+  });
+
+  return <ContractListClient initialContracts={serializedContracts} />;
+}
+
+export default function ContractsPage() {
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-6">
-      <Link 
-        href="/" 
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" /> กลับหน้าหลัก
-      </Link>
-
-      <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" /> เส้นทาง: /contracts
-        </div>
-        <h1 className="text-2xl font-bold text-slate-900">P09 รายการสัญญาเช่า</h1>
-        <p className="text-slate-500 text-sm leading-relaxed">รายการสัญญาทั้งหมด (Active, Ended, Cancelled)</p>
-        
-        <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-          <span>โมดูลพร้อมสำหรับการลงโค้ด</span>
-          <span>Dormitory Management System</span>
-        </div>
+    <AppLayout>
+      <div className="p-6 md:p-8 space-y-6">
+        <Suspense
+          fallback={
+            <div className="space-y-6 animate-pulse">
+              <div className="h-20 bg-violet-950/20 rounded-2xl border border-violet-900/20"></div>
+              <div className="h-28 bg-violet-950/20 rounded-2xl border border-violet-900/20"></div>
+              <div className="h-96 bg-violet-950/20 rounded-2xl border border-violet-900/20"></div>
+            </div>
+          }
+        >
+          <ContractsData />
+        </Suspense>
       </div>
-    </div>
+    </AppLayout>
   );
 }

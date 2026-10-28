@@ -1,28 +1,346 @@
+import { Suspense } from "react";
 import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { notFound } from "next/navigation";
+import prisma from "@/lib/prisma";
+import AppLayout from "@/components/AppLayout";
+import EndContractModal from "./EndContractModal";
+import {
+  FileText,
+  ArrowLeft,
+  Building2,
+  User,
+  Calendar,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  Receipt,
+  CreditCard,
+  Sparkles,
+  Users,
+  Car,
+  DollarSign,
+  ArrowRight,
+} from "lucide-react";
 
-export default function Page() {
+async function ContractDetailContent({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ action?: string }>;
+}) {
+  const { id } = await params;
+  const { action } = await searchParams;
+  const contractId = parseInt(id, 10);
+
+  if (isNaN(contractId)) {
+    notFound();
+  }
+
+  const contract = await prisma.contract.findUnique({
+    where: { id: contractId },
+    include: {
+      room: true,
+      tenant: true,
+      invoices: {
+        include: {
+          payments: {
+            where: { status: "valid" },
+          },
+        },
+        orderBy: { billingMonth: "desc" },
+      },
+    },
+  });
+
+  if (!contract) {
+    notFound();
+  }
+
+  // คำนวณหายอดค้างรวม (O)
+  let totalUnpaidBalance = 0;
+  const invoicesWithBalance = contract.invoices.map((inv) => {
+    const paidSum = inv.payments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const balance = Math.max(0, Number(inv.totalAmount) - paidSum);
+    if (inv.status !== "paid" && inv.status !== "cancelled") {
+      totalUnpaidBalance += balance;
+    }
+    return {
+      ...inv,
+      paidSum,
+      balance,
+    };
+  });
+
+  const isActive = contract.status === "active";
+  const isEnded = contract.status === "ended";
+
+  const contractModalData = {
+    id: contract.id,
+    roomNo: contract.room.roomNo,
+    tenantName: `${contract.tenant.firstName} ${contract.tenant.lastName}`,
+    deposit: Number(contract.deposit),
+    unpaidBalance: totalUnpaidBalance,
+    hasInvoices: contract.invoices.length > 0,
+  };
+
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-6">
-      <Link 
-        href="/" 
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" /> กลับหน้าหลัก
-      </Link>
+    <div className="space-y-6">
+      {/* Navigation Breadcrumb */}
+      <div className="flex items-center justify-between">
+        <Link
+          href="/contracts"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> กลับหน้ารายการสัญญา
+        </Link>
+      </div>
 
-      <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" /> เส้นทาง: /contracts/[id]
+      {/* Main Contract Card */}
+      <div className="bg-[#120f24] rounded-3xl border border-violet-950/80 shadow-2xl p-6 md:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-violet-950/60 pb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-violet-600 via-purple-600 to-fuchsia-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-violet-950/60 ring-1 ring-violet-400/40">
+              <FileText className="w-7 h-7" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-2xl font-black text-white">
+                  สัญญาเช่าห้อง {contract.room.roomNo}
+                </h1>
+                {isActive && (
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    🟢 ใช้งานอยู่ (Active)
+                  </span>
+                )}
+                {isEnded && (
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-zinc-800 text-zinc-400 border border-zinc-700">
+                    สิ้นสุดสัญญาแล้ว
+                  </span>
+                )}
+                {contract.status === "cancelled" && (
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-red-950 text-red-400 border border-red-900">
+                    ยกเลิกสัญญา
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-zinc-400 mt-1">
+                รหัสสัญญา: #CT-{contract.id} • บันทึกเมื่อ {new Date(contract.createdAt).toLocaleDateString("th-TH")}
+              </p>
+            </div>
+          </div>
+
+          {/* Action Button for Active Contract */}
+          {isActive && (
+            <EndContractModal
+              contract={contractModalData}
+              initiallyOpen={action === "end"}
+            />
+          )}
         </div>
-        <h1 className="text-2xl font-bold text-slate-900">P11 รายละเอียดสัญญา & สิ้นสุดสัญญา</h1>
-        <p className="text-slate-500 text-sm leading-relaxed">ดูรายละเอียดสัญญา คำนวณคืนเงินมัดจำ และพิมพ์สัญญา</p>
-        
-        <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-          <span>โมดูลพร้อมสำหรับการลงโค้ด</span>
-          <span>Dormitory Management System</span>
+
+        {/* Contract Key Attributes Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-1">
+            <span className="text-[11px] font-semibold text-zinc-500">ค่าเช่ารายเดือน</span>
+            <p className="text-base font-black text-fuchsia-300">
+              ฿{Number(contract.monthlyRent).toLocaleString()}
+              <span className="text-[10px] font-normal text-zinc-500"> /ด.</span>
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-1">
+            <span className="text-[11px] font-semibold text-zinc-500">เงินมัดจำ/ประกัน</span>
+            <p className="text-base font-black text-white">
+              ฿{Number(contract.deposit).toLocaleString()}
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-1">
+            <span className="text-[11px] font-semibold text-zinc-500">ค่าน้ำ / ค่าไฟต่อหน่วย</span>
+            <p className="text-sm font-bold text-zinc-200">
+              น้ำ ฿{Number(contract.waterRate)} • ไฟ ฿{Number(contract.electricRate)}
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-1">
+            <span className="text-[11px] font-semibold text-zinc-500">กำหนดชำระ / ค่าปรับ</span>
+            <p className="text-sm font-bold text-zinc-200">
+              วันที่ {contract.dueDay} (ปรับ ฿{Number(contract.lateFee)})
+            </p>
+          </div>
+        </div>
+
+        {/* Parties: Room & Tenant Details */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          {/* Tenant Card */}
+          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-2">
+            <span className="text-[11px] font-bold text-violet-400 flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5" /> ข้อมูลผู้เช่าหลักและผู้พักอาศัย
+            </span>
+            <div>
+              <Link
+                href={`/tenants/${contract.tenant.id}`}
+                className="font-bold text-white text-sm hover:text-violet-300 transition-colors"
+              >
+                คุณ {contract.tenant.firstName} {contract.tenant.lastName}
+              </Link>
+              <p className="text-zinc-400 text-[11px] mt-0.5">โทร: {contract.tenant.phone}</p>
+            </div>
+            {contract.tenant.coTenantName && (
+              <p className="text-[11px] text-violet-300/80 pt-1 border-t border-violet-950">
+                <strong>รูมเมท:</strong> {contract.tenant.coTenantName}
+              </p>
+            )}
+            {contract.tenant.vehicleInfo && (
+              <p className="text-[11px] text-cyan-400/80">
+                <strong>ยานพาหนะ:</strong> {contract.tenant.vehicleInfo}
+              </p>
+            )}
+          </div>
+
+          {/* Room & Dates Card */}
+          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-2">
+            <span className="text-[11px] font-bold text-violet-400 flex items-center gap-1.5">
+              <Building2 className="w-3.5 h-3.5" /> ข้อมูลห้องพักและระยะเวลา
+            </span>
+            <div className="flex items-center justify-between">
+              <div>
+                <Link
+                  href={`/rooms/${contract.room.id}`}
+                  className="font-black text-white text-sm hover:text-violet-300 transition-colors"
+                >
+                  ห้อง {contract.room.roomNo} (ชั้น {contract.room.floor})
+                </Link>
+                <p className="text-zinc-400 text-[11px] mt-0.5">{contract.room.roomType}</p>
+              </div>
+            </div>
+            <p className="text-[11px] text-zinc-300 pt-1 border-t border-violet-950 flex items-center gap-1.5">
+              <Calendar className="w-3.5 h-3.5 text-fuchsia-400" />
+              {new Date(contract.startDate).toLocaleDateString("th-TH")} ถึง{" "}
+              {new Date(contract.endDate).toLocaleDateString("th-TH")}
+            </p>
+          </div>
         </div>
       </div>
+
+      {/* สรุปการสิ้นสุดสัญญาและคืนเงินมัดจำ (ถ้าสถานะ ended) ตามกฎ BR-10 */}
+      {isEnded && (
+        <div className="bg-[#120f24] rounded-3xl border border-amber-900/40 shadow-xl p-6 md:p-8 space-y-4">
+          <div className="flex items-center justify-between border-b border-violet-950/60 pb-3">
+            <h3 className="text-sm font-bold text-amber-300 flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              ผลการสิ้นสุดสัญญาและคืนเงินมัดจำ (BR-10)
+            </h3>
+            {contract.movedOutDate && (
+              <span className="text-xs text-zinc-400">
+                ย้ายออกจริงเมื่อ: {new Date(contract.movedOutDate).toLocaleDateString("th-TH")}
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            <div className="p-3.5 rounded-2xl bg-[#0c0a18] border border-violet-950">
+              <span className="text-zinc-500">ค่าเสียหายที่หัก:</span>
+              <p className="font-bold text-amber-300 text-sm mt-0.5">
+                ฿{Number(contract.damageAmount || 0).toLocaleString()}
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-[#0c0a18] border border-violet-950">
+              <span className="text-zinc-500">หักชำระยอดค้างบิล:</span>
+              <p className="font-bold text-white text-sm mt-0.5">
+                ฿{Number(contract.depositApplied || 0).toLocaleString()}
+              </p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-emerald-950/30 border border-emerald-800/40">
+              <span className="text-emerald-400 font-semibold">เงินมัดจำที่คืนผู้เช่า:</span>
+              <p className="font-black text-emerald-300 text-base mt-0.5">
+                ฿{Number(contract.depositRefund || 0).toLocaleString()}
+              </p>
+            </div>
+          </div>
+
+          {contract.exitNote && (
+            <p className="text-xs text-zinc-400 italic bg-[#0c0a18] p-3 rounded-xl border border-violet-950">
+              หมายเหตุตอนย้ายออก: {contract.exitNote}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* รายการใบแจ้งหนี้ภายใต้สัญญานี้ (Invoices under this contract) */}
+      <div className="bg-[#120f24] rounded-3xl border border-violet-950/80 shadow-xl p-6 md:p-8 space-y-4">
+        <div className="flex items-center justify-between border-b border-violet-950/60 pb-3">
+          <h3 className="text-sm font-bold text-white flex items-center gap-2">
+            <Receipt className="w-4 h-4 text-violet-400" />
+            ประวัติใบแจ้งหนี้ของสัญญานี้ ({contract.invoices.length} ฉบับ)
+          </h3>
+          {totalUnpaidBalance > 0 && (
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-red-950/60 text-red-400 border border-red-800/40">
+              ยอดค้างรวม: ฿{totalUnpaidBalance.toLocaleString()}
+            </span>
+          )}
+        </div>
+
+        {invoicesWithBalance.length === 0 ? (
+          <p className="text-xs text-zinc-500 text-center py-6">
+            ยังไม่มีการออกใบแจ้งหนี้สำหรับสัญญานี้ (รอบบิลจะออกในเมนูออกใบแจ้งหนี้)
+          </p>
+        ) : (
+          <div className="divide-y divide-violet-950/50 text-xs">
+            {invoicesWithBalance.map((inv) => (
+              <div key={inv.id} className="py-3 flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-white block">{inv.invoiceNo}</span>
+                  <span className="text-[11px] text-zinc-500">
+                    รอบเดือน: {new Date(inv.billingMonth).toLocaleDateString("th-TH", { month: "long", year: "numeric" })}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <span className="font-bold text-white block">฿{Number(inv.totalAmount).toLocaleString()}</span>
+                    {inv.status !== "paid" ? (
+                      <span className="text-[10px] text-red-400">ค้าง ฿{inv.balance.toLocaleString()}</span>
+                    ) : (
+                      <span className="text-[10px] text-emerald-400">ชำระครบแล้ว</span>
+                    )}
+                  </div>
+                  <Link
+                    href={`/invoices/${inv.id}`}
+                    className="p-1.5 rounded-lg bg-violet-950/60 text-violet-300 hover:text-white"
+                  >
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
+  );
+}
+
+export default function ContractDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ action?: string }>;
+}) {
+  return (
+    <AppLayout>
+      <div className="p-6 md:p-10 max-w-4xl mx-auto space-y-6">
+        <Suspense
+          fallback={
+            <div className="h-96 bg-violet-950/20 rounded-3xl border border-violet-900/20 animate-pulse"></div>
+          }
+        >
+          <ContractDetailContent params={params} searchParams={searchParams} />
+        </Suspense>
+      </div>
+    </AppLayout>
   );
 }

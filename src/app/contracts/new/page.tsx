@@ -1,28 +1,103 @@
+import { Suspense } from "react";
 import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import prisma from "@/lib/prisma";
+import NewContractForm from "./NewContractForm";
+import AppLayout from "@/components/AppLayout";
+import { ArrowLeft } from "lucide-react";
 
-export default function Page() {
+async function NewContractContent({
+  searchParams,
+}: {
+  searchParams: Promise<{ roomId?: string; tenantId?: string }>;
+}) {
+  const { roomId, tenantId } = await searchParams;
+  const preselectedRoomId = roomId ? parseInt(roomId, 10) : undefined;
+  const preselectedTenantId = tenantId ? parseInt(tenantId, 10) : undefined;
+
+  // 1. ดึงเฉพาะห้องว่าง (vacant)
+  const vacantRoomsRaw = await prisma.room.findMany({
+    where: {
+      OR: [
+        { status: "vacant" },
+        ...(preselectedRoomId ? [{ id: preselectedRoomId }] : []),
+      ],
+    },
+    orderBy: [
+      { floor: "asc" },
+      { roomNo: "asc" },
+    ],
+  });
+
+  const vacantRooms = vacantRoomsRaw.map((r) => ({
+    id: r.id,
+    roomNo: r.roomNo,
+    floor: r.floor,
+    roomType: r.roomType,
+    baseRent: Number(r.baseRent),
+  }));
+
+  // 2. ดึงรายชื่อผู้เช่าทั้งหมด
+  const tenantsRaw = await prisma.tenant.findMany({
+    orderBy: { firstName: "asc" },
+  });
+
+  const tenants = tenantsRaw.map((t) => ({
+    id: t.id,
+    firstName: t.firstName,
+    lastName: t.lastName,
+    phone: t.phone,
+    coTenantName: t.coTenantName,
+    vehicleInfo: t.vehicleInfo,
+  }));
+
+  // 3. ดึงการตั้งค่ากลางของระบบ (System Settings)
+  const settings = await prisma.systemSetting.findFirst();
+
+  const defaultSettings = {
+    defaultWaterRate: settings ? Number(settings.defaultWaterRate) : 18,
+    defaultElectricRate: settings ? Number(settings.defaultElectricRate) : 8,
+    defaultLateFee: settings ? Number(settings.defaultLateFee) : 50,
+    defaultDueDay: settings ? settings.defaultDueDay : 5,
+  };
+
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-6">
-      <Link 
-        href="/" 
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" /> กลับหน้าหลัก
-      </Link>
-
-      <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" /> เส้นทาง: /contracts/new
-        </div>
-        <h1 className="text-2xl font-bold text-slate-900">P10 ทำสัญญาเช่าใหม่</h1>
-        <p className="text-slate-500 text-sm leading-relaxed">จับคู่ห้องว่างกับผู้เช่า กำหนดค่าเช่า ค่าน้ำไฟ และเงินมัดจำ</p>
-        
-        <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-          <span>โมดูลพร้อมสำหรับการลงโค้ด</span>
-          <span>Dormitory Management System</span>
-        </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <Link
+          href="/contracts"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" /> กลับหน้ารายการสัญญา
+        </Link>
       </div>
+
+      <NewContractForm
+        vacantRooms={vacantRooms}
+        tenants={tenants}
+        defaultSettings={defaultSettings}
+        preselectedRoomId={preselectedRoomId}
+        preselectedTenantId={preselectedTenantId}
+      />
     </div>
+  );
+}
+
+export default function NewContractPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ roomId?: string; tenantId?: string }>;
+}) {
+  return (
+    <AppLayout>
+      <div className="p-6 md:p-10 max-w-3xl mx-auto space-y-6">
+        <Suspense
+          fallback={
+            <div className="h-96 bg-violet-950/20 rounded-3xl border border-violet-900/20 animate-pulse"></div>
+          }
+        >
+          <NewContractContent searchParams={searchParams} />
+        </Suspense>
+      </div>
+    </AppLayout>
   );
 }
