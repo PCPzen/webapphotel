@@ -1,0 +1,298 @@
+// ==============================================================================
+// Prisma Schema สำหรับระบบจัดการหอพัก (Dormitory Management System) - Version B
+// สอดคล้องกับ PostgreSQL Production-Ready และ SRD เวอร์ชันขยาย
+// ==============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ------------------------------------------------------------------------------
+// ตารางที่ 1: การตั้งค่ากลางของหอพัก (System Settings)
+// ------------------------------------------------------------------------------
+model SystemSetting {
+  id                  Int      @id @default(autoincrement())
+  dormName            String   @default("หอพักสุขสบาย เพลส") @map("dorm_name") @db.VarChar(120)
+  dormAddress         String?  @map("dorm_address") @db.Text
+  dormPhone           String?  @map("dorm_phone") @db.VarChar(20)
+  bankName            String?  @map("bank_name") @db.VarChar(60)
+  bankAccountNo       String?  @map("bank_account_no") @db.VarChar(30)
+  bankAccountName     String?  @map("bank_account_name") @db.VarChar(100)
+  promptpayId         String?  @map("promptpay_id") @db.VarChar(20)
+  defaultWaterRate    Decimal  @default(18.00) @map("default_water_rate") @db.Decimal(8, 2)
+  defaultElectricRate Decimal  @default(8.00) @map("default_electric_rate") @db.Decimal(8, 2)
+  defaultLateFee      Decimal  @default(50.00) @map("default_late_fee") @db.Decimal(10, 2)
+  defaultDueDay       Int      @default(5) @map("default_due_day") @db.SmallInt
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  updatedBy           String?  @map("updated_by") @db.Uuid
+
+  @@map("system_settings")
+}
+
+// ------------------------------------------------------------------------------
+// ตารางที่ 2: โปรไฟล์ผู้ใช้และบทบาท (Profiles & RBAC)
+// ------------------------------------------------------------------------------
+model Profile {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String    @unique @db.VarChar(120)
+  fullName  String    @map("full_name") @db.VarChar(100)
+  role      UserRole  @default(tenant)
+  phone     String?   @db.VarChar(20)
+  isActive  Boolean   @default(true) @map("is_active")
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  tenant    Tenant?
+
+  @@map("profiles")
+}
+
+enum UserRole {
+  admin
+  staff
+  tenant
+}
+
+// ------------------------------------------------------------------------------
+// ตารางที่ 3: ข้อมูลห้องพัก (Rooms)
+// ------------------------------------------------------------------------------
+model Room {
+  id             Int             @id @default(autoincrement())
+  roomNo         String          @unique @map("room_no") @db.VarChar(10)
+  floor          Int             @db.SmallInt
+  roomType       String          @map("room_type") @db.VarChar(30)
+  baseRent       Decimal         @map("base_rent") @db.Decimal(10, 2)
+  status         RoomStatus      @default(vacant)
+  note           String?         @db.Text
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt      DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  contracts      Contract[]
+  meterReadings  MeterReading[]
+  repairRequests RepairRequest[]
+
+  @@map("rooms")
+}
+
+enum RoomStatus {
+  vacant
+  occupied
+  maintenance
+}
+
+// ------------------------------------------------------------------------------
+// ตารางที่ 4: ข้อมูลผู้เช่า (Tenants)
+// ------------------------------------------------------------------------------
+model Tenant {
+  id             Int             @id @default(autoincrement())
+  authUserId     String?         @unique @map("auth_user_id") @db.Uuid
+  idCardNo       String          @unique @map("id_card_no") @db.Char(13)
+  firstName      String          @map("first_name") @db.VarChar(60)
+  lastName       String          @map("last_name") @db.VarChar(60)
+  birthDate      DateTime        @map("birth_date") @db.Date
+  phone          String          @db.VarChar(10)
+  email          String?         @db.VarChar(120)
+  address        String          @db.Text
+  emergencyName  String          @map("emergency_name") @db.VarChar(120)
+  emergencyPhone String          @map("emergency_phone") @db.VarChar(10)
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt      DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  createdBy      String?         @map("created_by") @db.Uuid
+
+  profile        Profile?        @relation(fields: [authUserId], references: [id], onDelete: SetNull)
+  contracts      Contract[]
+  repairRequests RepairRequest[]
+
+  @@map("tenants")
+}
+
+// ------------------------------------------------------------------------------
+// ตารางที่ 5: สัญญาเช่า (Contracts)
+// ------------------------------------------------------------------------------
+model Contract {
+  id             Int             @id @default(autoincrement())
+  roomId         Int             @map("room_id")
+  tenantId       Int             @map("tenant_id")
+  startDate      DateTime        @map("start_date") @db.Date
+  endDate        DateTime        @map("end_date") @db.Date
+  monthlyRent    Decimal         @map("monthly_rent") @db.Decimal(10, 2)
+  deposit        Decimal         @default(0) @db.Decimal(10, 2)
+  waterRate      Decimal         @map("water_rate") @db.Decimal(8, 2)
+  electricRate   Decimal         @map("electric_rate") @db.Decimal(8, 2)
+  lateFee        Decimal         @default(0) @map("late_fee") @db.Decimal(10, 2)
+  dueDay         Int             @map("due_day") @db.SmallInt
+  status         ContractStatus  @default(active)
+  movedOutDate   DateTime?       @map("moved_out_date") @db.Date
+  damageAmount   Decimal?        @default(0) @map("damage_amount") @db.Decimal(10, 2)
+  depositApplied Decimal?        @default(0) @map("deposit_applied") @db.Decimal(10, 2)
+  depositRefund  Decimal?        @default(0) @map("deposit_refund") @db.Decimal(10, 2)
+  exitNote       String?         @map("exit_note") @db.Text
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt      DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+  createdBy      String?         @map("created_by") @db.Uuid
+
+  room           Room            @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Restrict)
+  invoices       Invoice[]
+
+  @@map("contracts")
+}
+
+enum ContractStatus {
+  active
+  ended
+  cancelled
+}
+
+// ------------------------------------------------------------------------------
+// ตารางที่ 6: การจดเลขมิเตอร์น้ำและไฟฟ้า (Meter Readings)
+// ------------------------------------------------------------------------------
+model MeterReading {
+  id           Int       @id @default(autoincrement())
+  roomId       Int       @map("room_id")
+  readingMonth DateTime  @map("reading_month") @db.Date
+  waterPrev    Int       @map("water_prev")
+  waterCurr    Int       @map("water_curr")
+  elecPrev     Int       @map("elec_prev")
+  elecCurr     Int       @map("elec_curr")
+  readDate     DateTime  @default(now()) @map("read_date") @db.Date
+  note         String?   @db.Text
+  recordedBy   String?   @map("recorded_by") @db.Uuid
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  room         Room      @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  invoice      Invoice?
+
+  @@unique([roomId, readingMonth], name: "uq_room_reading_month")
+  @@map("meter_readings")
+}
+
+// ------------------------------------------------------------------------------
+// ตารางที่ 7: ใบแจ้งหนี้รายเดือน (Invoices)
+// ------------------------------------------------------------------------------
+model Invoice {
+  id             Int            @id @default(autoincrement())
+  contractId     Int            @map("contract_id")
+  meterReadingId Int            @unique @map("meter_reading_id")
+  invoiceNo      String         @unique @map("invoice_no") @db.VarChar(30)
+  billingMonth   DateTime       @map("billing_month") @db.Date
+  rentAmount     Decimal        @map("rent_amount") @db.Decimal(10, 2)
+  waterUnits     Int            @map("water_units")
+  waterAmount    Decimal        @map("water_amount") @db.Decimal(10, 2)
+  electricUnits  Int            @map("electric_units")
+  electricAmount Decimal        @map("electric_amount") @db.Decimal(10, 2)
+  otherAmount    Decimal        @default(0) @map("other_amount") @db.Decimal(10, 2)
+  otherNote      String?        @map("other_note") @db.VarChar(200)
+  lateFee        Decimal        @default(0) @map("late_fee") @db.Decimal(10, 2)
+  totalAmount    Decimal        @map("total_amount") @db.Decimal(10, 2)
+  dueDate        DateTime       @map("due_date") @db.Date
+  status         InvoiceStatus  @default(unpaid)
+  issuedAt       DateTime       @default(now()) @map("issued_at") @db.Timestamptz()
+  createdBy      String?        @map("created_by") @db.Uuid
+
+  contract       Contract       @relation(fields: [contractId], references: [id], onDelete: Restrict)
+  meterReading   MeterReading   @relation(fields: [meterReadingId], references: [id], onDelete: Restrict)
+  payments       Payment[]
+
+  @@unique([contractId, billingMonth], name: "uq_contract_billing_month")
+  @@map("invoices")
+}
+
+enum InvoiceStatus {
+  unpaid
+  partial
+  paid
+  cancelled
+}
+
+// ------------------------------------------------------------------------------
+// ตารางที่ 8: การรับชำระเงินและใบเสร็จ (Payments - Version B)
+// ------------------------------------------------------------------------------
+model Payment {
+  id            Int            @id @default(autoincrement())
+  invoiceId     Int            @map("invoice_id")
+  receiptNo     String         @unique @map("receipt_no") @db.VarChar(20)
+  amount        Decimal        @db.Decimal(10, 2)
+  method        PaymentMethod
+  paidAt        DateTime       @default(now()) @map("paid_at") @db.Timestamptz()
+  slipImageUrl  String?        @map("slip_image_url") @db.Text
+  receiptPdfUrl String?        @map("receipt_pdf_url") @db.Text
+  referenceNote String?        @map("reference_note") @db.VarChar(200)
+  status        PaymentStatus  @default(valid)
+  voidReason    String?        @map("void_reason") @db.Text
+  voidedBy      String?        @map("voided_by") @db.Uuid
+  voidedAt      DateTime?      @map("voided_at") @db.Timestamptz()
+  receivedBy    String?        @map("received_by") @db.Uuid
+  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz()
+
+  invoice       Invoice        @relation(fields: [invoiceId], references: [id], onDelete: Restrict)
+
+  @@map("payments")
+}
+
+enum PaymentMethod {
+  cash
+  bank_transfer
+  deposit_offset
+  other
+}
+
+enum PaymentStatus {
+  valid
+  voided
+}
+
+// ------------------------------------------------------------------------------
+// ตารางที่ 9: การแจ้งซ่อมแซมและบำรุงรักษา (Repair Requests - Version B)
+// ------------------------------------------------------------------------------
+model RepairRequest {
+  id             Int            @id @default(autoincrement())
+  roomId         Int            @map("room_id")
+  tenantId       Int?           @map("tenant_id")
+  title          String         @db.VarChar(120)
+  description    String         @db.Text
+  imageUrl       String?        @map("image_url") @db.Text
+  category       RepairCategory
+  priority       RepairPriority @default(normal)
+  status         RepairStatus   @default(open)
+  reportedAt     DateTime       @default(now()) @map("reported_at") @db.Timestamptz()
+  assignedTo     String?        @map("assigned_to") @db.VarChar(120)
+  startedAt      DateTime?      @map("started_at") @db.Timestamptz()
+  completedAt    DateTime?      @map("completed_at") @db.Timestamptz()
+  cost           Decimal?       @default(0) @db.Decimal(10, 2)
+  resolutionNote String?        @map("resolution_note") @db.Text
+  createdBy      String?        @map("created_by") @db.Uuid
+
+  room           Room           @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  tenant         Tenant?        @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+
+  @@map("repair_requests")
+}
+
+enum RepairCategory {
+  electric
+  plumbing
+  aircon
+  furniture
+  other
+}
+
+enum RepairPriority {
+  low
+  normal
+  urgent
+}
+
+enum RepairStatus {
+  open
+  in_progress
+  done
+  cancelled
+}
