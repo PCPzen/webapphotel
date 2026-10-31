@@ -204,13 +204,19 @@ export async function loginStaff(
     cookieStore.set("webhotel_user_role", profile.role, {
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
-      httpOnly: true,
+      httpOnly: false,
       sameSite: "lax",
     });
     cookieStore.set("webhotel_user_email", profile.email, {
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
-      httpOnly: true,
+      httpOnly: false,
+      sameSite: "lax",
+    });
+    cookieStore.set("webhotel_user_name", encodeURIComponent(profile.fullName), {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+      httpOnly: false,
       sameSite: "lax",
     });
 
@@ -224,18 +230,50 @@ export async function loginStaff(
 }
 
 // -----------------------------------------------------------------------------
-// 3. สลับไปยังมุมมองผู้ดูแลระบบ (Switch to Admin Mode for Demo/Testing)
+// 3. สลับยศ/บทบาทระหว่าง Admin และ Staff (Switch Role for Testing & RBAC Verification)
 // -----------------------------------------------------------------------------
-export async function switchToAdminAction(): Promise<void> {
+export async function switchRoleAction(targetRole: "admin" | "staff"): Promise<void> {
   const cookieStore = await cookies();
-  cookieStore.set("webhotel_user_role", "admin", {
+  cookieStore.set("webhotel_user_role", targetRole, {
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
-    httpOnly: true,
+    httpOnly: false,
     sameSite: "lax",
   });
 
+  if (targetRole === "admin") {
+    cookieStore.set("webhotel_user_name", encodeURIComponent("ผู้ดูแลระบบสูงสุด (System Admin)"), {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+      httpOnly: false,
+      sameSite: "lax",
+    });
+    cookieStore.set("webhotel_user_email", "admin@webhotel.com", {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+      httpOnly: false,
+      sameSite: "lax",
+    });
+  } else {
+    cookieStore.set("webhotel_user_name", encodeURIComponent("เจ้าหน้าที่นิติบุคคล (Staff)"), {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+      httpOnly: false,
+      sameSite: "lax",
+    });
+    cookieStore.set("webhotel_user_email", "staff@webhotel.com", {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+      httpOnly: false,
+      sameSite: "lax",
+    });
+  }
+
   redirect("/dashboard");
+}
+
+export async function switchToAdminAction(): Promise<void> {
+  return switchRoleAction("admin");
 }
 
 // -----------------------------------------------------------------------------
@@ -246,6 +284,7 @@ export async function logoutAction(): Promise<void> {
   cookieStore.delete("webhotel_tenant_id");
   cookieStore.delete("webhotel_user_role");
   cookieStore.delete("webhotel_user_email");
+  cookieStore.delete("webhotel_user_name");
 
   redirect("/");
 }
