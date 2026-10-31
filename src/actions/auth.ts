@@ -20,6 +20,7 @@ export async function loginTenant(
 ): Promise<AuthFormState> {
   const roomNo = formData.get("roomNo")?.toString().trim() || "";
   const phone = formData.get("phone")?.toString().trim() || "";
+  const idCardLast4 = formData.get("idCardLast4")?.toString().trim() || "";
   const tenantIdStr = formData.get("tenantId")?.toString().trim() || "";
 
   // กรณีเป็น Quick Demo Login ที่ระบุ tenantId โดยตรง
@@ -61,6 +62,11 @@ export async function loginTenant(
     return { error: "กรุณาระบุเบอร์โทรศัพท์ที่ลงทะเบียนไว้กับหอพัก" };
   }
 
+  const cleanLast4 = idCardLast4.replace(/[^0-9]/g, "");
+  if (!cleanLast4 || cleanLast4.length !== 4) {
+    return { error: "กรุณาระบุเลขท้าย 4 หลักของบัตรประชาชนให้ครบ 4 หลัก" };
+  }
+
   try {
     // ค้นหาห้องพัก
     const room = await prisma.room.findFirst({
@@ -93,6 +99,14 @@ export async function loginTenant(
     ) {
       return {
         error: "เบอร์โทรศัพท์ไม่ตรงกับข้อมูลในสัญญาเช่าของห้องนี้",
+      };
+    }
+
+    // ตรวจสอบเลขท้าย 4 หลักของบัตรประชาชน (ความปลอดภัยระดับสูง)
+    const registeredIdCard = (activeContract.tenant.idCardNo || "").replace(/[^0-9]/g, "");
+    if (!registeredIdCard.endsWith(cleanLast4)) {
+      return {
+        error: "เลขท้าย 4 หลักของบัตรประชาชนไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง",
       };
     }
 

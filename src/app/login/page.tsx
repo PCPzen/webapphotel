@@ -19,6 +19,7 @@ export default async function LoginPage() {
     name: `${c.tenant.firstName} ${c.tenant.lastName}`.trim(),
     roomNo: c.room.roomNo,
     phone: c.tenant.phone,
+    idCardLast4: c.tenant.idCardNo ? c.tenant.idCardNo.replace(/[^0-9]/g, "").slice(-4) : "",
   }));
 
   return <LoginClient demoTenants={demoTenants} />;

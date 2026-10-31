@@ -16,6 +16,7 @@ import {
   Home,
   CheckCircle2,
   KeyRound,
+  CreditCard,
 } from "lucide-react";
 import { loginTenant, loginStaff } from "@/actions/auth";
 
@@ -24,6 +25,7 @@ export type DemoTenant = {
   name: string;
   roomNo: string;
   phone: string;
+  idCardLast4?: string;
 };
 
 export default function LoginClient({
@@ -37,6 +39,7 @@ export default function LoginClient({
   // Tenant form state
   const [roomNo, setRoomNo] = useState("");
   const [phone, setPhone] = useState("");
+  const [idCardLast4, setIdCardLast4] = useState("");
 
   // Staff form state
   const [email, setEmail] = useState("");
@@ -53,6 +56,7 @@ export default function LoginClient({
       const fd = new FormData();
       fd.append("roomNo", roomNo);
       fd.append("phone", phone);
+      fd.append("idCardLast4", idCardLast4);
 
       const res = await loginTenant({}, fd);
       if (res?.error) {
@@ -69,6 +73,9 @@ export default function LoginClient({
       fd.append("tenantId", t.id.toString());
       fd.append("roomNo", t.roomNo);
       fd.append("phone", t.phone);
+      if (t.idCardLast4) {
+        fd.append("idCardLast4", t.idCardLast4);
+      }
 
       const res = await loginTenant({}, fd);
       if (res?.error) {
@@ -226,8 +233,32 @@ export default function LoginClient({
                       className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-violet-500"
                     />
                   </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-slate-300">
+                      เลขท้าย 4 หลักของบัตรประชาชน
+                    </label>
+                    <span className="text-[10px] text-emerald-400 font-medium">
+                      🔒 ปลอดภัยสูงสุด
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <CreditCard className="w-4 h-4 absolute left-3.5 top-3 text-slate-500" />
+                    <input
+                      type="password"
+                      maxLength={4}
+                      inputMode="numeric"
+                      value={idCardLast4}
+                      onChange={(e) => setIdCardLast4(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))}
+                      placeholder="•••• (ตัวเลข 4 หลัก)"
+                      required
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono tracking-widest placeholder:text-slate-500 focus:outline-none focus:border-violet-500"
+                    />
+                  </div>
                   <p className="text-[10px] text-slate-500 mt-1">
-                    ระบบจะตรวจสอบความถูกต้องกับสัญญาเช่าปัจจุบัน
+                    ระบุตัวเลข 4 หลักสุดท้ายของบัตร ปชช. ที่ลงทะเบียนไว้กับสัญญาเช่า
                   </p>
                 </div>
 
@@ -269,6 +300,11 @@ export default function LoginClient({
                         <div>
                           <div className="font-semibold text-white">ห้อง {t.roomNo}</div>
                           <div className="text-[10px] text-slate-400 truncate">{t.name}</div>
+                          {t.idCardLast4 && (
+                            <div className="text-[9px] text-violet-300/80 font-mono">
+                              บัตรท้าย: ••••{t.idCardLast4}
+                            </div>
+                          )}
                         </div>
                         <ArrowRight className="w-3 h-3 text-violet-400" />
                       </button>
