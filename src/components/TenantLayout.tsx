@@ -29,6 +29,7 @@ export default function TenantLayout({
   children,
   currentTenant,
   allTenants,
+  isAdminPreview = false,
 }: {
   children: React.ReactNode;
   currentTenant: {
@@ -38,6 +39,7 @@ export default function TenantLayout({
     floor: number;
   } | null;
   allTenants: TenantOption[];
+  isAdminPreview?: boolean;
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -109,38 +111,51 @@ export default function TenantLayout({
             })}
           </nav>
 
-          {/* Right Controls: Tenant Switcher & Admin Switcher */}
+          {/* Right Controls: Tenant Info / Admin Preview Switcher & Logout */}
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Demo Switcher */}
-            {allTenants.length > 0 && currentTenant && (
-              <div className="relative group">
-                <select
-                  value={currentTenant.id}
-                  onChange={(e) => handleSwitchTenant(parseInt(e.target.value, 10))}
-                  className="appearance-none bg-black/40 hover:bg-black/60 text-slate-200 text-xs py-1.5 pl-3 pr-8 rounded-xl border border-white/10 focus:outline-none focus:border-violet-500 cursor-pointer transition-colors"
-                  title="สลับบัญชีผู้เช่า (Demo Mode)"
-                >
-                  {allTenants.map((t) => (
-                    <option key={t.id} value={t.id} className="bg-[#16122d]">
-                      ห้อง {t.roomNo} - {t.name}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
-              </div>
-            )}
+            {isAdminPreview ? (
+              <>
+                {/* Admin Preview Switcher */}
+                {allTenants.length > 0 && currentTenant && (
+                  <div className="relative group">
+                    <select
+                      value={currentTenant.id}
+                      onChange={(e) => handleSwitchTenant(parseInt(e.target.value, 10))}
+                      className="appearance-none bg-black/40 hover:bg-black/60 text-slate-200 text-xs py-1.5 pl-3 pr-8 rounded-xl border border-white/10 focus:outline-none focus:border-violet-500 cursor-pointer transition-colors"
+                      title="มุมมองแอดมิน: สลับดูพอร์ทัลของผู้เช่าห้องอื่น"
+                    >
+                      {allTenants.map((t) => (
+                        <option key={t.id} value={t.id} className="bg-[#16122d]">
+                          ห้อง {t.roomNo} - {t.name}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-2.5 pointer-events-none" />
+                  </div>
+                )}
 
-            {/* Back to Admin Dashboard */}
-            <form action={switchToAdminAction}>
-              <button
-                type="submit"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white border border-white/10 text-xs font-medium transition-all"
-                title="สลับไปยังหน้าควบคุมผู้ดูแลหอพัก"
-              >
-                <Building className="w-3.5 h-3.5 text-violet-400" />
-                <span className="hidden sm:inline">แดชบอร์ดหลัก</span>
-              </button>
-            </form>
+                {/* Back to Admin Dashboard (visible only to Admin/Staff) */}
+                <form action={switchToAdminAction}>
+                  <button
+                    type="submit"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white border border-white/10 text-xs font-medium transition-all"
+                    title="กลับไปยังหน้าควบคุมผู้ดูแลหอพัก"
+                  >
+                    <Building className="w-3.5 h-3.5 text-violet-400" />
+                    <span className="hidden sm:inline">แดชบอร์ดหลัก</span>
+                  </button>
+                </form>
+              </>
+            ) : (
+              currentTenant && (
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-violet-950/30 border border-violet-800/30 text-xs text-violet-200">
+                  <User className="w-3.5 h-3.5 text-violet-400" />
+                  <span>
+                    ห้อง <strong>{currentTenant.roomNo}</strong> • {currentTenant.name}
+                  </span>
+                </div>
+              )
+            )}
 
             {/* Logout Button */}
             <form action={logoutAction}>

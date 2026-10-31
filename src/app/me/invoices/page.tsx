@@ -42,8 +42,11 @@ export default async function TenantInvoicesPage({
   }
 
   const cookieStore = await cookies();
+  const roleCookie = cookieStore.get("webhotel_user_role")?.value;
   const cookieTenantId = cookieStore.get("webhotel_tenant_id")?.value;
-  const targetId = tenantIdParam
+  const isAdminPreview = roleCookie === "admin" || roleCookie === "staff";
+
+  const targetId = isAdminPreview && tenantIdParam
     ? parseInt(tenantIdParam, 10)
     : cookieTenantId
     ? parseInt(cookieTenantId, 10)
@@ -109,7 +112,11 @@ export default async function TenantInvoicesPage({
   };
 
   return (
-    <TenantLayout currentTenant={currentTenantHeader} allTenants={allTenants}>
+    <TenantLayout
+      currentTenant={currentTenantHeader}
+      allTenants={allTenants}
+      isAdminPreview={isAdminPreview}
+    >
       <TenantInvoicesClient
         invoices={invoices}
         bankDetails={bankDetails}

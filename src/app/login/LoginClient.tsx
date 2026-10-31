@@ -107,6 +107,20 @@ export default function LoginClient({
     });
   };
 
+  // Handle Quick Staff Login
+  const handleQuickStaffLogin = () => {
+    setErrorMessage(null);
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.append("isDemoStaff", "true");
+
+      const res = await loginStaff({}, fd);
+      if (res?.error) {
+        setErrorMessage(res.error);
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-[#0c0a18] text-slate-100 flex flex-col justify-center items-center p-4 selection:bg-violet-600 selection:text-white">
       {/* Background glow */}
@@ -323,8 +337,12 @@ export default function LoginClient({
                 </button>
               </form>
 
-              {/* Quick Admin Demo Button */}
+              {/* Quick Admin & Staff Demo Buttons */}
               <div className="pt-4 border-t border-white/5 space-y-2">
+                <div className="text-[11px] text-slate-400 font-medium flex items-center gap-1 mb-1">
+                  <Sparkles className="w-3 h-3 text-violet-400" />
+                  <span>คลิกเพื่อทดสอบตามระดับสิทธิ์ (Demo Quick Login):</span>
+                </div>
                 <button
                   type="button"
                   onClick={handleQuickAdminLogin}
@@ -332,7 +350,16 @@ export default function LoginClient({
                   className="w-full py-2.5 rounded-xl bg-violet-950/40 hover:bg-violet-900/40 text-violet-300 border border-violet-800/40 text-xs font-medium flex items-center justify-center gap-1.5 transition-all"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-violet-400" />
-                  <span>เข้าสู่ระบบด่วนในฐานะ Admin (Quick Admin Demo)</span>
+                  <span>เข้าสู่ระบบด่วนในฐานะ Admin (ผู้ดูแลสูงสุด)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleQuickStaffLogin}
+                  disabled={isPending}
+                  className="w-full py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-slate-300 border border-white/10 text-xs font-medium flex items-center justify-center gap-1.5 transition-all"
+                >
+                  <User className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>เข้าสู่ระบบด่วนในฐานะ Staff (เจ้าหน้าที่ทั่วไป)</span>
                 </button>
               </div>
             </div>

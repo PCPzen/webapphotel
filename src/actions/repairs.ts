@@ -95,9 +95,17 @@ export async function createRepairRequest(
     return { error: err.message || "เกิดข้อผิดพลาดในการบันทึกการแจ้งซ่อม" };
   }
 
+  const fromTenantPortal = formData.get("fromTenantPortal")?.toString() === "true";
+
   revalidatePath("/repairs");
+  revalidatePath("/me");
+  revalidatePath("/me/repairs");
   revalidatePath("/dashboard");
   revalidatePath("/");
+
+  if (fromTenantPortal && tenantId > 0) {
+    redirect(`/me/repairs?tenantId=${tenantId}`);
+  }
   redirect(`/repairs/${createdId}`);
 }
 

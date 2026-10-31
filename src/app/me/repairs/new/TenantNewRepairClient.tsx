@@ -62,6 +62,7 @@ export default function TenantNewRepairClient({
       fd.append("category", category);
       fd.append("priority", priority);
       fd.append("description", description.trim());
+      fd.append("fromTenantPortal", "true");
       if (imageUrl.trim()) {
         fd.append("imageUrl", imageUrl.trim());
       }

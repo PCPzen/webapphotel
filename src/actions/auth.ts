@@ -128,6 +128,7 @@ export async function loginStaff(
 ): Promise<AuthFormState> {
   const email = formData.get("email")?.toString().trim().toLowerCase() || "";
   const isDemoAdmin = formData.get("isDemoAdmin")?.toString() === "true";
+  const isDemoStaff = formData.get("isDemoStaff")?.toString() === "true";
 
   try {
     let profile;
@@ -146,6 +147,23 @@ export async function loginStaff(
             email: "admin@webhotel.com",
             role: "admin",
             phone: "0812345678",
+            isActive: true,
+          },
+        });
+      }
+    } else if (isDemoStaff) {
+      // Quick Demo Staff Login
+      profile = await prisma.profile.findFirst({
+        where: { role: "staff", isActive: true },
+      });
+
+      if (!profile) {
+        profile = await prisma.profile.create({
+          data: {
+            fullName: "เจ้าหน้าที่นิติบุคคล (Staff)",
+            email: "staff@webhotel.com",
+            role: "staff",
+            phone: "0898765432",
             isActive: true,
           },
         });
