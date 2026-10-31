@@ -20,12 +20,20 @@ async function DatabaseStats() {
             </span>
           </div>
         </div>
-        <Link 
-          href="/rooms"
-          className="text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-xl transition-all shadow-md inline-flex items-center gap-1.5 self-start sm:self-auto"
-        >
-          ดูผังห้องพัก <ArrowRight className="w-3.5 h-3.5" />
-        </Link>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <Link 
+            href="/dashboard"
+            className="text-xs font-bold text-white bg-violet-600 hover:bg-violet-500 px-4 py-2 rounded-xl transition-all shadow-md inline-flex items-center gap-1.5"
+          >
+            แดชบอร์ดบริหาร <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+          <Link 
+            href="/rooms"
+            className="text-xs font-bold text-slate-200 bg-white/10 hover:bg-white/20 px-3.5 py-2 rounded-xl transition-all inline-flex items-center gap-1.5 border border-white/10"
+          >
+            ผังห้องพัก
+          </Link>
+        </div>
       </div>
     );
   } catch (err: any) {
