@@ -18,7 +18,9 @@ import {
   X,
   Home,
   Sparkles,
+  LogOut,
 } from "lucide-react";
+import { logoutAction } from "@/actions/auth";
 
 const NAV_ITEMS = [
   {
@@ -145,16 +147,25 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* Footer / System Info */}
         <div className="p-4 border-t border-violet-950/50 bg-[#0c0a18]/60 space-y-2">
-          <Link
-            href="/"
-            className="flex items-center justify-between px-3 py-2 rounded-xl bg-violet-950/40 hover:bg-violet-900/40 border border-violet-800/20 text-[11px] font-medium text-violet-300 transition-colors"
-          >
-            <span className="flex items-center gap-2">
+          <div className="grid grid-cols-2 gap-1.5">
+            <Link
+              href="/"
+              className="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-violet-950/40 hover:bg-violet-900/40 border border-violet-800/20 text-[11px] font-medium text-violet-300 transition-colors"
+            >
               <Home className="w-3.5 h-3.5 text-violet-400" />
-              ผังระบบหลัก
-            </span>
-            <Sparkles className="w-3 h-3 text-violet-400" />
-          </Link>
+              <span>หน้าหลัก</span>
+            </Link>
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-rose-950/30 hover:bg-rose-900/40 border border-rose-800/20 text-[11px] font-medium text-rose-300 transition-colors"
+                title="ออกจากระบบหรือสลับบัญชี"
+              >
+                <LogOut className="w-3.5 h-3.5 text-rose-400" />
+                <span>ออกจากระบบ</span>
+              </button>
+            </form>
+          </div>
 
           <div className="flex items-center justify-between px-2 pt-1 text-[10px] text-zinc-500">
             <span>สถานะ: Admin / Staff</span>

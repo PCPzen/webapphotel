@@ -17,7 +17,7 @@ import {
   ArrowRight,
   ShieldAlert,
 } from "lucide-react";
-import { logoutAction } from "@/actions/auth";
+import { logoutAction, switchToAdminAction } from "@/actions/auth";
 
 export type TenantOption = {
   id: number;
@@ -131,14 +131,16 @@ export default function TenantLayout({
             )}
 
             {/* Back to Admin Dashboard */}
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white border border-white/10 text-xs font-medium transition-all"
-              title="กลับไปยังหน้าควบคุมผู้ดูแลหอพัก"
-            >
-              <Building className="w-3.5 h-3.5 text-violet-400" />
-              <span className="hidden sm:inline">แดชบอร์ดหลัก</span>
-            </Link>
+            <form action={switchToAdminAction}>
+              <button
+                type="submit"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white border border-white/10 text-xs font-medium transition-all"
+                title="สลับไปยังหน้าควบคุมผู้ดูแลหอพัก"
+              >
+                <Building className="w-3.5 h-3.5 text-violet-400" />
+                <span className="hidden sm:inline">แดชบอร์ดหลัก</span>
+              </button>
+            </form>
 
             {/* Logout Button */}
             <form action={logoutAction}>

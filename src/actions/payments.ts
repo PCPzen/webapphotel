@@ -108,50 +108,63 @@ export async function recordPayment(formData: FormData): Promise<PaymentActionRe
       };
     }
 
-    let createdPaymentId: number;
-    let createdReceiptNo: string;
+    let createdPaymentId = 0;
+    let createdReceiptNo = "";
+    let maxRetries = 3;
 
-    // บันทึกการชำระเงินและอัปเดตสถานะบิลใน Transaction เดียวกัน
-    const result = await prisma.$transaction(async (tx) => {
-      // 1. ออกเลขที่ใบเสร็จรับเงินตามกฎ BR-11
-      const receiptNo = await generateNextReceiptNo(tx, paidAt);
+    // บันทึกการชำระเงินและอัปเดตสถานะบิลใน Transaction เดียวกัน พร้อมระบบ Retry ป้องกันเลขใบเสร็จชนกัน (Concurrency)
+    while (maxRetries > 0) {
+      try {
+        const result = await prisma.$transaction(async (tx) => {
+          // 1. ออกเลขที่ใบเสร็จรับเงินตามกฎ BR-11
+          const receiptNo = await generateNextReceiptNo(tx, paidAt);
 
-      // 2. สร้างเรคคอร์ดการรับชำระเงิน
-      const newPayment = await tx.payment.create({
-        data: {
-          invoiceId,
-          receiptNo,
-          amount: paymentAmount,
-          method,
-          paidAt,
-          referenceNote,
-          slipImageUrl,
-          status: "valid",
-        },
-      });
+          // 2. สร้างเรคคอร์ดการรับชำระเงิน
+          const newPayment = await tx.payment.create({
+            data: {
+              invoiceId,
+              receiptNo,
+              amount: paymentAmount,
+              method,
+              paidAt,
+              referenceNote,
+              slipImageUrl,
+              status: "valid",
+            },
+          });
 
-      // 3. คำนวณสถานะบิลใหม่ตามกฎ BR-07
-      const newTotalPaid = roundHalfUp(alreadyPaid + paymentAmount, 2);
-      let newInvoiceStatus: "paid" | "partial" | "unpaid" = "partial";
+          // 3. คำนวณสถานะบิลใหม่ตามกฎ BR-07
+          const newTotalPaid = roundHalfUp(alreadyPaid + paymentAmount, 2);
+          let newInvoiceStatus: "paid" | "partial" | "unpaid" = "partial";
 
-      if (newTotalPaid >= totalAmount) {
-        newInvoiceStatus = "paid";
-      } else if (newTotalPaid > 0) {
-        newInvoiceStatus = "partial";
-      } else {
-        newInvoiceStatus = "unpaid";
+          if (newTotalPaid >= totalAmount) {
+            newInvoiceStatus = "paid";
+          } else if (newTotalPaid > 0) {
+            newInvoiceStatus = "partial";
+          } else {
+            newInvoiceStatus = "unpaid";
+          }
+
+          await tx.invoice.update({
+            where: { id: invoiceId },
+            data: { status: newInvoiceStatus },
+          });
+
+          return newPayment;
+        });
+
+        createdPaymentId = result.id;
+        createdReceiptNo = result.receiptNo;
+        break;
+      } catch (txErr: any) {
+        maxRetries--;
+        if (txErr?.code === "P2002" && maxRetries > 0) {
+          // กรณีเกิดการกดพร้อมกันเสี้ยววินาที ให้คำนวณเลขลำดับใหม่ในรอบถัดไป
+          continue;
+        }
+        throw txErr;
       }
-
-      await tx.invoice.update({
-        where: { id: invoiceId },
-        data: { status: newInvoiceStatus },
-      });
-
-      return newPayment;
-    });
-
-    createdPaymentId = result.id;
-    createdReceiptNo = result.receiptNo;
+    }
 
     revalidatePath("/payments");
     revalidatePath(`/payments/${createdPaymentId}/receipt`);

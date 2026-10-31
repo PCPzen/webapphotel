@@ -43,6 +43,12 @@ export async function loginTenant(
         httpOnly: true,
         sameSite: "lax",
       });
+      cookieStore.set("webhotel_user_role", "tenant", {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+        httpOnly: true,
+        sameSite: "lax",
+      });
 
       redirect(`/me?tenantId=${tenant.id}`);
     }
@@ -92,6 +98,12 @@ export async function loginTenant(
 
     const cookieStore = await cookies();
     cookieStore.set("webhotel_tenant_id", activeContract.tenant.id.toString(), {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+      httpOnly: true,
+      sameSite: "lax",
+    });
+    cookieStore.set("webhotel_user_role", "tenant", {
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
       httpOnly: true,
@@ -180,7 +192,22 @@ export async function loginStaff(
 }
 
 // -----------------------------------------------------------------------------
-// 3. ออกจากระบบ (Logout)
+// 3. สลับไปยังมุมมองผู้ดูแลระบบ (Switch to Admin Mode for Demo/Testing)
+// -----------------------------------------------------------------------------
+export async function switchToAdminAction(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set("webhotel_user_role", "admin", {
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+    httpOnly: true,
+    sameSite: "lax",
+  });
+
+  redirect("/dashboard");
+}
+
+// -----------------------------------------------------------------------------
+// 4. ออกจากระบบ (Logout)
 // -----------------------------------------------------------------------------
 export async function logoutAction(): Promise<void> {
   const cookieStore = await cookies();
