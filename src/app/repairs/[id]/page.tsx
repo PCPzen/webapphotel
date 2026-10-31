@@ -1,28 +1,72 @@
-import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import prisma from "@/lib/prisma";
+import { notFound } from "next/navigation";
+import AppLayout from "@/components/AppLayout";
+import RepairDetailClient, { RepairDetailData } from "./RepairDetailClient";
 
-export default function Page() {
+export default async function RepairDetailPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const repairId = parseInt(id, 10);
+
+  if (isNaN(repairId) || repairId <= 0) {
+    notFound();
+  }
+
+  const repair = await prisma.repairRequest.findUnique({
+    where: { id: repairId },
+    include: {
+      room: {
+        select: {
+          roomNo: true,
+          floor: true,
+          roomType: true,
+        },
+      },
+      tenant: {
+        select: {
+          firstName: true,
+          lastName: true,
+          phone: true,
+          lineId: true,
+        },
+      },
+    },
+  });
+
+  if (!repair) {
+    notFound();
+  }
+
+  const data: RepairDetailData = {
+    id: repair.id,
+    roomId: repair.roomId,
+    roomNo: repair.room.roomNo,
+    roomType: repair.room.roomType,
+    floor: repair.room.floor,
+    tenantId: repair.tenantId,
+    tenantName: repair.tenant ? `${repair.tenant.firstName} ${repair.tenant.lastName}`.trim() : null,
+    tenantPhone: repair.tenant?.phone || null,
+    tenantLineId: repair.tenant?.lineId || null,
+    title: repair.title,
+    description: repair.description,
+    category: repair.category as RepairDetailData["category"],
+    priority: repair.priority as RepairDetailData["priority"],
+    status: repair.status as RepairDetailData["status"],
+    imageUrl: repair.imageUrl,
+    reportedAt: repair.reportedAt.toISOString(),
+    assignedTo: repair.assignedTo,
+    startedAt: repair.startedAt?.toISOString() || null,
+    completedAt: repair.completedAt?.toISOString() || null,
+    cost: Number(repair.cost ?? 0),
+    resolutionNote: repair.resolutionNote,
+  };
+
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-6">
-      <Link 
-        href="/" 
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" /> กลับหน้าหลัก
-      </Link>
-
-      <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" /> เส้นทาง: /repairs/[id]
-        </div>
-        <h1 className="text-2xl font-bold text-slate-900">P20 รายละเอียด & อัปเดตงานซ่อม</h1>
-        <p className="text-slate-500 text-sm leading-relaxed">มอบหมายงานช่าง บันทึกค่าใช้จ่าย และปิดงานซ่อม</p>
-        
-        <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-          <span>โมดูลพร้อมสำหรับการลงโค้ด</span>
-          <span>Dormitory Management System</span>
-        </div>
-      </div>
-    </div>
+    <AppLayout>
+      <RepairDetailClient repair={data} />
+    </AppLayout>
   );
 }

@@ -1,28 +1,61 @@
-import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { Suspense } from "react";
+import prisma from "@/lib/prisma";
+import AppLayout from "@/components/AppLayout";
+import NewRepairForm from "./NewRepairForm";
 
-export default function Page() {
+async function NewRepairContent({
+  searchParams,
+}: {
+  searchParams: Promise<{ roomId?: string }>;
+}) {
+  const { roomId } = await searchParams;
+  const preselectedRoomId = roomId ? parseInt(roomId, 10) : undefined;
+
+  const rooms = await prisma.room.findMany({
+    orderBy: [{ floor: "asc" }, { roomNo: "asc" }],
+    include: {
+      contracts: {
+        where: { status: "active" },
+        include: { tenant: true },
+      },
+    },
+  });
+
+  const roomOptions = rooms.map((r) => {
+    const activeContract = r.contracts[0];
+    return {
+      id: r.id,
+      roomNo: r.roomNo,
+      floor: r.floor,
+      roomType: r.roomType,
+      tenantId: activeContract?.tenantId || null,
+      tenantName: activeContract
+        ? `${activeContract.tenant.firstName} ${activeContract.tenant.lastName}`
+        : null,
+    };
+  });
+
+  return <NewRepairForm rooms={roomOptions} preselectedRoomId={preselectedRoomId} />;
+}
+
+export default async function NewRepairPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ roomId?: string }>;
+}) {
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-6">
-      <Link 
-        href="/" 
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" /> กลับหน้าหลัก
-      </Link>
-
-      <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" /> เส้นทาง: /repairs/new
-        </div>
-        <h1 className="text-2xl font-bold text-slate-900">P19 แจ้งซ่อมแซมใหม่</h1>
-        <p className="text-slate-500 text-sm leading-relaxed">ฟอร์มรับแจ้งเรื่องชำรุดเสียหายและแนบรูปภาพ</p>
-        
-        <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-          <span>โมดูลพร้อมสำหรับการลงโค้ด</span>
-          <span>Dormitory Management System</span>
-        </div>
+    <AppLayout>
+      <div className="max-w-3xl mx-auto py-2">
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          }
+        >
+          <NewRepairContent searchParams={searchParams} />
+        </Suspense>
       </div>
-    </div>
+    </AppLayout>
   );
 }

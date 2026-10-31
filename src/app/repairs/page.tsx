@@ -1,28 +1,53 @@
-import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import prisma from "@/lib/prisma";
+import AppLayout from "@/components/AppLayout";
+import RepairListClient, { RepairListItem } from "./RepairListClient";
 
-export default function Page() {
+export default async function RepairsPage() {
+  const repairRecords = await prisma.repairRequest.findMany({
+    orderBy: [
+      { reportedAt: "desc" },
+    ],
+    include: {
+      room: {
+        select: {
+          roomNo: true,
+          floor: true,
+        },
+      },
+      tenant: {
+        select: {
+          firstName: true,
+          lastName: true,
+          phone: true,
+        },
+      },
+    },
+  });
+
+  const repairs: RepairListItem[] = repairRecords.map((r) => ({
+    id: r.id,
+    roomId: r.roomId,
+    roomNo: r.room.roomNo,
+    floor: r.room.floor,
+    tenantId: r.tenantId,
+    tenantName: r.tenant ? `${r.tenant.firstName} ${r.tenant.lastName}`.trim() : null,
+    tenantPhone: r.tenant?.phone || null,
+    title: r.title,
+    description: r.description,
+    category: r.category as RepairListItem["category"],
+    priority: r.priority as RepairListItem["priority"],
+    status: r.status as RepairListItem["status"],
+    reportedAt: r.reportedAt.toISOString(),
+    assignedTo: r.assignedTo,
+    startedAt: r.startedAt?.toISOString() || null,
+    completedAt: r.completedAt?.toISOString() || null,
+    cost: Number(r.cost ?? 0),
+    resolutionNote: r.resolutionNote,
+  }));
+
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-6">
-      <Link 
-        href="/" 
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" /> กลับหน้าหลัก
-      </Link>
-
-      <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" /> เส้นทาง: /repairs
-        </div>
-        <h1 className="text-2xl font-bold text-slate-900">P18 รายการแจ้งซ่อมแซม</h1>
-        <p className="text-slate-500 text-sm leading-relaxed">ติดตามงานซ่อมทั้งหมด แยกตามหมวดหมู่และระดับความเร่งด่วน</p>
-        
-        <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-          <span>โมดูลพร้อมสำหรับการลงโค้ด</span>
-          <span>Dormitory Management System</span>
-        </div>
-      </div>
-    </div>
+    <AppLayout>
+      <RepairListClient initialRepairs={repairs} />
+    </AppLayout>
   );
 }
