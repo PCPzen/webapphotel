@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -22,9 +22,8 @@ import {
   Crown,
   UserCheck,
   Lock,
-  Loader2,
 } from "lucide-react";
-import { logoutAction, switchRoleAction } from "@/actions/auth";
+import { logoutAction } from "@/actions/auth";
 
 type NavItem = {
   name: string;
@@ -71,7 +70,6 @@ const NAV_ITEMS: { category: string; items: NavItem[] }[] = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isSwitching, startSwitchTransition] = useTransition();
 
   // Role & User identity state
   const [role, setRole] = useState<"admin" | "staff">("admin");
@@ -94,12 +92,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       }
     }
   }, []);
-
-  const handleSwitchRole = (targetRole: "admin" | "staff") => {
-    startSwitchTransition(async () => {
-      await switchRoleAction(targetRole);
-    });
-  };
 
   const currentNavItem = NAV_ITEMS.flatMap((s) => s.items).find(
     (i) => i.href === pathname || (i.href !== "/" && pathname.startsWith(i.href))
@@ -350,42 +342,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
             )}
-
-            {/* Quick Switch Buttons for Testing Roles */}
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-white/[0.03] border border-white/5 text-[11px]">
-              <button
-                type="button"
-                onClick={() => handleSwitchRole("admin")}
-                disabled={isSwitching || role === "admin"}
-                className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
-                  role === "admin"
-                    ? "bg-violet-600 text-white shadow-xs"
-                    : "text-slate-400 hover:text-white hover:bg-white/5"
-                }`}
-                title="สลับเป็นมุมมอง Admin (มีสิทธิ์เข้าถึงทุกหน้า รวมทั้งจัดการผู้ใช้)"
-              >
-                {isSwitching && role !== "admin" ? (
-                  <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
-                ) : null}
-                Admin
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSwitchRole("staff")}
-                disabled={isSwitching || role === "staff"}
-                className={`px-2.5 py-1 rounded-lg font-medium transition-all ${
-                  role === "staff"
-                    ? "bg-emerald-600 text-white shadow-xs"
-                    : "text-slate-400 hover:text-white hover:bg-white/5"
-                }`}
-                title="สลับเป็นมุมมอง Staff (จัดการหอพักทั่วไป บล็อกหน้าจัดการผู้ใช้)"
-              >
-                {isSwitching && role !== "staff" ? (
-                  <Loader2 className="w-3 h-3 animate-spin inline mr-1" />
-                ) : null}
-                Staff
-              </button>
-            </div>
 
             {/* Logout Button */}
             <form action={logoutAction}>
