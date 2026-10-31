@@ -339,14 +339,9 @@ export default function LoginClient({
           )}
         </div>
 
-        {/* Back Link */}
-        <div className="text-center">
-          <Link
-            href="/"
-            className="text-xs text-slate-500 hover:text-violet-400 transition-colors"
-          >
-            ← กลับสู่หน้าแรกแผนผังระบบ
-          </Link>
+        {/* Footer Info */}
+        <div className="text-center text-xs text-slate-500">
+          ระบบบริหารจัดการหอพักครบวงจร • Dormitory Management System
         </div>
       </div>
     </div>

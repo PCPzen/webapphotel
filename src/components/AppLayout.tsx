@@ -27,6 +27,7 @@ const NAV_ITEMS = [
     category: "หลัก",
     items: [
       { name: "แดชบอร์ดภาพรวม", href: "/dashboard", icon: LayoutDashboard },
+      { name: "แผนผังระบบ (9 สเต็ป)", href: "/dashboard/roadmap", icon: Sparkles },
       { name: "ผังและจัดการห้องพัก", href: "/rooms", icon: Building2 },
     ],
   },
@@ -118,7 +119,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 {section.category}
               </p>
               {section.items.map((item) => {
-                const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
+                const isActive =
+                  item.href === "/dashboard"
+                    ? pathname === "/dashboard"
+                    : pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href));
                 const Icon = item.icon;
 
                 return (
@@ -149,11 +153,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="p-4 border-t border-violet-950/50 bg-[#0c0a18]/60 space-y-2">
           <div className="grid grid-cols-2 gap-1.5">
             <Link
-              href="/"
+              href="/dashboard/roadmap"
               className="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-violet-950/40 hover:bg-violet-900/40 border border-violet-800/20 text-[11px] font-medium text-violet-300 transition-colors"
             >
-              <Home className="w-3.5 h-3.5 text-violet-400" />
-              <span>หน้าหลัก</span>
+              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
+              <span>แผนผังระบบ</span>
             </Link>
             <form action={logoutAction}>
               <button

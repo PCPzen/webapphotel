@@ -16,6 +16,7 @@ export function proxy(request: NextRequest) {
       /^\/payments\/\d+\/receipt$/.test(pathname);
 
     const isRestrictedAdminRoute =
+      pathname.startsWith("/dashboard") ||
       pathname.startsWith("/admin") ||
       pathname.startsWith("/rooms") ||
       pathname.startsWith("/tenants") ||

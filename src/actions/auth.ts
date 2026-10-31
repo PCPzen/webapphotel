@@ -215,5 +215,5 @@ export async function logoutAction(): Promise<void> {
   cookieStore.delete("webhotel_user_role");
   cookieStore.delete("webhotel_user_email");
 
-  redirect("/login");
+  redirect("/");
 }

@@ -126,6 +126,12 @@ export default function DashboardClient({ data }: { data: DashboardData }) {
           {/* Quick Shortcuts */}
           <div className="flex flex-wrap items-center gap-2">
             <Link
+              href="/dashboard/roadmap"
+              className="px-3.5 py-2 rounded-xl bg-violet-500/15 hover:bg-violet-500/25 text-violet-200 border border-violet-500/30 text-xs font-semibold transition-all flex items-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-violet-400" /> ดูแผนผังระบบ (9 สเต็ป)
+            </Link>
+            <Link
               href="/meters"
               className="px-3.5 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 border border-white/10 text-xs font-medium transition-all flex items-center gap-1.5"
             >
