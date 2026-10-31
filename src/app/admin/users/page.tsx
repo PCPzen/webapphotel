@@ -1,28 +1,47 @@
-import Link from "next/link";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import prisma from "@/lib/prisma";
+import AppLayout from "@/components/AppLayout";
+import AdminUsersClient, { ProfileItem, SystemSettingsData } from "./AdminUsersClient";
 
-export default function Page() {
+export default async function AdminUsersPage() {
+  const rawProfiles = await prisma.profile.findMany({
+    orderBy: [
+      { role: "asc" },
+      { createdAt: "desc" },
+    ],
+  });
+
+  const profiles: ProfileItem[] = rawProfiles.map((p) => ({
+    id: p.id,
+    email: p.email,
+    fullName: p.fullName,
+    role: p.role,
+    phone: p.phone,
+    isActive: p.isActive,
+    createdAt: p.createdAt.toISOString(),
+  }));
+
+  const rawSettings = await prisma.systemSetting.findFirst();
+
+  const settings: SystemSettingsData = {
+    id: rawSettings?.id,
+    dormName: rawSettings?.dormName || "หอพักสุขสบาย",
+    dormAddress: rawSettings?.dormAddress || "123 ถ.สุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพมหานคร 10110",
+    dormPhone: rawSettings?.dormPhone || "02-123-4567",
+    bankName: rawSettings?.bankName || "ธนาคารกสิกรไทย",
+    bankAccountNo: rawSettings?.bankAccountNo || "123-4-56789-0",
+    bankAccountName: rawSettings?.bankAccountName || "หอพักสุขสบาย โดย นายสมบูรณ์ มั่นคง",
+    promptpayId: rawSettings?.promptpayId || "0812345678",
+    defaultWaterRate: Number(rawSettings?.defaultWaterRate ?? 18),
+    defaultElectricRate: Number(rawSettings?.defaultElectricRate ?? 8),
+    defaultLateFee: Number(rawSettings?.defaultLateFee ?? 50),
+    defaultDueDay: rawSettings?.defaultDueDay ?? 5,
+  };
+
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-6">
-      <Link 
-        href="/" 
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 transition-colors"
-      >
-        <ArrowLeft className="w-4 h-4" /> กลับหน้าหลัก
-      </Link>
-
-      <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
-          <Sparkles className="w-3.5 h-3.5" /> เส้นทาง: /admin/users
-        </div>
-        <h1 className="text-2xl font-bold text-slate-900">P25 จัดการผู้ใช้และบทบาท</h1>
-        <p className="text-slate-500 text-sm leading-relaxed">จัดการบัญชีเจ้าหน้าที่และกำหนดสิทธิ์ (Admin / Staff)</p>
-        
-        <div className="pt-6 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
-          <span>โมดูลพร้อมสำหรับการลงโค้ด</span>
-          <span>Dormitory Management System</span>
-        </div>
+    <AppLayout>
+      <div className="p-4 md:p-8 max-w-7xl mx-auto">
+        <AdminUsersClient profiles={profiles} settings={settings} />
       </div>
-    </div>
+    </AppLayout>
   );
 }

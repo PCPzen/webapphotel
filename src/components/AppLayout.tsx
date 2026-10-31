@@ -46,9 +46,10 @@ const NAV_ITEMS = [
     ],
   },
   {
-    category: "ระบบ",
+    category: "ระบบและบริการผู้เช่า",
     items: [
       { name: "จัดการผู้ใช้และสิทธิ์", href: "/admin/users", icon: ShieldCheck },
+      { name: "พอร์ทัลผู้เช่า (Tenant)", href: "/me", icon: Home },
     ],
   },
 ];
