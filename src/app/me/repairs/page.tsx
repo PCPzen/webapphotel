@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { cookies } from "next/headers";
 import TenantLayout, { TenantOption } from "@/components/TenantLayout";
 import TenantRepairsClient, { TenantRepairItem } from "./TenantRepairsClient";
 
@@ -34,7 +35,13 @@ export default async function TenantRepairsPage({
     );
   }
 
-  const targetId = tenantIdParam ? parseInt(tenantIdParam, 10) : allActiveContracts[0].tenant.id;
+  const cookieStore = await cookies();
+  const cookieTenantId = cookieStore.get("webhotel_tenant_id")?.value;
+  const targetId = tenantIdParam
+    ? parseInt(tenantIdParam, 10)
+    : cookieTenantId
+    ? parseInt(cookieTenantId, 10)
+    : allActiveContracts[0].tenant.id;
   const currentContract =
     allActiveContracts.find((c) => c.tenant.id === targetId) || allActiveContracts[0];
 

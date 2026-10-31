@@ -64,11 +64,14 @@ export default function HomePage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Link
+              href="/login"
+              className="px-3.5 py-1.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold shadow-md shadow-violet-600/30 transition-all flex items-center gap-1.5"
+            >
+              เข้าสู่ระบบ (Login)
+            </Link>
             <span className="px-3 py-1 rounded-full text-xs font-semibold bg-violet-950/60 text-violet-300 border border-violet-800/40">
               Next.js 16 + TypeScript
-            </span>
-            <span className="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-950/60 text-emerald-300 border border-emerald-800/40">
-              Prisma + Supabase
             </span>
           </div>
         </header>
