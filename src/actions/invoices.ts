@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { parseReadingMonth } from "@/lib/meters";
 import { roundHalfUp, computeDueDate, generateInvoiceNo } from "@/lib/invoices";
+import { requireStaffOrAdmin } from "@/lib/auth-guard";
 
 export type InvoiceActionResult = {
   success?: boolean;
@@ -26,6 +27,9 @@ export async function generateInvoicesBatch(
   billingMonthStr: string,
   items: GenerateInvoiceItemInput[]
 ): Promise<InvoiceActionResult> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const billingMonth = parseReadingMonth(billingMonthStr);
 
   if (!items || items.length === 0) {
@@ -175,6 +179,9 @@ export async function updateInvoiceOtherFee(
   invoiceId: number,
   formData: FormData
 ): Promise<InvoiceActionResult> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const otherAmount = parseFloat(formData.get("otherAmount")?.toString() || "0");
   const otherNote = formData.get("otherNote")?.toString().trim() || null;
 
@@ -233,6 +240,9 @@ export async function updateInvoiceOtherFee(
 // 3. คิดค่าปรับล่าช้า (กฎ BR-09: คิดได้ครั้งเดียวเมื่อเลยวันครบกำหนด)
 // -----------------------------------------------------------------------------
 export async function applyLateFee(invoiceId: number): Promise<InvoiceActionResult> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   try {
     const invoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },
@@ -299,6 +309,9 @@ export async function cancelInvoice(
   invoiceId: number,
   reason?: string
 ): Promise<InvoiceActionResult> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   try {
     const invoice = await prisma.invoice.findUnique({
       where: { id: invoiceId },

@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { parseReadingMonth } from "@/lib/meters";
+import { requireStaffOrAdmin } from "@/lib/auth-guard";
 
 export type MeterActionResult = {
   success?: boolean;
@@ -29,6 +30,9 @@ export async function saveMeterReading(
   readingMonthStr: string,
   input: MeterReadingInput
 ): Promise<MeterActionResult> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const { roomId, waterPrev, waterCurr, elecPrev, elecCurr, readDate, note, allowAdminPrevEdit } = input;
   const readingMonth = parseReadingMonth(readingMonthStr);
 
@@ -133,6 +137,9 @@ export async function saveMeterReadingsBatch(
   readingMonthStr: string,
   readings: MeterReadingInput[]
 ): Promise<MeterActionResult> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const readingMonth = parseReadingMonth(readingMonthStr);
 
   if (!readings || readings.length === 0) {
@@ -245,6 +252,9 @@ export async function saveMeterReadingsBatch(
 // 3. ลบรายการมิเตอร์ (Delete Reading) - ลบได้เฉพาะยังไม่ออกบิล
 // -----------------------------------------------------------------------------
 export async function deleteMeterReading(meterReadingId: number): Promise<MeterActionResult> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   try {
     const reading = await prisma.meterReading.findUnique({
       where: { id: meterReadingId },

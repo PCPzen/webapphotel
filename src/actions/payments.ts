@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { PaymentMethod } from "@prisma/client";
 import { roundHalfUp } from "@/lib/invoices";
+import { requireStaffOrAdmin } from "@/lib/auth-guard";
 
 export type PaymentActionResult = {
   success?: boolean;
@@ -49,6 +50,9 @@ async function generateNextReceiptNo(tx: any, paidDate: Date): Promise<string> {
 // 1. บันทึกการรับชำระเงิน (กฎ BR-08, BR-07, BR-11)
 // -----------------------------------------------------------------------------
 export async function recordPayment(formData: FormData): Promise<PaymentActionResult> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const invoiceId = parseInt(formData.get("invoiceId")?.toString() || "0", 10);
   const amount = parseFloat(formData.get("amount")?.toString() || "0");
   const methodStr = formData.get("method")?.toString() || "bank_transfer";
@@ -192,6 +196,9 @@ export async function voidPayment(
   paymentId: number,
   voidReason: string
 ): Promise<PaymentActionResult> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const reason = voidReason?.trim();
   if (!reason) {
     return { error: "กรุณาระบุเหตุผลในการยกเลิกใบเสร็จ (ตามกฎ BR-08)" };

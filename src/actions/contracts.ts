@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ContractStatus } from "@prisma/client";
+import { requireStaffOrAdmin } from "@/lib/auth-guard";
 
 export type ContractFormState = {
   error?: string;
@@ -19,6 +20,9 @@ export async function createContract(
   prevState: ContractFormState,
   formData: FormData
 ): Promise<ContractFormState> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const roomId = parseInt(formData.get("roomId")?.toString() || "0", 10);
   const tenantId = parseInt(formData.get("tenantId")?.toString() || "0", 10);
   const startDateStr = formData.get("startDate")?.toString().trim() || "";
@@ -142,6 +146,9 @@ export async function endContract(
   contractId: number,
   formData: FormData
 ): Promise<ContractFormState> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const movedOutDateStr = formData.get("movedOutDate")?.toString().trim() || "";
   const damageAmount = parseFloat(formData.get("damageAmount")?.toString() || "0");
   const exitNote = formData.get("exitNote")?.toString().trim() || null;
@@ -266,6 +273,9 @@ export async function endContract(
 // 3. ยกเลิกสัญญาเช่า (SRD 4.10: ยกเลิกสัญญาที่สร้างผิดเมื่อยังไม่มีใบแจ้งหนี้)
 // -----------------------------------------------------------------------------
 export async function cancelContract(contractId: number): Promise<ContractFormState> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   try {
     const contract = await prisma.contract.findUnique({
       where: { id: contractId },
@@ -312,6 +322,9 @@ export async function renewContract(
   contractId: number,
   formData: FormData
 ): Promise<ContractFormState> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const startDateStr = formData.get("startDate")?.toString().trim() || "";
   const endDateStr = formData.get("endDate")?.toString().trim() || "";
   const monthlyRent = parseFloat(formData.get("monthlyRent")?.toString() || "0");

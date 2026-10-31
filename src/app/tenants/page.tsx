@@ -28,7 +28,7 @@ async function TenantsData() {
       id: t.id,
       firstName: t.firstName,
       lastName: t.lastName,
-      idCardNo: t.idCardNo,
+      idCardNo: maskThaiId(t.idCardNo),
       maskedIdCard: maskThaiId(t.idCardNo),
       phone: t.phone,
       email: t.email,

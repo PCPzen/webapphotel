@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { RoomStatus } from "@prisma/client";
+import { requireStaffOrAdmin } from "@/lib/auth-guard";
 
 export type FormState = {
   error?: string;
@@ -15,6 +16,9 @@ export type FormState = {
 // 1. สร้างห้องพักเดี่ยว (BR-03: ตรวจสอบเลขห้องซ้ำ, ค่าเช่า > 0)
 // -----------------------------------------------------------------------------
 export async function createRoom(prevState: FormState, formData: FormData): Promise<FormState> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const roomNo = formData.get("roomNo")?.toString().trim();
   const floor = parseInt(formData.get("floor")?.toString() || "1", 10);
   const roomType = formData.get("roomType")?.toString().trim() || "พัดลม";
@@ -66,6 +70,9 @@ export async function createRoom(prevState: FormState, formData: FormData): Prom
 // 2. สร้างห้องพักแบบชุดสำหรับทั้งชั้น (Batch Generator)
 // -----------------------------------------------------------------------------
 export async function createRoomsBatch(prevState: FormState, formData: FormData): Promise<FormState> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const floor = parseInt(formData.get("floor")?.toString() || "1", 10);
   const startNum = parseInt(formData.get("startNum")?.toString() || "1", 10);
   const endNum = parseInt(formData.get("endNum")?.toString() || "10", 10);
@@ -136,6 +143,9 @@ export async function updateRoom(
   prevState: FormState,
   formData: FormData
 ): Promise<FormState> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const roomNo = formData.get("roomNo")?.toString().trim();
   const floor = parseInt(formData.get("floor")?.toString() || "1", 10);
   const roomType = formData.get("roomType")?.toString().trim() || "พัดลม";
@@ -212,6 +222,9 @@ export async function updateRoom(
 // 4. ลบห้องพัก (เฉพาะห้องที่ไม่มีประวัติสัญญา, มิเตอร์ หรือบิล ตาม BR-12)
 // -----------------------------------------------------------------------------
 export async function deleteRoom(id: number): Promise<FormState> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   try {
     const contractsCount = await prisma.contract.count({ where: { roomId: id } });
     if (contractsCount > 0) {

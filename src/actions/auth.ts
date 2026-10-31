@@ -82,6 +82,7 @@ export async function loginTenant(
     });
 
     if (!room || room.contracts.length === 0) {
+      await new Promise((r) => setTimeout(r, 400));
       return {
         error: `ไม่พบสัญญาเช่าที่เปิดใช้งานสำหรับห้อง ${roomNo} กรุณาตรวจสอบหรือติดต่อสำนักงานหอพัก`,
       };
@@ -97,6 +98,7 @@ export async function loginTenant(
       !registeredPhone.endsWith(inputPhone) &&
       !inputPhone.endsWith(registeredPhone)
     ) {
+      await new Promise((r) => setTimeout(r, 400));
       return {
         error: "เบอร์โทรศัพท์ไม่ตรงกับข้อมูลในสัญญาเช่าของห้องนี้",
       };
@@ -105,22 +107,26 @@ export async function loginTenant(
     // ตรวจสอบเลขท้าย 4 หลักของบัตรประชาชน (ความปลอดภัยระดับสูง)
     const registeredIdCard = (activeContract.tenant.idCardNo || "").replace(/[^0-9]/g, "");
     if (!registeredIdCard.endsWith(cleanLast4)) {
+      await new Promise((r) => setTimeout(r, 400));
       return {
         error: "เลขท้าย 4 หลักของบัตรประชาชนไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง",
       };
     }
 
+    const isProd = process.env.NODE_ENV === "production";
     const cookieStore = await cookies();
     cookieStore.set("webhotel_tenant_id", activeContract.tenant.id.toString(), {
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
       httpOnly: true,
+      secure: isProd,
       sameSite: "lax",
     });
     cookieStore.set("webhotel_user_role", "tenant", {
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
       httpOnly: true,
+      secure: isProd,
       sameSite: "lax",
     });
 
@@ -192,31 +198,37 @@ export async function loginStaff(
       });
 
       if (!profile) {
+        await new Promise((r) => setTimeout(r, 400));
         return { error: `ไม่พบข้อมูลผู้ใช้สำหรับอีเมล ${email}` };
       }
 
       if (!profile.isActive) {
+        await new Promise((r) => setTimeout(r, 400));
         return { error: "บัญชีผู้ใช้นี้ถูกระงับการใช้งานชั่วคราว กรุณาติดต่อผู้ดูแลระบบ" };
       }
     }
 
+    const isProd = process.env.NODE_ENV === "production";
     const cookieStore = await cookies();
     cookieStore.set("webhotel_user_role", profile.role, {
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
       httpOnly: false,
+      secure: isProd,
       sameSite: "lax",
     });
     cookieStore.set("webhotel_user_email", profile.email, {
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
       httpOnly: false,
+      secure: isProd,
       sameSite: "lax",
     });
     cookieStore.set("webhotel_user_name", encodeURIComponent(profile.fullName), {
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
       httpOnly: false,
+      secure: isProd,
       sameSite: "lax",
     });
 

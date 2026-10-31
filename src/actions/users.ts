@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { UserRole } from "@prisma/client";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export type UserActionState = {
   success?: boolean;
@@ -17,6 +18,9 @@ export async function createStaffProfile(
   prevState: UserActionState,
   formData: FormData
 ): Promise<UserActionState> {
+  const auth = await requireAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const fullName = formData.get("fullName")?.toString().trim() || "";
   const email = formData.get("email")?.toString().trim().toLowerCase() || "";
   const phone = formData.get("phone")?.toString().trim() || null;
@@ -60,6 +64,9 @@ export async function updateUserProfile(
   userId: string,
   formData: FormData
 ): Promise<UserActionState> {
+  const auth = await requireAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   if (!userId) return { error: "ไม่พบรหัสผู้ใช้" };
 
   const fullName = formData.get("fullName")?.toString().trim() || "";
@@ -104,6 +111,9 @@ export async function updateUserProfile(
 // 3. ลบบัญชีผู้ใช้ (Delete User Profile)
 // -----------------------------------------------------------------------------
 export async function deleteUserProfile(userId: string): Promise<UserActionState> {
+  const auth = await requireAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   if (!userId) return { error: "ไม่พบรหัสผู้ใช้" };
 
   try {
@@ -138,6 +148,9 @@ export async function deleteUserProfile(userId: string): Promise<UserActionState
 export async function updateSystemSettings(
   formData: FormData
 ): Promise<UserActionState> {
+  const auth = await requireAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const dormName = formData.get("dormName")?.toString().trim() || "หอพักสุขสบาย";
   const dormAddress = formData.get("dormAddress")?.toString().trim() || "";
   const dormPhone = formData.get("dormPhone")?.toString().trim() || "";

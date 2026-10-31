@@ -9,6 +9,7 @@ import {
   validatePhoneNumber,
   calculateAge,
 } from "@/lib/thaiId";
+import { requireStaffOrAdmin } from "@/lib/auth-guard";
 
 export type TenantFormState = {
   error?: string;
@@ -25,6 +26,9 @@ export async function createTenant(
   prevState: TenantFormState,
   formData: FormData
 ): Promise<TenantFormState> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const firstName = formData.get("firstName")?.toString().trim() || "";
   const lastName = formData.get("lastName")?.toString().trim() || "";
   const rawIdCardNo = formData.get("idCardNo")?.toString().trim() || "";
@@ -145,6 +149,9 @@ export async function updateTenant(
   prevState: TenantFormState,
   formData: FormData
 ): Promise<TenantFormState> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const firstName = formData.get("firstName")?.toString().trim() || "";
   const lastName = formData.get("lastName")?.toString().trim() || "";
   const rawPhone = formData.get("phone")?.toString().trim() || "";
@@ -204,6 +211,9 @@ export async function updateTenant(
 // 3. ลบข้อมูลผู้เช่า (ตามกฎ BR-12 ห้ามลบหากมีประวัติธุรกรรม)
 // -----------------------------------------------------------------------------
 export async function deleteTenant(id: number): Promise<TenantFormState> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   try {
     const contractsCount = await prisma.contract.count({ where: { tenantId: id } });
     if (contractsCount > 0) {

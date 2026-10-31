@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { RepairCategory, RepairPriority, RepairStatus } from "@prisma/client";
+import { requireRepairAccess, requireStaffOrAdmin } from "@/lib/auth-guard";
 
 export type RepairFormState = {
   error?: string;
@@ -22,6 +23,9 @@ export async function createRepairRequest(
 ): Promise<RepairFormState> {
   const roomId = parseInt(formData.get("roomId")?.toString() || "0", 10);
   let tenantId = parseInt(formData.get("tenantId")?.toString() || "0", 10);
+
+  const auth = await requireRepairAccess(tenantId);
+  if (!auth.authorized) return { error: auth.error };
   const title = formData.get("title")?.toString().trim() || "";
   const description = formData.get("description")?.toString().trim() || "";
   const categoryStr = formData.get("category")?.toString() || "other";
@@ -117,11 +121,14 @@ export async function updateRepairStatus(
   repairId: number,
   formData: FormData
 ): Promise<RepairFormState> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const targetStatus = formData.get("status")?.toString() as RepairStatus;
   const assignedTo = formData.get("assignedTo")?.toString().trim() || null;
   const resolutionNote = formData.get("resolutionNote")?.toString().trim() || null;
   const cost = parseFloat(formData.get("cost")?.toString() || "0");
-  const isAdmin = formData.get("isAdmin")?.toString() === "true";
+  const isAdmin = auth.role === "admin";
 
   if (!repairId || repairId <= 0) {
     return { error: "ไม่พบรหัสงานซ่อม" };
@@ -210,6 +217,9 @@ export async function updateRepairDetails(
   repairId: number,
   formData: FormData
 ): Promise<RepairFormState> {
+  const auth = await requireStaffOrAdmin();
+  if (!auth.authorized) return { error: auth.error };
+
   const title = formData.get("title")?.toString().trim() || "";
   const description = formData.get("description")?.toString().trim() || "";
   const categoryStr = formData.get("category")?.toString() || "other";
