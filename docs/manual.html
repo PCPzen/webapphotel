@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>คู่มือการใช้งาน วิธีการทดสอบ และสถาปัตยกรรมระบบ | หอพักสุขสบาย เพลส</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    @page {
+      size: A4;
+      margin: 18mm 15mm 20mm 15mm;
+      @bottom-right {
+        content: counter(page);
+        font-family: 'Sarabun', sans-serif;
+        font-size: 9pt;
+        color: #64748b;
+      }
+      @bottom-left {
+        content: "ระบบบริหารจัดการหอพัก (หอพักสุขสบาย เพลส)";
+        font-family: 'Sarabun', sans-serif;
+        font-size: 9pt;
+        color: #64748b;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Sarabun', sans-serif;
+      font-size: 10.5pt;
+      line-height: 1.6;
+      color: #1e293b;
+      background-color: #ffffff;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Kanit', sans-serif;
+      color: #0f172a;
+      page-break-after: avoid;
+    }
+
+    h1 {
+      font-size: 24pt;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 8px;
+      color: #3b0764;
+    }
+
+    h2 {
+      font-size: 15pt;
+      font-weight: 600;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #8b5cf6;
+      color: #4c1d95;
+    }
+
+    h3 {
+      font-size: 12pt;
+      font-weight: 600;
+      margin-top: 16px;
+      margin-bottom: 8px;
+      color: #581c87;
+    }
+
+    p {
+      margin-bottom: 10px;
+      text-align: justify;
+    }
+
+    .page-break {
+      page-break-before: always;
+    }
+
+    /* Cover Page */
+    .cover-page {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 94vh;
+      padding: 40px 20px 20px 20px;
+      text-align: center;
+      page-break-after: always;
+      border: 2px solid #ddd6fe;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #faf5ff 0%, #ffffff 100%);
+    }
+
+    .cover-badge {
+      display: inline-block;
+      padding: 6px 16px;
+      background-color: #6b21a8;
+      color: #ffffff;
+      border-radius: 9999px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 10pt;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      margin-bottom: 16px;
+    }
+
+    .cover-title-box {
+      margin-top: 60px;
+    }
+
+    .cover-subtitle {
+      font-size: 14pt;
+      color: #6b21a8;
+      font-family: 'Kanit', sans-serif;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+
+    .cover-desc {
+      font-size: 11pt;
+      color: #64748b;
+      max-width: 550px;
+      margin: 0 auto 30px auto;
+    }
+
+    .cover-meta {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: left;
+      font-size: 9.5pt;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    .cover-meta table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .cover-meta td {
+      padding: 5px 8px;
+    }
+
+    .cover-meta td.label {
+      font-weight: 600;
+      color: #475569;
+      width: 40%;
+    }
+
+    .cover-footer {
+      font-size: 9pt;
+      color: #94a3b8;
+      margin-top: 40px;
+    }
+
+    /* Content Styling */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 8.5pt;
+      font-weight: 600;
+      font-family: 'Kanit', sans-serif;
+    }
+
+    .badge-admin { background-color: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
+    .badge-staff { background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+    .badge-tenant { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .badge-rule { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+
+    /* Tables */
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 18px 0;
+      font-size: 9.5pt;
+      page-break-inside: avoid;
+    }
+
+    table.data-table th, table.data-table td {
+      border: 1px solid #cbd5e1;
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    table.data-table th {
+      background-color: #f1f5f9;
+      color: #334155;
+      font-family: 'Kanit', sans-serif;
+      font-weight: 600;
+    }
+
+    table.data-table tr:nth-child(even) {
+      background-color: #f8fafc;
+    }
+
+    /* Callout Box */
+    .callout {
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin: 14px 0;
+      font-size: 9.5pt;
+      page-break-inside: avoid;
+    }
+
+    .callout-info {
+      background-color: #f5f3ff;
+      border-left: 4px solid #8b5cf6;
+      color: #4c1d95;
+    }
+
+    .callout-warning {
+      background-color: #fffbeb;
+      border-left: 4px solid #f59e0b;
+      color: #92400e;
+    }
+
+    .callout-success {
+      background-color: #ecfdf5;
+      border-left: 4px solid #10b981;
+      color: #065f46;
+    }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5pt;
+      background-color: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #be185d;
+      border: 1px solid #e2e8f0;
+    }
+
+    .code-block {
+      background-color: #0f172a;
+      color: #f8fafc;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 8.5pt;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin: 12px 0;
+      overflow-x: auto;
+      line-height: 1.5;
+    }
+
+    ul, ol {
+      margin-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    .grid-2 {
+      display: flex;
+      gap: 16px;
+      margin: 12px 0;
+    }
+
+    .grid-card {
+      flex: 1;
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 9pt;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================= -->
+  <!-- COVER PAGE -->
+  <!-- ========================================================================= -->
+  <div class="cover-page">
+    <div>
+      <span class="cover-badge">DOCUMENTATION & TESTING SPECIFICATION v1.0</span>
+      <div class="cover-title-box">
+        <h1>คู่มือระบบบริหารจัดการหอพัก</h1>
+        <div class="cover-subtitle">หอพักสุขสบาย เพลส (Dormitory Management System)</div>
+        <p class="cover-desc">
+          คู่มือการใช้งานระบบครบวงจร แผนและวิธีการทดสอบระบบ (Testing Scenarios) 
+          และคู่มือสถาปัตยกรรมเครื่องมือเทคโนโลยี (Tech Stack Architecture)
+        </p>
+      </div>
+    </div>
+
+    <div class="cover-meta">
+      <table>
+        <tr>
+          <td class="label">โปรเจกต์:</td>
+          <td><code>webapphotel</code> (หอพักสุขสบาย เพลส)</td>
+        </tr>
+        <tr>
+          <td class="label">Repository:</td>
+          <td><code>github.com/PCPzen/webapphotel</code> (Branch: main)</td>
+        </tr>
+        <tr>
+          <td class="label">สถาปัตยกรรมหลัก:</td>
+          <td>Next.js 16.4.3 (Turbopack) • React 19 • Prisma 6</td>
+        </tr>
+        <tr>
+          <td class="label">ฐานข้อมูล:</td>
+          <td>PostgreSQL on Supabase (Tokyo aws-0-ap-northeast-1)</td>
+        </tr>
+        <tr>
+          <td class="label">โฮสติ้ง / คลาวด์:</td>
+          <td>Vercel Production Edge Deployment</td>
+        </tr>
+        <tr>
+          <td class="label">มาตรฐานความปลอดภัย:</td>
+          <td>OWASP Top 10, PDPA Data Masking, RBAC</td>
+        </tr>
+        <tr>
+          <td class="label">วันที่ปรับปรุงล่าสุด:</td>
+          <td>31 ตุลาคม 2026</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="cover-footer">
+      ระบบบริหารจัดการหอพักและพอร์ทัลผู้เช่าออนไลน์ตามมาตรฐานข้อกำหนด SRD v1.0 • เอกสารสำหรับอาจารย์และผู้ตรวจประเมิน
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- SECTION 1: TOOLS & TECH STACK -->
+  <!-- ========================================================================= -->
+  <h2>ส่วนที่ 1: เครื่องมือและเทคโนโลยีที่ใช้ในโปรเจกต์ (Tech Stack & Tools)</h2>
+
+  <p>
+    โปรเจกต์นี้ได้รับการพัฒนาบนสถาปัตยกรรม <strong>Modern Full-Stack Web Application</strong> 
+    โดยเลือกใช้เครื่องมือที่ทันสมัยและเป็นมาตรฐานสากล เพื่อรองรับประสิทธิภาพสูงสุด (High Performance), 
+    ความปลอดภัยระดับสูง (Enterprise-Grade Security) และความเสถียรในการทำงานระยะยาว
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width: 25%;">หมวดหมู่</th>
+        <th style="width: 35%;">เทคโนโลยี / ไลบรารี</th>
+        <th style="width: 40%;">บทบาทหน้าที่ในระบบ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Core Framework</strong></td>
+        <td><code>Next.js 16.4.3 (App Router)</code></td>
+        <td>โครงสร้างหลักแบบ Full-Stack รองรับ Server Components, Server Actions และระบบ Routing แบบ Dynamic</td>
+      </tr>
+      <tr>
+        <td><strong>Bundler & Compiler</strong></td>
+        <td><code>Turbopack (Rust-based)</code></td>
+        <td>ระบบคอมไพล์โค้ดความเร็วสูง รองรับ Fast Refresh และ Optimized Production Build</td>
+      </tr>
+      <tr>
+        <td><strong>UI Library & State</strong></td>
+        <td><code>React 19.3.0</code></td>
+        <td>การจัดการคอมโพเนนต์และการเรนเดอร์แบบ Concurrent, <code>useTransition</code>, Action States</td>
+      </tr>
+      <tr>
+        <td><strong>Type System</strong></td>
+        <td><code>TypeScript 5</code></td>
+        <td>ตรวจสอบความถูกต้องของประเภทข้อมูลแบบ Strict Type Checking ป้องกัน Runtime Error 100%</td>
+      </tr>
+      <tr>
+        <td><strong>ORM & Database Client</strong></td>
+        <td><code>Prisma ORM 6.19.3</code></td>
+        <td>Object-Relational Mapping จัดการโครงสร้างตาราง, Migrations, Type-safe Query และ Parameterized Queries</td>
+      </tr>
+      <tr>
+        <td><strong>Cloud Database</strong></td>
+        <td><code>PostgreSQL on Supabase</code></td>
+        <td>ฐานข้อมูลเชิงสัมพันธ์บน Cloud (Region Tokyo: <code>aws-0-ap-northeast-1</code>) พร้อม Connection Pooler (PgBouncer พอร์ต 6543)</td>
+      </tr>
+      <tr>
+        <td><strong>Styling & Design System</strong></td>
+        <td><code>Tailwind CSS v4</code></td>
+        <td>Utility-First CSS Engine ยุคใหม่ ธีม Dark Violet & Deep Black Aesthetic (<code>#0c0a18</code>) สอดคล้องกับ SRD</td>
+      </tr>
+      <tr>
+        <td><strong>Iconography</strong></td>
+        <td><code>Lucide React (1.62.0)</code></td>
+        <td>ชุดไอคอนแบบ SVG คุณภาพสูง สะอาดตาและประหยัด Bandwidth</td>
+      </tr>
+      <tr>
+        <td><strong>Security & Auth</strong></td>
+        <td><code>Custom RBAC + Edge Proxy</code></td>
+        <td>ระบบจำแนกสิทธิ์ 4 ระดับ (Unauthenticated, Tenant, Staff, Admin) พร้อม Server Action Guards</td>
+      </tr>
+      <tr>
+        <td><strong>Hosting & CI/CD</strong></td>
+        <td><code>Vercel Cloud Platform</code></td>
+        <td>โฮสติ้ง Production เชื่อมต่อ GitHub Pipeline (Auto-Deploy ทุกครั้งที่มีการ Push โค้ด)</td>
+      </tr>
+      <tr>
+        <td><strong>Containerization</strong></td>
+        <td><code>Docker & Docker Compose</code></td>
+        <td>รองรับการรัน Environment แบบจำลองตู้คอนเทนเนอร์ (<code>Dockerfile.dev</code>, <code>docker-compose.yml</code>)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>สถาปัตยกรรมความปลอดภัยและการปกป้องข้อมูล (Security & PDPA Architecture)</h3>
+  <ul>
+    <li><strong>HTTP Security Headers:</strong> ติดตั้ง Header ผ่าน <code>next.config.ts</code> เช่น <code>X-Frame-Options: DENY</code> (ป้องกัน Clickjacking), <code>X-Content-Type-Options: nosniff</code>, <code>Referrer-Policy</code>, <code>HSTS</code> และ <code>Permissions-Policy</code></li>
+    <li><strong>Defense-in-Depth Authorization:</strong> เสริมการตรวจสิทธิ์ซ้ำระดับเซิร์ฟเวอร์ที่ <code>src/lib/auth-guard.ts</code> ในทุก Server Action ป้องกันช่องโหว่ <em>OWASP A01: Broken Access Control</em></li>
+    <li><strong>Anti-Brute-Force Delay:</strong> หน่วงเวลา 400ms เมื่อมีการล็อกอินผิดพลาดเพื่อป้องกันการโจมตีแบบสุ่มรหัสผ่านด้วย Bot</li>
+    <li><strong>PDPA Data Masking:</strong> ซ่อนหมายเลขบัตรประชาชน 13 หลักของผู้เช่าในหน้าจอทั่วไปด้วยฟังก์ชัน <code>maskThaiId()</code> (แสดงผลเป็น <code>•••••••••1234</code>)</li>
+  </ul>
+
+  <!-- ========================================================================= -->
+  <!-- SECTION 2: USER MANUAL -->
+  <!-- ========================================================================= -->
+  <div class="page-break"></div>
+  <h2>ส่วนที่ 2: คู่มือการใช้งานระบบแยกตามบทบาท (User Manual)</h2>
+
+  <p>
+    ระบบบริหารจัดการหอพักแบ่งผู้ใช้งานออกเป็น <strong>3 บทบาทหลัก</strong> โดยแต่ละบทบาทจะมองเห็นเมนู 
+    และมีสิทธิ์การเข้าถึงหน้าที่แตกต่างกันอย่างเข้มงวด:
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>สิทธิ์ / หน้าเว็บ</th>
+        <th style="text-align: center;">👤 ผู้เช่า (Tenant)</th>
+        <th style="text-align: center;">🧑‍💼 เจ้าหน้าที่ (Staff)</th>
+        <th style="text-align: center;">🛡️ ผู้ดูแลสูงสุด (Admin)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>หน้าเข้าสู่ระบบ (<code>/</code>, <code>/login</code>)</td>
+        <td style="text-align: center;">✅ เข้าได้</td>
+        <td style="text-align: center;">✅ เข้าได้</td>
+        <td style="text-align: center;">✅ เข้าได้</td>
+      </tr>
+      <tr>
+        <td>พอร์ทัลผู้เช่า (<code>/me</code>, <code>/me/invoices</code>, <code>/me/repairs</code>)</td>
+        <td style="text-align: center;">✅ <strong>เฉพาะห้องตนเอง</strong></td>
+        <td style="text-align: center;">✅ ดูได้ทุกห้อง (Preview)</td>
+        <td style="text-align: center;">✅ ดูได้ทุกห้อง (Preview)</td>
+      </tr>
+      <tr>
+        <td>พิมพ์ใบแจ้งหนี้ / ใบเสร็จรับเงิน</td>
+        <td style="text-align: center;">✅ สั่งพิมพ์บิลตนเองได้</td>
+        <td style="text-align: center;">✅ สั่งพิมพ์ได้ทั้งหมด</td>
+        <td style="text-align: center;">✅ สั่งพิมพ์ได้ทั้งหมด</td>
+      </tr>
+      <tr>
+        <td>แดชบอร์ด & แผนผัง (<code>/dashboard</code>, <code>/rooms</code>)</td>
+        <td style="text-align: center; color: #dc2626;">❌ บล็อก (ดีดกลับ <code>/me</code>)</td>
+        <td style="text-align: center;">✅ เข้าใช้งานได้</td>
+        <td style="text-align: center;">✅ เข้าใช้งานได้</td>
+      </tr>
+      <tr>
+        <td>ทะเบียนผู้เช่า & สัญญาเช่า (<code>/tenants</code>, <code>/contracts</code>)</td>
+        <td style="text-align: center; color: #dc2626;">❌ บล็อก (ดีดกลับ <code>/me</code>)</td>
+        <td style="text-align: center;">✅ เพิ่ม/แก้ไข/จัดการได้</td>
+        <td style="text-align: center;">✅ เพิ่ม/แก้ไข/จัดการได้</td>
+      </tr>
+      <tr>
+        <td>จดมิเตอร์ & ออกบิลรายเดือน (<code>/meters</code>, <code>/invoices</code>)</td>
+        <td style="text-align: center; color: #dc2626;">❌ บล็อก (ดีดกลับ <code>/me</code>)</td>
+        <td style="text-align: center;">✅ จดเลข / ออกบิลได้</td>
+        <td style="text-align: center;">✅ จดเลข / ออกบิลได้</td>
+      </tr>
+      <tr>
+        <td>บันทึกรับชำระเงิน & ออกใบเสร็จ (<code>/payments</code>)</td>
+        <td style="text-align: center; color: #dc2626;">❌ บล็อก (ดีดกลับ <code>/me</code>)</td>
+        <td style="text-align: center;">✅ รับชำระ / Void ได้</td>
+        <td style="text-align: center;">✅ รับชำระ / Void ได้</td>
+      </tr>
+      <tr>
+        <td>จัดการงานแจ้งซ่อมบำรุงหลังบ้าน (<code>/repairs</code>)</td>
+        <td style="text-align: center; color: #dc2626;">❌ บล็อก (แจ้งผ่าน <code>/me</code>)</td>
+        <td style="text-align: center;">✅ มอบหมาย / ปิดงานซ่อม</td>
+        <td style="text-align: center;">✅ มอบหมาย / ปิดงาน / <strong>ย้อนสถานะ</strong></td>
+      </tr>
+      <tr>
+        <td>รายงานการเงินและสถิติ (<code>/reports/*</code>)</td>
+        <td style="text-align: center; color: #dc2626;">❌ บล็อก (ดีดกลับ <code>/me</code>)</td>
+        <td style="text-align: center;">✅ ดูและ Export CSV ได้</td>
+        <td style="text-align: center;">✅ ดูและ Export CSV ได้</td>
+      </tr>
+      <tr>
+        <td>จัดการผู้ใช้งาน & ตั้งค่าระบบ (<code>/admin/users</code>)</td>
+        <td style="text-align: center; color: #dc2626;">❌ บล็อก (ดีดกลับ <code>/me</code>)</td>
+        <td style="text-align: center; color: #dc2626;">❌ <strong>บล็อก (ล็อกป้าย 🔒)</strong></td>
+        <td style="text-align: center;">✅ <strong>Admin เท่านั้น</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>2.1 การใช้งานสำหรับผู้เช่า (Tenant Portal)</h3>
+  <ol>
+    <li>
+      <strong>การเข้าสู่ระบบผู้เช่า:</strong>
+      <p>ไปที่หน้าแรกของระบบ (<code>/</code>) เลือกแท็บ <em>"สำหรับผู้เช่า (Tenant)"</em> กรอกข้อมูล 3 ส่วนเพื่อความปลอดภัยสูงสุด:</p>
+      <ul>
+        <li>หมายเลขห้องพัก (เช่น <code>101</code> หรือ <code>201</code>)</li>
+        <li>เบอร์โทรศัพท์ที่ลงทะเบียนในสัญญาเช่า (เช่น <code>0812345678</code>)</li>
+        <li><strong>เลขท้าย 4 หลักของบัตรประชาชน</strong> (เพื่อป้องกันบุคคลอื่นแอบดูบิล)</li>
+      </ul>
+    </li>
+    <li>
+      <strong>หน้าแรกพอร์ทัลผู้เช่า (<code>/me</code>):</strong>
+      <p>แสดงการ์ดยอดค้างชำระรวม, ข้อมูลสัญญาเช่าปัจจุบัน, ปุ่มลัดชำระเงิน, และรายการแจ้งซ่อมบำรุงล่าสุด</p>
+    </li>
+    <li>
+      <strong>การตรวจสอบบิลและประวัติการชำระ (<code>/me/invoices</code>):</strong>
+      <p>สามารถคลิกดูรายละเอียดของใบแจ้งหนี้แต่ละเดือน ดูหน่วยน้ำ-ไฟที่ใช้ ยอดรวมที่ต้องชำระ บัญชีรับเงินของหอพัก และกดปุ่มพิมพ์ใบแจ้งหนี้หรือใบเสร็จรับเงิน</p>
+    </li>
+    <li>
+      <strong>การแจ้งซ่อมแซมห้องพัก (<code>/me/repairs/new</code>):</strong>
+      <p>ผู้เช่าระบุหัวข้องานซ่อม, เลือกหมวดหมู่ (⚡ ไฟฟ้า, 🚿 ประปา, ❄️ แอร์, 🪑 เฟอร์นิเจอร์), เลือกระดับความเร่งด่วน, อธิบายอาการ, และแนบลิงก์รูปถ่าย จากนั้นกดส่งเรื่อง</p>
+    </li>
+  </ol>
+
+  <!-- ========================================================================= -->
+  <!-- STAFF & ADMIN MANUAL -->
+  <!-- ========================================================================= -->
+  <div class="page-break"></div>
+  <h3>2.2 การใช้งานสำหรับเจ้าหน้าที่และผู้ดูแลระบบ (Staff & Admin)</h3>
+
+  <div class="callout callout-info">
+    <strong>💡 การเข้าสู่ระบบ:</strong> เลือกแท็บ <em>"ผู้ดูแล & เจ้าหน้าที่ (Admin)"</em> กรอกอีเมลเจ้าหน้าที่ หรือคลิกปุ่ม Quick Demo เพื่อเข้าสู่ระบบในฐานะ Admin หรือ Staff ได้ทันที
+  </div>
+
+  <ol>
+    <li>
+      <strong>แดชบอร์ดภาพรวม (<code>/dashboard</code>):</strong>
+      <p>แสดงตัวชี้วัดหลัก 4 รายการ (จำนวนห้องทั้งหมด, อัตราการเข้าพัก %, รายได้รวมเดือนปัจจุบัน, ยอดค้างชำระรวม) พร้อมตารางผังห้องพัก Interactive Grid แสดงสีตามสถานะห้องแบบ Real-time</p>
+    </li>
+    <li>
+      <strong>การจัดการห้องพัก (<code>/rooms</code>):</strong>
+      <p>สามารถกดปุ่ม <em>"+ เพิ่มห้องพักใหม่"</em> หรือใช้เครื่องมือ <em>"สร้างห้องพักแบบชุดทั้งชั้น (Batch Generator)"</em> เพื่อสร้างห้องพักทีละหลายห้องได้ในคลิกเดียว (ตามกฎ BR-03 สถานะห้องใหม่จะเป็น ว่าง หรือ ปรับปรุง เท่านั้น)</p>
+    </li>
+    <li>
+      <strong>ทะเบียนผู้เช่า (<code>/tenants</code>):</strong>
+      <p>บันทึกประวัติผู้เช่าใหม่ ตรวจสอบเลขบัตรประชาชน 13 หลักด้วยสูตร Modulo 11 (กฎ BR-01) โดยในหน้ารายการข้อมูลเลขบัตรจะถูกปกปิด (Masking) ตามมาตรฐาน PDPA</p>
+    </li>
+    <li>
+      <strong>สัญญาเช่าห้องพัก (<code>/contracts</code>):</strong>
+      <ul>
+        <li><strong>ทำสัญญาใหม่ (BR-02):</strong> เลือกห้องพักและผู้เช่า กำหนดค่าเช่า ค่ามัดจำ ค่าน้ำ-ไฟ และวันครบกำหนด เมื่อบันทึกห้องจะเปลี่ยนเป็น <code>occupied</code> อัตโนมัติ</li>
+        <li><strong>สิ้นสุดสัญญาและคืนเงินมัดจำ (BR-10):</strong> ระบบจะคำนวณเงินมัดจำหักกลบลบหนี้ค้างชำระและค่าเสียหายให้อัตโนมัติ พร้อมคืนสถานะห้องเป็น <code>vacant</code></li>
+        <li><strong>ต่ออายุสัญญา (Renew):</strong> สิ้นสุดสัญญาเดิมและสร้างสัญญาฉบับใหม่ต่อเนื่องทันที</li>
+      </ul>
+    </li>
+    <li>
+      <strong>การบันทึกมิเตอร์น้ำ-ไฟ (<code>/meters</code>):</strong>
+      <p>สามารถบันทึกได้ทั้งแบบรายห้องและแบบทั้งตาราง (Batch Save) ตามกฎ BR-04 ระบบจะตรวจสอบว่าเลขมิเตอร์ครั้งปัจจุบันต้องไม่ต่ำกว่าครั้งก่อนหน้า และหากห้องใดถูกนำไปออกบิลแล้ว ตารางจะล็อกเพื่อป้องกันการแก้ไข</p>
+    </li>
+    <li>
+      <strong>ระบบใบแจ้งหนี้รายเดือน (<code>/invoices</code>):</strong>
+      <p>กดปุ่ม <em>"+ ออกใบแจ้งหนี้"</em> เพื่อคำนวณค่าน้ำ-ไฟตามหน่วยการใช้งานจริง พร้อมปัดเศษทศนิยมตามกฎ BR-05 (Decimal Half-Up) และบังคับกฎ 1 ห้อง 1 บิลต่อเดือน (BR-06)</p>
+    </li>
+    <li>
+      <strong>การรับชำระเงินและใบเสร็จ (<code>/payments</code>):</strong>
+      <p>บันทึกการรับชำระเงินสดหรือโอนเงินผ่านธนาคาร ระบบจะออกเลขที่ใบเสร็จรับเงิน <code>RCP-YYYYMM-XXXX</code> อัตโนมัติ (BR-11) และหากบันทึกผิด กฎ BR-12 จะไม่อนุญาตให้ลบแต่ให้ทำรายการยกเลิกแบบ Void พร้อมระบุเหตุผล</p>
+    </li>
+    <li>
+      <strong>การจัดการงานแจ้งซ่อมบำรุง (<code>/repairs</code>):</strong>
+      <p>ระบบควบคุม Workflow 3 ขั้นตอน: <code>รอดำเนินการ (open)</code> &rarr; <code>กำลังดำเนินการ (in_progress)</code> &rarr; <code>เสร็จสิ้น (done)</code> พร้อมระบุค่าใช้จ่ายและบันทึกผลการซ่อม (การย้อนสถานะจาก done กลับเป็น in_progress อนุญาตเฉพาะ Admin ตามกฎ SRD 4.22)</p>
+    </li>
+    <li>
+      <strong>รายงานการเงินและสถิติ (<code>/reports/*</code>):</strong>
+      <p>ดูรายงานสรุป 4 มิติ (รายงานรายรับ, อัตราเข้าพัก, หนี้ค้างชำระ, สถิติงานซ่อม) พร้อมปุ่ม <strong>Export CSV</strong> เพื่อดาวน์โหลดข้อมูลไปใช้งานต่อใน Excel</p>
+    </li>
+  </ol>
+
+  <h3>2.3 สิทธิ์พิเศษเฉพาะผู้ดูแลระบบสูงสุด (Admin Features - <code>/admin/users</code>)</h3>
+  <ul>
+    <li><strong>เพิ่ม/แก้ไข/ระงับบัญชีผู้ใช้งาน:</strong> เพิ่มชื่อ อีเมล เบอร์โทร และกำหนดบทบาท Staff หรือ Admin</li>
+    <li><strong>ตั้งค่าส่วนกลางของหอพัก:</strong> แก้ไขชื่อหอพัก, เลขที่บัญชีธนาคาร/พร้อมเพย์, อัตราค่าน้ำ-ไฟเริ่มต้น, และวันครบกำหนดชำระเงิน</li>
+  </ul>
+
+  <!-- ========================================================================= -->
+  <!-- SECTION 3: TESTING GUIDE -->
+  <!-- ========================================================================= -->
+  <div class="page-break"></div>
+  <h2>ส่วนที่ 3: แผนและวิธีการทดสอบระบบ (Testing Guide & Test Cases)</h2>
+
+  <div class="callout callout-success">
+    <strong>🎯 สคริปต์ทดสอบเร่งด่วน 5 นาทีสำหรับอาจารย์ (5-Minute Quick Test Script):</strong>
+    <ol style="margin-top: 8px;">
+      <li><strong>นาทีที่ 1:</strong> เปิดหน้าแรก (<code>/</code>) กดปุ่ม Quick Tenant เข้าสู่พอร์ทัลผู้เช่าห้อง 101 ตรวจดูบิลและทดลองส่งแจ้งซ่อมบำรุง</li>
+      <li><strong>นาทีที่ 2:</strong> กดออกจากระบบ ล็อกอินด้วย Staff Quick Demo สังเกตป้ายยศ <code>STAFF 🧑‍💼</code> บน Navbar และสังเกตเมนู <em>จัดการผู้ใช้และสิทธิ์</em> จะถูกล็อก 🔒</li>
+      <li><strong>นาทีที่ 3:</strong> ไปที่หน้า <code>/meters</code> ทดสอบจดมิเตอร์น้ำไฟ และไปที่ <code>/invoices</code> กดออกใบแจ้งหนี้อัตโนมัติ</li>
+      <li><strong>นาทีที่ 4:</strong> ไปที่หน้า <code>/payments</code> บันทึกรับชำระเงินและดูใบเสร็จรับเงินเลขที่ <code>RCP</code></li>
+      <li><strong>นาทีที่ 5:</strong> กดออกจากระบบ ล็อกอินด้วย Admin Quick Demo สังเกตป้ายยศ <code>ADMIN 🛡️</code> และเข้าหน้า <code>/admin/users</code> เพื่อจัดการผู้ใช้</li>
+    </ol>
+  </div>
+
+  <h3>ตารางกรณีทดสอบระบบครบวงจร (System Test Cases Specification)</h3>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th style="width: 12%;">รหัสทดสอบ</th>
+        <th style="width: 25%;">ฟังก์ชันที่ทดสอบ</th>
+        <th style="width: 33%;">ขั้นตอนการทดสอบ (Steps)</th>
+        <th style="width: 30%;">ผลลัพธ์ที่คาดหวัง (Expected Result)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>TC-01</code></td>
+        <td>การล็อกอินผู้เช่าแบบปลอดภัย 3 ชั้น</td>
+        <td>กรอกเลขห้อง 101, เบอร์โทร, และเลขท้ายบัตร ปชช. 4 หลัก</td>
+        <td>เข้าสู่หน้า <code>/me</code> ของห้อง 101 ได้ถูกต้อง หากกรอกเลขบัตรผิดจะถูกปฏิเสธพร้อมหน่วงเวลา 400ms</td>
+      </tr>
+      <tr>
+        <td><code>TC-02</code></td>
+        <td>การป้องกันสิทธิ์เส้นทาง (RBAC)</td>
+        <td>ขณะเป็นผู้เช่า ให้ลองพิมพ์ URL <code>/dashboard</code> หรือ <code>/rooms</code></td>
+        <td>ระบบ Proxy สกัดกั้นทันที และ Redirect ผู้ใช้กลับมายังหน้า <code>/me</code></td>
+      </tr>
+      <tr>
+        <td><code>TC-03</code></td>
+        <td>การจำกัดสิทธิ์ของ Staff</td>
+        <td>ล็อกอินเป็น Staff แล้วพิมพ์ URL <code>/admin/users</code> หรือคลิกเมนูผู้ใช้</td>
+        <td>ระบบบล็อกการเข้าถึงและดีดกลับมาที่ <code>/dashboard</code> ตามกฎ RBAC</td>
+      </tr>
+      <tr>
+        <td><code>TC-04</code></td>
+        <td>การตรวจสอบเลขบัตร ปชช. (BR-01)</td>
+        <td>ไปหน้า <code>/tenants/new</code> กรอกเลขบัตร ปชช. ที่ Checksum ผิด</td>
+        <td>ระบบแจ้งเตือน <em>"เลขบัตรประชาชนไม่ถูกต้องตามสูตร Modulo 11"</em></td>
+      </tr>
+      <tr>
+        <td><code>TC-05</code></td>
+        <td>การทำสัญญาเช่าห้องพัก (BR-02, BR-03)</td>
+        <td>ทำสัญญาเช่าห้องว่างใหม่ที่ <code>/contracts/new</code></td>
+        <td>บันทึกสัญญาสำเร็จ และสถานะห้องพักในผังเปลี่ยนเป็น <code>occupied</code> ทันที</td>
+      </tr>
+      <tr>
+        <td><code>TC-06</code></td>
+        <td>การตรวจสอบเลขมิเตอร์ (BR-04)</td>
+        <td>จดมิเตอร์ที่ <code>/meters</code> โดยใส่เลขปัจจุบันต่ำกว่าเลขเดิม</td>
+        <td>ระบบแจ้งเตือนข้อผิดพลาดตามกฎ BR-04 ไม่อนุญาตให้บันทึก</td>
+      </tr>
+      <tr>
+        <td><code>TC-07</code></td>
+        <td>การออกบิลและปัดเศษทศนิยม (BR-05, BR-06)</td>
+        <td>ออกใบแจ้งหนี้แบบชุดที่ <code>/invoices</code></td>
+        <td>ระบบคำนวณค่าน้ำ-ไฟตามสูตร ปัดเศษแบบ Half-Up และป้องกันการออกบิลซ้ำในเดือนเดียวกัน</td>
+      </tr>
+      <tr>
+        <td><code>TC-08</code></td>
+        <td>การคิดค่าปรับชำระล่าช้า (BR-09)</td>
+        <td>กดคิดค่าปรับล่าช้าในใบแจ้งหนี้ที่เลยวันครบกำหนด</td>
+        <td>บวกค่าปรับตามสัญญาสำเร็จ และปุ่มจะถูกปิดเพื่อป้องกันการคิดค่าปรับซ้ำเกิน 1 ครั้ง</td>
+      </tr>
+      <tr>
+        <td><code>TC-09</code></td>
+        <td>การรับชำระเงินและออกใบเสร็จ (BR-08, BR-11)</td>
+        <td>บันทึกการชำระเงินที่ <code>/payments</code></td>
+        <td>ออกใบเสร็จรับเงินเลขที่ <code>RCP-YYYYMM-XXXX</code> ต่อเนื่อง และสถานะบิลเปลี่ยนเป็น paid</td>
+      </tr>
+      <tr>
+        <td><code>TC-10</code></td>
+        <td>การยกเลิกใบเสร็จรับเงิน (BR-12)</td>
+        <td>กดยกเลิกใบเสร็จรับเงินในหน้ารายละเอียดการชำระเงิน</td>
+        <td>ระบบเปลี่ยนสถานะเป็น <code>voided</code> บันทึกเหตุผล และคำนวณยอดค้างของบิลกลับมา</td>
+      </tr>
+      <tr>
+        <td><code>TC-11</code></td>
+        <td>เวิร์กโฟลว์งานแจ้งซ่อมบำรุง (SRD 4.22)</td>
+        <td>เปลี่ยนสถานะงานซ่อมจาก open &rarr; in_progress &rarr; done</td>
+        <td>ต้องผ่าน in_progress ก่อนเสมอ และการย้อนสถานะจาก done กลับทำได้เฉพาะ Admin</td>
+      </tr>
+      <tr>
+        <td><code>TC-12</code></td>
+        <td>การสิ้นสุดสัญญาและคืนเงินมัดจำ (BR-10)</td>
+        <td>กดยุติสัญญาห้องพักที่ <code>/contracts/[id]</code> ระบุค่าเสียหาย</td>
+        <td>คำนวณเงินมัดจำหักยอดค้างและค่าเสียหายอัตโนมัติ และคืนสถานะห้องพักกลับเป็น <code>vacant</code></td>
+      </tr>
+    </tbody>
+  </table>
+
+</body>
+</html>
