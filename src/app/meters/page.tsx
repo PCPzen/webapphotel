@@ -2,33 +2,7 @@ import { Suspense } from "react";
 import prisma from "@/lib/prisma";
 import AppLayout from "@/components/AppLayout";
 import MetersClient, { MeterRowData } from "./MetersClient";
-import { parseReadingMonth } from "@/actions/meters";
-
-function getThaiMonthName(date: Date): string {
-  const months = [
-    "มกราคม",
-    "กุมภาพันธ์",
-    "มีนาคม",
-    "เมษายน",
-    "พฤษภาคม",
-    "มิถุนายน",
-    "กรกฎาคม",
-    "สิงหาคม",
-    "กันยายน",
-    "ตุลาคม",
-    "พฤศจิกายน",
-    "ธันวาคม",
-  ];
-  const m = months[date.getUTCMonth()];
-  const y = date.getUTCFullYear() + 543;
-  return `${m} ${y}`;
-}
-
-function formatMonthString(d: Date): string {
-  const y = d.getUTCFullYear();
-  const m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  return `${y}-${m}`;
-}
+import { parseReadingMonth, formatMonthString, getThaiMonthName } from "@/lib/meters";
 
 async function MetersData({ monthParam }: { monthParam?: string }) {
   const today = new Date();

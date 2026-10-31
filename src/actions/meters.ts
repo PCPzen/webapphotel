@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { parseReadingMonth } from "@/lib/meters";
 
 export type MeterActionResult = {
   success?: boolean;
@@ -20,21 +21,6 @@ export type MeterReadingInput = {
   note?: string;
   allowAdminPrevEdit?: boolean;
 };
-
-// -----------------------------------------------------------------------------
-// Helper: ตรวจสอบและแปลง string YYYY-MM เป็น Date (วันแรกของเดือน)
-// -----------------------------------------------------------------------------
-export function parseReadingMonth(monthStr: string): Date {
-  const parts = monthStr.split("-");
-  const year = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10);
-
-  if (isNaN(year) || isNaN(month) || month < 1 || month > 12) {
-    const now = new Date();
-    return new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1));
-  }
-  return new Date(Date.UTC(year, month - 1, 1));
-}
 
 // -----------------------------------------------------------------------------
 // 1. บันทึกมิเตอร์เดี่ยวรายห้อง (Single Save / Update) - กฎ BR-04

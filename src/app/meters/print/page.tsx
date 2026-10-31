@@ -1,27 +1,7 @@
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
 import PrintWalksheetClient from "./PrintWalksheetClient";
-import { parseReadingMonth } from "@/actions/meters";
-
-function getThaiMonthName(date: Date): string {
-  const months = [
-    "มกราคม",
-    "กุมภาพันธ์",
-    "มีนาคม",
-    "เมษายน",
-    "พฤษภาคม",
-    "มิถุนายน",
-    "กรกฎาคม",
-    "สิงหาคม",
-    "กันยายน",
-    "ตุลาคม",
-    "พฤศจิกายน",
-    "ธันวาคม",
-  ];
-  const m = months[date.getUTCMonth()];
-  const y = date.getUTCFullYear() + 543;
-  return `${m} ${y}`;
-}
+import { parseReadingMonth, getThaiMonthName } from "@/lib/meters";
 
 export default async function PrintMeterWalksheetPage({
   searchParams,
