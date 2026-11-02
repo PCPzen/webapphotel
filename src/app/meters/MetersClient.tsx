@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useMemo, useRef, useTransition } from "react";
+import { useState, useMemo, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Gauge,
   Calendar,
   Search,
-  Filter,
   Save,
   CheckCircle2,
   AlertTriangle,
@@ -16,15 +15,15 @@ import {
   Printer,
   ChevronLeft,
   ChevronRight,
-  Clock,
   Sparkles,
   Zap,
   Droplet,
-  Settings,
-  HelpCircle,
-  FileCheck,
+  Pencil,
+  Loader2,
+  X,
 } from "lucide-react";
-import { saveMeterReading, saveMeterReadingsBatch, deleteMeterReading, MeterReadingInput } from "@/actions/meters";
+import { saveMeterReading, saveMeterReadingsBatch, MeterReadingInput } from "@/actions/meters";
+import { handleEmojiInput } from "@/lib/emoji";
 
 export type MeterRowData = {
   roomId: number;
@@ -152,9 +151,10 @@ export default function MetersClient({
     };
   }, [rows]);
 
-  // ฟิลเตอร์แถวตามเงื่อนไข
+  // กรองแถวตามแท็บและคำค้นหา
   const filteredRows = useMemo(() => {
     return rows.filter((r) => {
+      // 1. ตรวจสอบค้นหา
       const q = search.trim().toLowerCase();
       const matchSearch =
         !q ||
@@ -163,29 +163,27 @@ export default function MetersClient({
 
       if (!matchSearch) return false;
 
+      // 2. ตรวจสอบ Filter Tab
       const isRecorded = r.inputWaterCurr !== "" && r.inputElecCurr !== "";
-
-      const wCurr = parseInt(r.inputWaterCurr, 10);
-      const eCurr = parseInt(r.inputElecCurr, 10);
-      const wPrev = parseInt(r.inputWaterPrev, 10) || 0;
-      const ePrev = parseInt(r.inputElecPrev, 10) || 0;
-      const wUnits = !isNaN(wCurr) && wCurr >= wPrev ? wCurr - wPrev : 0;
-      const eUnits = !isNaN(eCurr) && eCurr >= ePrev ? eCurr - ePrev : 0;
-      const isAnomaly =
-        r.hasHistory &&
-        ((r.pastAvgWater > 0 && wUnits > 3 * r.pastAvgWater) ||
-          (r.pastAvgElec > 0 && eUnits > 3 * r.pastAvgElec));
-
       if (filterTab === "pending") return !isRecorded;
       if (filterTab === "recorded") return isRecorded;
-      if (filterTab === "anomaly") return isAnomaly;
       if (filterTab === "locked") return r.isLocked;
-
+      if (filterTab === "anomaly") {
+        const wCurr = parseInt(r.inputWaterCurr, 10);
+        const eCurr = parseInt(r.inputElecCurr, 10);
+        const wPrev = parseInt(r.inputWaterPrev, 10) || 0;
+        const ePrev = parseInt(r.inputElecPrev, 10) || 0;
+        const wU = !isNaN(wCurr) ? Math.max(0, wCurr - wPrev) : 0;
+        const eU = !isNaN(eCurr) ? Math.max(0, eCurr - ePrev) : 0;
+        const isWAnomaly = r.hasHistory && r.pastAvgWater > 0 && wU > 3 * r.pastAvgWater;
+        const isEAnomaly = r.hasHistory && r.pastAvgElec > 0 && eU > 3 * r.pastAvgElec;
+        return isWAnomaly || isEAnomaly;
+      }
       return true;
     });
   }, [rows, search, filterTab]);
 
-  // จัดการการเปลี่ยนค่าในช่อง
+  // เปลี่ยนแปลงค่าในช่อง Input
   const handleInputChange = (
     index: number,
     field: "inputWaterCurr" | "inputElecCurr" | "inputWaterPrev" | "inputElecPrev" | "inputNote" | "inputReadDate",
@@ -221,7 +219,6 @@ export default function MetersClient({
         if (nextRowElem) {
           nextRowElem.focus();
         } else {
-          // ถ้าเป็นแถวสุดท้าย ให้โฟกัสปุ่มบันทึก
           document.getElementById("btn-batch-save")?.focus();
         }
       }
@@ -295,33 +292,24 @@ export default function MetersClient({
 
   // บันทึกทั้งตาราง (Batch Save)
   const handleBatchSave = async () => {
-    // กรองเฉพาะแถวที่มีข้อมูลครบและไม่ถูกล็อก
     const validPayload: MeterReadingInput[] = [];
     const anomalies: string[] = [];
 
-    for (let i = 0; i < rows.length; i++) {
-      const r = rows[i];
+    for (const r of rows) {
       if (r.isLocked) continue;
-
-      if (r.inputWaterCurr === "" && r.inputElecCurr === "") continue;
+      if (r.inputWaterCurr === "" || r.inputElecCurr === "") continue;
 
       const waterCurr = parseInt(r.inputWaterCurr, 10);
       const elecCurr = parseInt(r.inputElecCurr, 10);
       const waterPrev = parseInt(r.inputWaterPrev, 10);
       const elecPrev = parseInt(r.inputElecPrev, 10);
 
-      if (isNaN(waterCurr) || isNaN(elecCurr)) {
-        setFeedbackMessage({
-          type: "error",
-          text: `ห้อง ${r.roomNo}: กรุณากรอกเลขมิเตอร์น้ำและไฟให้ครบเป็นตัวเลข`,
-        });
-        return;
-      }
+      if (isNaN(waterCurr) || isNaN(elecCurr)) continue;
 
       if (!r.isAdminEditPrev && (waterCurr < waterPrev || elecCurr < elecPrev)) {
         setFeedbackMessage({
           type: "error",
-          text: `ห้อง ${r.roomNo}: เลขมิเตอร์ปัจจุบันต้องไม่ต่ำกว่าเลขก่อนหน้า (BR-04)`,
+          text: `ห้อง ${r.roomNo}: เลขใหม่น้อยกว่าเลขเดิม ไม่อนุญาตให้บันทึก (BR-04)`,
         });
         return;
       }
@@ -351,7 +339,7 @@ export default function MetersClient({
 
     if (anomalies.length > 0) {
       const confirmed = window.confirm(
-        `⚠️ มีการใช้งานมิเตอร์สูงผิดปกติเกิน 3 เท่าใน ${anomalies.join(", ")}\n\nคุณต้องการยืนยันว่าเลขมิเตอร์ถูกต้องและบันทึกต่อไปหรือไม่?`
+        `แจ้งเตือน: มีการใช้งานมิเตอร์สูงผิดปกติเกิน 3 เท่าใน ${anomalies.join(", ")}\n\nคุณต้องการยืนยันว่าเลขมิเตอร์ถูกต้องและบันทึกต่อไปหรือไม่?`
       );
       if (!confirmed) return;
     }
@@ -370,19 +358,19 @@ export default function MetersClient({
   return (
     <div className="space-y-6">
       {/* Top Header & Actions */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#120f24] rounded-3xl border border-violet-950/80 p-6 shadow-2xl">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#0b1120] rounded-3xl border border-slate-800 p-6 shadow-2xl">
         <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-gradient-to-tr from-cyan-600 via-violet-600 to-fuchsia-600 text-white rounded-2xl shadow-lg shadow-violet-950/60 ring-1 ring-violet-400/40">
+          <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-950/50 border border-blue-500/30">
             <Gauge className="w-7 h-7" />
           </div>
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-2xl font-black text-white">บันทึกมิเตอร์น้ำ-ไฟ</h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
                 สเต็ป 4
               </span>
             </div>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               จดบันทึกมาตรวัดน้ำ-ไฟฟ้าประจำเดือน คำนวณหน่วยใช้ และส่งต่อออกใบแจ้งหนี้ (BR-04, UR-2.14, UR-2.15)
             </p>
           </div>
@@ -393,16 +381,16 @@ export default function MetersClient({
           {/* Print Walksheet */}
           <Link
             href={`/meters/print?month=${monthStr}`}
-            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 text-xs font-bold border border-violet-800/40 shadow-sm transition-all hover:scale-105"
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 shadow-sm transition-all hover:scale-105"
           >
-            <Printer className="w-4 h-4 text-violet-400" />
+            <Printer className="w-4 h-4 text-blue-400" />
             พิมพ์ใบเดินจด (Walksheet)
           </Link>
 
           {/* Go to Generate Invoices */}
           <Link
             href={`/invoices/generate?month=${monthStr}`}
-            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black shadow-lg shadow-emerald-950/40 transition-all hover:scale-105"
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-lg shadow-blue-950/40 border border-blue-500/30 transition-all hover:scale-105"
           >
             <Sparkles className="w-4 h-4" />
             ออกบิลต่อ (สเต็ป 5)
@@ -414,10 +402,10 @@ export default function MetersClient({
             id="btn-batch-save"
             onClick={handleBatchSave}
             disabled={isPending}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white text-xs font-black shadow-lg shadow-violet-950/60 transition-all hover:scale-105 disabled:opacity-50"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-lg shadow-blue-950/60 border border-blue-500/30 transition-all hover:scale-105 disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
-            {isPending ? "กำลังบันทึกทั้งตาราง..." : "💾 บันทึกทั้งตาราง"}
+            {isPending ? "กำลังบันทึกทั้งตาราง..." : "บันทึกทั้งตาราง"}
           </button>
         </div>
       </div>
@@ -441,26 +429,26 @@ export default function MetersClient({
           </div>
           <button
             onClick={() => setFeedbackMessage(null)}
-            className="text-zinc-500 hover:text-zinc-300 font-bold px-2 py-0.5 rounded text-xs"
+            className="text-slate-500 hover:text-slate-300 p-1 rounded"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {/* Month Selector Bar */}
-      <div className="bg-[#120f24] rounded-2xl border border-violet-950/70 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+      <div className="bg-[#0b1120] rounded-2xl border border-slate-800 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-violet-400" />
-          <span className="text-xs text-zinc-400">รอบประจำเดือน:</span>
+          <Calendar className="w-4 h-4 text-blue-400" />
+          <span className="text-xs text-slate-400">รอบประจำเดือน:</span>
           <span className="text-base font-black text-white">{thaiMonthName}</span>
-          <span className="text-xs font-mono text-zinc-500">({monthStr})</span>
+          <span className="text-xs font-mono text-slate-500">({monthStr})</span>
         </div>
 
         <div className="flex items-center gap-2">
           <Link
             href={`/meters?month=${prevMonthStr}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 text-xs font-semibold border border-violet-800/30 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
             เดือนก่อนหน้า
@@ -468,14 +456,14 @@ export default function MetersClient({
 
           <Link
             href={`/meters`}
-            className="px-3 py-1.5 rounded-xl bg-[#0c0a18] hover:bg-zinc-800 text-zinc-300 text-xs font-bold border border-violet-950 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-[#080c15] hover:bg-slate-800 text-slate-300 text-xs font-bold border border-slate-800 transition-colors"
           >
             เดือนปัจจุบัน
           </Link>
 
           <Link
             href={`/meters?month=${nextMonthStr}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 text-xs font-semibold border border-violet-800/30 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors"
           >
             เดือนถัดไป
             <ChevronRight className="w-4 h-4" />
@@ -486,47 +474,47 @@ export default function MetersClient({
       {/* Metrics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
         {/* Progress Card */}
-        <div className="p-4 rounded-2xl bg-[#120f24] border border-violet-950/80 space-y-2">
-          <div className="flex items-center justify-between text-zinc-400">
+        <div className="p-4 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-2">
+          <div className="flex items-center justify-between text-slate-400">
             <span className="font-semibold">ความคืบหน้าการจด</span>
             <span className="font-mono text-white font-bold">
               {metrics.recorded}/{metrics.total} ห้อง
             </span>
           </div>
-          <div className="w-full bg-[#080612] rounded-full h-2.5 overflow-hidden border border-violet-950">
+          <div className="w-full bg-[#080c15] rounded-full h-2.5 overflow-hidden border border-slate-800">
             <div
-              className="bg-gradient-to-r from-cyan-500 to-violet-500 h-2.5 rounded-full transition-all duration-500"
+              className="bg-blue-500 h-2.5 rounded-full transition-all duration-500"
               style={{ width: `${metrics.progressPercent}%` }}
             ></div>
           </div>
-          <p className="text-[11px] text-zinc-500 flex justify-between">
+          <p className="text-[11px] text-slate-500 flex justify-between">
             <span>จดเสร็จ {metrics.progressPercent}%</span>
             <span>รอจด {metrics.pending} ห้อง</span>
           </p>
         </div>
 
         {/* Total Water Units */}
-        <div className="p-4 rounded-2xl bg-[#120f24] border border-violet-950/80 space-y-1">
-          <div className="flex items-center justify-between text-zinc-400">
+        <div className="p-4 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-1">
+          <div className="flex items-center justify-between text-slate-400">
             <span className="font-semibold flex items-center gap-1.5">
-              <Droplet className="w-3.5 h-3.5 text-cyan-400" /> รวมหน่วยใช้น้ำ
+              <Droplet className="w-3.5 h-3.5 text-blue-400" /> รวมหน่วยใช้น้ำ
             </span>
-            <span className="text-[10px] text-cyan-400 bg-cyan-950/50 px-2 py-0.5 rounded-full border border-cyan-800/30">
+            <span className="text-[10px] text-blue-400 bg-blue-950/50 px-2 py-0.5 rounded-full border border-blue-800/30">
               ประปา
             </span>
           </div>
-          <p className="text-xl font-black text-cyan-300 font-mono">
+          <p className="text-xl font-black text-blue-300 font-mono">
             {metrics.totalWaterUnits.toLocaleString()}{" "}
-            <span className="text-xs font-normal text-zinc-400">หน่วย</span>
+            <span className="text-xs font-normal text-slate-400">หน่วย</span>
           </p>
-          <p className="text-[11px] text-zinc-500">
+          <p className="text-[11px] text-slate-500">
             จดแล้ว {metrics.recorded} ห้อง
           </p>
         </div>
 
         {/* Total Electric Units */}
-        <div className="p-4 rounded-2xl bg-[#120f24] border border-violet-950/80 space-y-1">
-          <div className="flex items-center justify-between text-zinc-400">
+        <div className="p-4 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-1">
+          <div className="flex items-center justify-between text-slate-400">
             <span className="font-semibold flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-amber-400" /> รวมหน่วยใช้ไฟฟ้า
             </span>
@@ -536,20 +524,20 @@ export default function MetersClient({
           </div>
           <p className="text-xl font-black text-amber-300 font-mono">
             {metrics.totalElecUnits.toLocaleString()}{" "}
-            <span className="text-xs font-normal text-zinc-400">หน่วย</span>
+            <span className="text-xs font-normal text-slate-400">หน่วย</span>
           </p>
-          <p className="text-[11px] text-zinc-500">
+          <p className="text-[11px] text-slate-500">
             จดแล้ว {metrics.recorded} ห้อง
           </p>
         </div>
 
         {/* Anomaly & Invoiced Card */}
-        <div className="p-4 rounded-2xl bg-[#120f24] border border-violet-950/80 space-y-1">
-          <div className="flex items-center justify-between text-zinc-400">
+        <div className="p-4 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-1">
+          <div className="flex items-center justify-between text-slate-400">
             <span className="font-semibold flex items-center gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5 text-rose-400" /> ตรวจสอบความผิดปกติ
             </span>
-            <span className="text-[10px] text-zinc-400">
+            <span className="text-[10px] text-slate-400">
               ล็อกแล้ว {metrics.locked} ห้อง
             </span>
           </div>
@@ -577,8 +565,8 @@ export default function MetersClient({
             onClick={() => setFilterTab("all")}
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               filterTab === "all"
-                ? "bg-violet-600 text-white font-bold shadow-md shadow-violet-950/60"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                ? "bg-blue-600 text-white font-bold shadow-md shadow-blue-950/60"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             ทั้งหมด ({rows.length})
@@ -587,8 +575,8 @@ export default function MetersClient({
             onClick={() => setFilterTab("pending")}
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               filterTab === "pending"
-                ? "bg-cyan-600 text-white font-bold shadow-md shadow-cyan-950/60"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                ? "bg-blue-600 text-white font-bold shadow-md shadow-blue-950/60"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             ยังไม่จด ({metrics.pending})
@@ -598,7 +586,7 @@ export default function MetersClient({
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               filterTab === "recorded"
                 ? "bg-emerald-600 text-white font-bold shadow-md shadow-emerald-950/60"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             จดแล้ว ({metrics.recorded})
@@ -608,7 +596,7 @@ export default function MetersClient({
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               filterTab === "anomaly"
                 ? "bg-amber-600 text-white font-bold shadow-md shadow-amber-950/60"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             ผิดปกติ &gt;3x ({metrics.anomalyCount})
@@ -617,51 +605,53 @@ export default function MetersClient({
             onClick={() => setFilterTab("locked")}
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               filterTab === "locked"
-                ? "bg-zinc-700 text-white font-bold shadow-md"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                ? "bg-slate-700 text-white font-bold shadow-md"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
-            ออกบิลแล้ว 🔒 ({metrics.locked})
+            <Lock className="w-3 h-3 inline mr-1" />
+            ออกบิลแล้ว ({metrics.locked})
           </button>
         </div>
 
         {/* Search */}
         <div className="relative w-full sm:w-64">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
             placeholder="ค้นหาเลขห้อง หรือผู้เช่า..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#120f24] border border-violet-950 text-xs text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
+            onInput={handleEmojiInput}
+            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#0b1120] border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>
 
       {/* Main Table */}
-      <div className="bg-[#120f24] rounded-3xl border border-violet-950/80 shadow-2xl overflow-hidden">
+      <div className="bg-[#0b1120] rounded-3xl border border-slate-800 shadow-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-violet-950/80 bg-[#16122d]/80 text-zinc-300 font-bold tracking-wider">
+              <tr className="border-b border-slate-800 bg-[#0f172a] text-slate-300 font-bold tracking-wider">
                 <th className="py-3 px-4 w-28">ห้องพัก</th>
                 <th className="py-3 px-4 w-44">ผู้เช่าหลัก</th>
-                <th className="py-3 px-4 bg-cyan-950/20 text-cyan-300 border-x border-violet-950/60" colSpan={3}>
+                <th className="py-3 px-4 bg-blue-950/20 text-blue-300 border-x border-slate-800" colSpan={3}>
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
-                      <Droplet className="w-3.5 h-3.5 text-cyan-400" /> มิเตอร์น้ำประปา
+                      <Droplet className="w-3.5 h-3.5 text-blue-400" /> มิเตอร์น้ำประปา
                     </span>
-                    <span className="text-[10px] text-zinc-400 font-normal">
+                    <span className="text-[10px] text-slate-400 font-normal">
                       (ก่อนหน้า → ปัจจุบัน = หน่วยใช้)
                     </span>
                   </div>
                 </th>
-                <th className="py-3 px-4 bg-amber-950/20 text-amber-300 border-x border-violet-950/60" colSpan={3}>
+                <th className="py-3 px-4 bg-amber-950/20 text-amber-300 border-x border-slate-800" colSpan={3}>
                   <div className="flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
                       <Zap className="w-3.5 h-3.5 text-amber-400" /> มิเตอร์ไฟฟ้า
                     </span>
-                    <span className="text-[10px] text-zinc-400 font-normal">
+                    <span className="text-[10px] text-slate-400 font-normal">
                       (ก่อนหน้า → ปัจจุบัน = หน่วยใช้)
                     </span>
                   </div>
@@ -669,19 +659,19 @@ export default function MetersClient({
                 <th className="py-3 px-3 w-40">หมายเหตุ</th>
                 <th className="py-3 px-4 text-center w-28">สถานะ / บันทึก</th>
               </tr>
-              <tr className="border-b border-violet-950/60 bg-[#0e0b1f] text-[11px] text-zinc-500">
+              <tr className="border-b border-slate-800 bg-[#080c15] text-[11px] text-slate-500">
                 <th className="py-1 px-4">เลข / ชั้น</th>
                 <th className="py-1 px-4">ชื่อ - นามสกุล</th>
                 {/* Water subheaders */}
-                <th className="py-1 px-3 text-right bg-cyan-950/10 text-cyan-400/80 w-24">ก่อนหน้า</th>
-                <th className="py-1 px-3 text-center bg-cyan-950/10 text-cyan-400 w-28">ปัจจุบัน (จด)</th>
-                <th className="py-1 px-3 text-center bg-cyan-950/10 text-cyan-300 w-20 border-r border-violet-950/60">
+                <th className="py-1 px-3 text-right bg-blue-950/10 text-blue-400/80 w-24">ก่อนหน้า</th>
+                <th className="py-1 px-3 text-center bg-blue-950/10 text-blue-400 w-28">ปัจจุบัน (จด)</th>
+                <th className="py-1 px-3 text-center bg-blue-950/10 text-blue-300 w-20 border-r border-slate-800">
                   หน่วยใช้
                 </th>
                 {/* Electric subheaders */}
                 <th className="py-1 px-3 text-right bg-amber-950/10 text-amber-400/80 w-24">ก่อนหน้า</th>
                 <th className="py-1 px-3 text-center bg-amber-950/10 text-amber-400 w-28">ปัจจุบัน (จด)</th>
-                <th className="py-1 px-3 text-center bg-amber-950/10 text-amber-300 w-20 border-r border-violet-950/60">
+                <th className="py-1 px-3 text-center bg-amber-950/10 text-amber-300 w-20 border-r border-slate-800">
                   หน่วยใช้
                 </th>
                 <th className="py-1 px-3">บันทึกเพิ่มเติม</th>
@@ -689,11 +679,11 @@ export default function MetersClient({
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-violet-950/50">
+            <tbody className="divide-y divide-slate-800/60">
               {filteredRows.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-12 text-center text-zinc-500">
-                    <Gauge className="w-8 h-8 mx-auto text-zinc-600 mb-2 opacity-50" />
+                  <td colSpan={10} className="py-12 text-center text-slate-500">
+                    <Gauge className="w-8 h-8 mx-auto text-slate-600 mb-2 opacity-50" />
                     ไม่พบข้อมูลมิเตอร์ตามเงื่อนไขที่เลือก
                   </td>
                 </tr>
@@ -727,42 +717,42 @@ export default function MetersClient({
                   return (
                     <tr
                       key={r.roomId}
-                      className={`hover:bg-[#16122d]/60 transition-colors ${
-                        r.isLocked ? "bg-zinc-950/40 opacity-75" : ""
-                      } ${isWaterAnomaly || isElecAnomaly ? "bg-amber-950/10" : ""}`}
+                      className={`hover:bg-slate-800/40 transition-colors ${
+                        r.isLocked ? "bg-slate-900/40 opacity-75" : ""
+                      } ${isWaterAnomaly || isElecAnomaly ? "bg-amber-950/15" : ""}`}
                     >
                       {/* Room & Floor */}
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
                           <span className="font-black text-white text-sm">{r.roomNo}</span>
-                          <span className="text-[10px] text-zinc-500 px-1.5 py-0.5 rounded bg-[#0a0716] border border-violet-950">
+                          <span className="text-[10px] text-slate-500 px-1.5 py-0.5 rounded bg-[#080c15] border border-slate-800">
                             ชั้น {r.floor}
                           </span>
                         </div>
-                        <span className="text-[10px] text-zinc-500">{r.roomType}</span>
+                        <span className="text-[10px] text-slate-500">{r.roomType}</span>
                       </td>
 
                       {/* Tenant Name */}
                       <td className="py-3 px-4">
                         {r.hasActiveContract ? (
                           <div>
-                            <span className="font-bold text-zinc-200 block truncate max-w-[150px]">
+                            <span className="font-bold text-slate-200 block truncate max-w-[150px]">
                               {r.tenantName}
                             </span>
                             <span className="text-[10px] text-emerald-400">สัญญาเปิดใช้งาน</span>
                           </div>
                         ) : (
                           <div>
-                            <span className="text-zinc-500 block truncate max-w-[150px]">
+                            <span className="text-slate-500 block truncate max-w-[150px]">
                               {r.tenantName}
                             </span>
-                            <span className="text-[10px] text-zinc-600">ไม่มีสัญญาเช่า</span>
+                            <span className="text-[10px] text-slate-600">ไม่มีสัญญาเช่า</span>
                           </div>
                         )}
                       </td>
 
                       {/* Water: Prev reading */}
-                      <td className="py-3 px-3 text-right bg-cyan-950/10">
+                      <td className="py-3 px-3 text-right bg-blue-950/10">
                         {r.isAdminEditPrev ? (
                           <input
                             type="number"
@@ -771,20 +761,20 @@ export default function MetersClient({
                             onChange={(e) =>
                               handleInputChange(originalIndex, "inputWaterPrev", e.target.value)
                             }
-                            className="w-20 px-2 py-1 rounded bg-[#090714] border border-cyan-500 text-xs font-mono text-cyan-300 text-right focus:outline-none"
+                            className="w-20 px-2 py-1 rounded bg-[#080c15] border border-blue-500 text-xs font-mono text-blue-300 text-right focus:outline-none"
                             title="แก้ไขเลขก่อนหน้า (OI-10)"
                           />
                         ) : (
                           <div className="flex items-center justify-end gap-1.5">
-                            <span className="font-mono text-cyan-300 font-bold">{r.inputWaterPrev}</span>
+                            <span className="font-mono text-blue-300 font-bold">{r.inputWaterPrev}</span>
                             {!r.isLocked && (
                               <button
                                 type="button"
                                 onClick={() => toggleAdminEditPrev(originalIndex)}
                                 title="แก้ไขเลขก่อนหน้า (กรณีเปลี่ยนมิเตอร์ใหม่)"
-                                className="text-zinc-600 hover:text-cyan-400 text-[10px]"
+                                className="text-slate-500 hover:text-blue-400 transition-colors"
                               >
-                                ✏️
+                                <Pencil className="w-3 h-3" />
                               </button>
                             )}
                           </div>
@@ -792,7 +782,7 @@ export default function MetersClient({
                       </td>
 
                       {/* Water: Current input */}
-                      <td className="py-3 px-3 bg-cyan-950/10">
+                      <td className="py-3 px-3 bg-blue-950/10">
                         <div className="relative">
                           <input
                             id={`water-input-${originalIndex}`}
@@ -808,12 +798,12 @@ export default function MetersClient({
                             onKeyDown={(e) => handleKeyDown(e, originalIndex, "water")}
                             className={`w-full px-2.5 py-1.5 rounded-xl text-center font-mono font-bold text-sm text-white focus:outline-none focus:ring-2 transition-all ${
                               r.isLocked
-                                ? "bg-transparent text-zinc-500 border-none"
+                                ? "bg-transparent text-slate-500 border-none"
                                 : isWaterLower
                                 ? "bg-red-950/40 border border-red-500 ring-1 ring-red-500 text-red-200"
                                 : isWaterAnomaly
-                                ? "bg-[#090714] border border-amber-500/80 focus:ring-amber-500"
-                                : "bg-[#090714] border border-violet-950 focus:ring-cyan-500"
+                                ? "bg-[#080c15] border border-amber-500/80 focus:ring-amber-500"
+                                : "bg-[#080c15] border border-slate-800 focus:ring-blue-500"
                             }`}
                           />
                           {isWaterLower && (
@@ -825,14 +815,14 @@ export default function MetersClient({
                       </td>
 
                       {/* Water: Units used */}
-                      <td className="py-3 px-3 text-center bg-cyan-950/10 border-r border-violet-950/60">
+                      <td className="py-3 px-3 text-center bg-blue-950/10 border-r border-slate-800">
                         <span
                           className={`font-mono font-bold ${
                             waterCurrNum === null
-                              ? "text-zinc-600"
+                              ? "text-slate-600"
                               : isWaterAnomaly
                               ? "text-amber-400"
-                              : "text-cyan-300"
+                              : "text-blue-300"
                           }`}
                         >
                           {waterCurrNum !== null ? waterUnits : "-"}
@@ -857,7 +847,7 @@ export default function MetersClient({
                             onChange={(e) =>
                               handleInputChange(originalIndex, "inputElecPrev", e.target.value)
                             }
-                            className="w-20 px-2 py-1 rounded bg-[#090714] border border-amber-500 text-xs font-mono text-amber-300 text-right focus:outline-none"
+                            className="w-20 px-2 py-1 rounded bg-[#080c15] border border-amber-500 text-xs font-mono text-amber-300 text-right focus:outline-none"
                             title="แก้ไขเลขก่อนหน้า (OI-10)"
                           />
                         ) : (
@@ -868,9 +858,9 @@ export default function MetersClient({
                                 type="button"
                                 onClick={() => toggleAdminEditPrev(originalIndex)}
                                 title="แก้ไขเลขก่อนหน้า (กรณีเปลี่ยนมิเตอร์ใหม่)"
-                                className="text-zinc-600 hover:text-amber-400 text-[10px]"
+                                className="text-slate-500 hover:text-amber-400 transition-colors"
                               >
-                                ✏️
+                                <Pencil className="w-3 h-3" />
                               </button>
                             )}
                           </div>
@@ -894,12 +884,12 @@ export default function MetersClient({
                             onKeyDown={(e) => handleKeyDown(e, originalIndex, "elec")}
                             className={`w-full px-2.5 py-1.5 rounded-xl text-center font-mono font-bold text-sm text-white focus:outline-none focus:ring-2 transition-all ${
                               r.isLocked
-                                ? "bg-transparent text-zinc-500 border-none"
+                                ? "bg-transparent text-slate-500 border-none"
                                 : isElecLower
                                 ? "bg-red-950/40 border border-red-500 ring-1 ring-red-500 text-red-200"
                                 : isElecAnomaly
-                                ? "bg-[#090714] border border-amber-500/80 focus:ring-amber-500"
-                                : "bg-[#090714] border border-violet-950 focus:ring-amber-500"
+                                ? "bg-[#080c15] border border-amber-500/80 focus:ring-amber-500"
+                                : "bg-[#080c15] border border-slate-800 focus:ring-amber-500"
                             }`}
                           />
                           {isElecLower && (
@@ -911,11 +901,11 @@ export default function MetersClient({
                       </td>
 
                       {/* Electric: Units used */}
-                      <td className="py-3 px-3 text-center bg-amber-950/10 border-r border-violet-950/60">
+                      <td className="py-3 px-3 text-center bg-amber-950/10 border-r border-slate-800">
                         <span
                           className={`font-mono font-bold ${
                             elecCurrNum === null
-                              ? "text-zinc-600"
+                              ? "text-slate-600"
                               : isElecAnomaly
                               ? "text-amber-400"
                               : "text-amber-300"
@@ -943,7 +933,8 @@ export default function MetersClient({
                           onChange={(e) =>
                             handleInputChange(originalIndex, "inputNote", e.target.value)
                           }
-                          className="w-full px-2.5 py-1.5 rounded-lg bg-[#090714] border border-violet-950/70 text-[11px] text-zinc-300 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                          onInput={handleEmojiInput}
+                          className="w-full px-2.5 py-1.5 rounded-lg bg-[#080c15] border border-slate-800 text-[11px] text-slate-300 placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         />
                       </td>
 
@@ -951,11 +942,11 @@ export default function MetersClient({
                       <td className="py-3 px-4 text-center">
                         {r.isLocked ? (
                           <div className="flex flex-col items-center">
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 text-[10px] font-bold border border-zinc-700">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 text-[10px] font-bold border border-slate-700">
                               <Lock className="w-3 h-3 text-amber-400" />
                               ออกบิลแล้ว
                             </span>
-                            <span className="text-[9px] text-zinc-500 mt-0.5">
+                            <span className="text-[9px] text-slate-500 mt-0.5">
                               {r.invoiceNo}
                             </span>
                           </div>
@@ -967,13 +958,13 @@ export default function MetersClient({
                               disabled={isPending || r.rowStatus === "saving"}
                               className={`p-1.5 rounded-lg text-xs font-bold transition-all ${
                                 isRowRecorded
-                                  ? "bg-violet-600/80 hover:bg-violet-500 text-white shadow-sm"
-                                  : "bg-zinc-800 hover:bg-zinc-700 text-zinc-400"
+                                  ? "bg-blue-600 hover:bg-blue-500 text-white shadow-sm"
+                                  : "bg-slate-800 hover:bg-slate-700 text-slate-400"
                               }`}
                               title="บันทึกมิเตอร์ห้องนี้"
                             >
                               {r.rowStatus === "saving" ? (
-                                <span className="animate-spin text-xs">⌛</span>
+                                <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                               ) : (
                                 <Save className="w-3.5 h-3.5" />
                               )}
@@ -993,14 +984,14 @@ export default function MetersClient({
         </div>
 
         {/* Footer Info & Shortcuts */}
-        <div className="p-4 bg-[#16122d]/60 border-t border-violet-950/80 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-zinc-400 gap-2">
+        <div className="p-4 bg-[#0f172a] border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-400 gap-2">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-violet-400" />
+            <Sparkles className="w-4 h-4 text-blue-400" />
             <span>
-              💡 <strong>ทิปการใช้งาน:</strong> พิมพ์ตัวเลขแล้วกดปุ่ม <strong>Enter</strong> เพื่อเลื่อนไปยังช่องถัดไปได้ทันที
+              <strong>คำแนะนำการใช้งาน:</strong> พิมพ์ตัวเลขแล้วกดปุ่ม <strong>Enter</strong> เพื่อเลื่อนไปยังช่องถัดไปได้ทันที
             </span>
           </div>
-          <div className="flex items-center gap-3 text-[11px] text-zinc-500">
+          <div className="flex items-center gap-3 text-[11px] text-slate-500">
             <span>กฎ BR-04: เลขใหม่ ≥ เลขเก่า</span>
             <span>•</span>
             <span>UR-2.15: เตือนเมื่อ &gt; 3 เท่าค่าเฉลี่ย 3 เดือน</span>

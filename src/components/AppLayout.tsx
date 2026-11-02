@@ -22,8 +22,13 @@ import {
   Crown,
   UserCheck,
   Lock,
+  ChevronLeft,
+  ChevronRight,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { logoutAction } from "@/actions/auth";
+import { ThemeToggle } from "@/components/ThemeProvider";
 
 type NavItem = {
   name: string;
@@ -67,9 +72,28 @@ const NAV_ITEMS: { category: string; items: NavItem[] }[] = [
   },
 ];
 
+function safeDecodeCookie(val: string): string {
+  try {
+    let res = decodeURIComponent(val);
+    while (res.includes("%")) {
+      try {
+        const next = decodeURIComponent(res);
+        if (next === res) break;
+        res = next;
+      } catch {
+        break;
+      }
+    }
+    return res;
+  } catch {
+    return val;
+  }
+}
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Role & User identity state
   const [role, setRole] = useState<"admin" | "staff">("admin");
@@ -77,132 +101,189 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [userEmail, setUserEmail] = useState<string>("admin@webhotel.com");
 
   useEffect(() => {
-    if (typeof document !== "undefined") {
+    if (typeof window !== "undefined") {
+      // Restore collapsed state
+      const savedCollapsed = localStorage.getItem("webhotel_sidebar_collapsed");
+      if (savedCollapsed === "true") {
+        setIsCollapsed(true);
+      }
+
+      // Restore user identity from cookie
       const matchRole = document.cookie.match(/webhotel_user_role=([^;]+)/);
       if (matchRole && (matchRole[1] === "admin" || matchRole[1] === "staff")) {
         setRole(matchRole[1] as "admin" | "staff");
       }
       const matchName = document.cookie.match(/webhotel_user_name=([^;]+)/);
       if (matchName) {
-        setUserName(decodeURIComponent(matchName[1]));
+        setUserName(safeDecodeCookie(matchName[1]));
       }
       const matchEmail = document.cookie.match(/webhotel_user_email=([^;]+)/);
       if (matchEmail) {
-        setUserEmail(decodeURIComponent(matchEmail[1]));
+        setUserEmail(safeDecodeCookie(matchEmail[1]));
       }
     }
   }, []);
+
+  const toggleSidebar = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("webhotel_sidebar_collapsed", next ? "true" : "false");
+      return next;
+    });
+  };
 
   const currentNavItem = NAV_ITEMS.flatMap((s) => s.items).find(
     (i) => i.href === pathname || (i.href !== "/" && pathname.startsWith(i.href))
   );
 
   return (
-    <div className="min-h-screen bg-[#0c0a17] text-zinc-100 flex flex-col md:flex-row antialiased selection:bg-violet-600 selection:text-white">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#080c15] text-slate-900 dark:text-slate-100 flex flex-col md:flex-row antialiased selection:bg-blue-600 selection:text-white transition-colors duration-200">
       {/* Mobile Topbar */}
-      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-[#110e20] border-b border-violet-950/70 sticky top-0 z-40">
+      <div className="md:hidden flex items-center justify-between px-4 py-3 bg-white dark:bg-[#0b1120] border-b border-slate-200 dark:border-slate-800 sticky top-0 z-40 shadow-xs">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-violet-600 to-fuchsia-500 flex items-center justify-center text-white font-bold shadow-md shadow-violet-900/40">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-sky-500 flex items-center justify-center text-white font-bold shadow-md shadow-blue-900/40">
             ห
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-sm tracking-wide text-white">หอพักสุขสบาย</span>
+              <span className="font-bold text-sm tracking-wide text-slate-900 dark:text-white">หอพักสุขสบาย</span>
               <span
                 className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded ${
                   role === "admin"
-                    ? "bg-violet-500/20 text-violet-300 border border-violet-500/30"
-                    : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                    ? "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30"
+                    : "bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-500/20 dark:text-sky-300 dark:border-sky-500/30"
                 }`}
               >
-                {role === "admin" ? "ยศ: ADMIN 🛡️" : "ยศ: STAFF 🧑‍💼"}
+                {role === "admin" ? "ADMIN" : "STAFF"}
               </span>
             </div>
           </div>
         </div>
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="p-2 rounded-lg bg-violet-950/50 text-violet-300 hover:bg-violet-900/50"
-        >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+
+        <div className="flex items-center gap-2">
+          {/* Theme Swap Button */}
+          <ThemeToggle />
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition-colors"
+            aria-label="เมนูหลัก"
+          >
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Sidebar Overlay for Mobile */}
       {mobileOpen && (
         <div
-          className="md:hidden fixed inset-0 bg-black/70 backdrop-blur-xs z-40"
+          className="md:hidden fixed inset-0 bg-black/80 backdrop-blur-xs z-40 transition-opacity"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed md:sticky top-0 h-screen w-64 bg-[#0f0c1e] border-r border-violet-950/60 flex flex-col justify-between z-50 transition-transform duration-200 ease-in-out md:translate-x-0 ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
-        }`}
+        className={`fixed md:sticky top-0 h-screen bg-white dark:bg-[#0b1120] border-r border-slate-200 dark:border-slate-800/80 flex flex-col justify-between z-50 transition-all duration-300 ease-in-out md:translate-x-0 ${
+          mobileOpen ? "translate-x-0 w-64" : "-translate-x-full md:translate-x-0"
+        } ${isCollapsed ? "md:w-20" : "md:w-64"}`}
       >
         {/* Brand / Logo */}
-        <div className="p-5 border-b border-violet-950/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-violet-600 via-purple-600 to-fuchsia-500 flex items-center justify-center text-white font-extrabold shadow-lg shadow-violet-900/40 ring-1 ring-violet-400/30">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-blue-500 to-sky-400 flex items-center justify-center text-white font-extrabold shadow-md shadow-blue-900/30 ring-1 ring-blue-400/30 flex-shrink-0">
               <Building2 className="w-5 h-5" />
             </div>
-            <div>
-              <h2 className="font-bold text-sm tracking-wide text-white flex items-center gap-1.5">
-                หอพักสุขสบาย
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30">
-                  เพลส
-                </span>
-              </h2>
-              <p className="text-[11px] text-violet-300/60">Dormitory Management</p>
-            </div>
+            {!isCollapsed && (
+              <div className="min-w-0 transition-opacity duration-200">
+                <h2 className="font-bold text-sm tracking-wide text-slate-900 dark:text-white flex items-center gap-1.5 truncate">
+                  หอพักสุขสบาย
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20">
+                    เพลส
+                  </span>
+                </h2>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">Dormitory Management</p>
+              </div>
+            )}
           </div>
+
+          {/* Desktop collapse toggle button inside header */}
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            className="hidden md:flex p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800/80 transition-colors"
+            title={isCollapsed ? "ขยายแถบเมนู (Expand)" : "ย่อแถบเมนู (Collapse)"}
+            aria-label="ย่อ/ขยายเมนู"
+          >
+            {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
         </div>
 
         {/* User Identity & Role Card ("ยศ") in Sidebar */}
-        <div className="mx-3 my-2.5 p-3 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center gap-2.5">
-          <div
-            className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold shadow-md flex-shrink-0 ${
-              role === "admin"
-                ? "bg-violet-600/20 text-violet-300 border border-violet-500/30"
-                : "bg-emerald-600/20 text-emerald-300 border border-emerald-500/30"
-            }`}
-          >
-            {role === "admin" ? (
-              <Crown className="w-4 h-4 text-violet-400" />
-            ) : (
-              <UserCheck className="w-4 h-4 text-emerald-400" />
-            )}
+        {!isCollapsed ? (
+          <div className="mx-3 my-2.5 p-3 rounded-2xl bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center gap-2.5">
+            <div
+              className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold shadow-md flex-shrink-0 ${
+                role === "admin"
+                  ? "bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-600/20 dark:text-blue-300 dark:border-blue-500/30"
+                  : "bg-sky-100 text-sky-700 border border-sky-200 dark:bg-sky-600/20 dark:text-sky-300 dark:border-sky-500/30"
+              }`}
+            >
+              {role === "admin" ? (
+                <Crown className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              ) : (
+                <UserCheck className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded ${
+                    role === "admin"
+                      ? "bg-blue-600 text-white dark:bg-blue-500/20 dark:text-blue-300 dark:border dark:border-blue-500/30"
+                      : "bg-sky-600 text-white dark:bg-sky-500/20 dark:text-sky-300 dark:border dark:border-sky-500/30"
+                  }`}
+                >
+                  {role === "admin" ? "ยศ: ADMIN" : "ยศ: STAFF"}
+                </span>
+              </div>
+              <div className="text-xs font-semibold text-slate-900 dark:text-white truncate mt-0.5">
+                {userName || (role === "admin" ? "ผู้ดูแลระบบสูงสุด" : "เจ้าหน้าที่นิติบุคคล")}
+              </div>
+              <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate">
+                {userEmail}
+              </div>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span
-                className={`text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded ${
-                  role === "admin"
-                    ? "bg-violet-500/20 text-violet-300 border border-violet-500/30"
-                    : "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                }`}
-              >
-                {role === "admin" ? "ยศ: ADMIN" : "ยศ: STAFF"}
-              </span>
-            </div>
-            <div className="text-xs font-semibold text-white truncate mt-0.5">
-              {userName || (role === "admin" ? "ผู้ดูแลระบบสูงสุด" : "เจ้าหน้าที่นิติบุคคล")}
-            </div>
-            <div className="text-[10px] text-slate-400 font-mono truncate">
-              {userEmail}
+        ) : (
+          <div className="my-2.5 flex justify-center">
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shadow-md ${
+                role === "admin"
+                  ? "bg-blue-600/20 text-blue-300 border border-blue-500/30"
+                  : "bg-sky-600/20 text-sky-300 border border-sky-500/30"
+              }`}
+              title={`${role === "admin" ? "ยศ: ADMIN" : "ยศ: STAFF"} - ${userName}`}
+            >
+              {role === "admin" ? (
+                <Crown className="w-4 h-4 text-blue-400" />
+              ) : (
+                <UserCheck className="w-4 h-4 text-sky-400" />
+              )}
             </div>
           </div>
-        </div>
+        )}
 
         {/* Nav Items */}
-        <div className="flex-1 overflow-y-auto px-3 py-2 space-y-4 scrollbar-thin scrollbar-thumb-violet-900/40">
+        <div className="flex-1 overflow-y-auto px-2.5 py-2 space-y-4">
           {NAV_ITEMS.map((section, idx) => (
             <div key={idx} className="space-y-1">
-              <p className="px-3 text-[10px] font-bold text-violet-400/50 uppercase tracking-wider">
-                {section.category}
-              </p>
+              {!isCollapsed && (
+                <p className="px-3 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  {section.category}
+                </p>
+              )}
               {section.items.map((item) => {
                 const isActive =
                   item.href === "/dashboard"
@@ -215,16 +296,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   return (
                     <div
                       key={item.href}
-                      className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-600 cursor-not-allowed opacity-60"
+                      className={`flex items-center rounded-xl text-xs font-medium text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-60 ${
+                        isCollapsed ? "justify-center p-2.5" : "justify-between px-3 py-2"
+                      }`}
                       title="เข้าถึงได้เฉพาะยศ Admin เท่านั้น"
                     >
                       <div className="flex items-center gap-3">
-                        <Icon className="w-4 h-4 text-slate-600" />
-                        <span>{item.name}</span>
+                        <Icon className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                        {!isCollapsed && <span>{item.name}</span>}
                       </div>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-500 border border-slate-700">
-                        🔒 Admin
-                      </span>
+                      {!isCollapsed && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 flex items-center gap-1">
+                          <Lock className="w-2.5 h-2.5" /> Admin
+                        </span>
+                      )}
                     </div>
                   );
                 }
@@ -234,18 +319,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all group ${
+                    title={isCollapsed ? item.name : undefined}
+                    className={`flex items-center rounded-xl text-xs font-semibold transition-all group ${
+                      isCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2"
+                    } ${
                       isActive
-                        ? "bg-violet-600 text-white shadow-lg shadow-violet-900/40 ring-1 ring-violet-400/40"
-                        : "text-zinc-400 hover:text-zinc-100 hover:bg-violet-950/40"
+                        ? "bg-blue-600 text-white shadow-md shadow-blue-600/30 ring-1 ring-blue-500"
+                        : "text-slate-600 hover:text-blue-600 hover:bg-blue-50/70 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800/60"
                     }`}
                   >
                     <Icon
-                      className={`w-4 h-4 transition-transform group-hover:scale-110 ${
-                        isActive ? "text-white" : "text-violet-400/70"
+                      className={`w-4 h-4 transition-transform group-hover:scale-110 flex-shrink-0 ${
+                        isActive ? "text-white" : "text-blue-600 dark:text-blue-400"
                       }`}
                     />
-                    <span>{item.name}</span>
+                    {!isCollapsed && <span className="truncate">{item.name}</span>}
                   </Link>
                 );
               })}
@@ -254,89 +342,131 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Footer / System Info & Quick Switch */}
-        <div className="p-4 border-t border-violet-950/50 bg-[#0c0a18]/60 space-y-2">
-          <div className="grid grid-cols-2 gap-1.5">
-            <Link
-              href="/dashboard/roadmap"
-              className="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-violet-950/40 hover:bg-violet-900/40 border border-violet-800/20 text-[11px] font-medium text-violet-300 transition-colors"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-              <span>แผนผังระบบ</span>
-            </Link>
-            <form action={logoutAction}>
-              <button
-                type="submit"
-                className="w-full flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-rose-950/30 hover:bg-rose-900/40 border border-rose-800/20 text-[11px] font-medium text-rose-300 transition-colors"
-                title="ออกจากระบบหรือสลับบัญชี"
-              >
-                <LogOut className="w-3.5 h-3.5 text-rose-400" />
-                <span>ออกจากระบบ</span>
-              </button>
-            </form>
-          </div>
+        <div className="p-3 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50 dark:bg-[#090d16]/70 space-y-2">
+          {!isCollapsed ? (
+            <>
+              <div className="grid grid-cols-2 gap-1.5">
+                <Link
+                  href="/dashboard/roadmap"
+                  className="flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 text-[11px] font-medium text-slate-700 dark:text-slate-200 transition-colors shadow-2xs"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <span>แผนผังระบบ</span>
+                </Link>
+                <form action={logoutAction}>
+                  <button
+                    type="submit"
+                    className="w-full flex items-center justify-center gap-1.5 px-2.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/30 border border-rose-200 dark:border-rose-800/30 text-[11px] font-medium text-rose-700 dark:text-rose-300 transition-colors"
+                    title="ออกจากระบบหรือสลับบัญชี"
+                  >
+                    <LogOut className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+                    <span>ออกจากระบบ</span>
+                  </button>
+                </form>
+              </div>
 
-          <div className="flex items-center justify-between px-2 pt-1 text-[10px] text-zinc-500">
-            <span>
-              สิทธิ์: {role === "admin" ? "🛡️ Admin" : "🧑‍💼 Staff"}
-            </span>
-            <span className="flex items-center gap-1 text-emerald-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              เชื่อมต่อแล้ว
-            </span>
-          </div>
+              <div className="flex items-center justify-between px-1 pt-1 text-[10px] text-slate-500 dark:text-slate-400">
+                <span>
+                  สิทธิ์: {role === "admin" ? "Admin" : "Staff"}
+                </span>
+                <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  เชื่อมต่อแล้ว
+                </span>
+              </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center gap-2 py-1">
+              <Link
+                href="/dashboard/roadmap"
+                className="p-2 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-800/60 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-200"
+                title="แผนผังระบบ (9 สเต็ป)"
+              >
+                <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              </Link>
+              <form action={logoutAction}>
+                <button
+                  type="submit"
+                  className="p-2 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/20 dark:hover:bg-rose-900/30 border border-rose-200 dark:border-rose-800/30 text-rose-700 dark:text-rose-300"
+                  title="ออกจากระบบ"
+                >
+                  <LogOut className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                </button>
+              </form>
+            </div>
+          )}
         </div>
       </aside>
 
       {/* Main Content Area with Desktop Top Navbar */}
-      <main className="flex-1 min-w-0 bg-[#0c0a17] overflow-y-auto flex flex-col">
-        {/* Desktop Top Navbar ("Navbar บอกยศ") */}
-        <header className="hidden md:flex sticky top-0 z-30 bg-[#0f0c1e]/90 backdrop-blur-md border-b border-violet-950/60 px-6 py-3 items-center justify-between shadow-sm">
-          {/* Left: Breadcrumbs / Page Indicator */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-400">หอพักสุขสบาย</span>
-            <span className="text-slate-600">/</span>
-            <span className="text-white font-semibold">
-              {currentNavItem?.name || "ระบบบริหารจัดการ"}
-            </span>
+      <main className="flex-1 min-w-0 bg-slate-50 dark:bg-[#080c15] overflow-y-auto flex flex-col transition-colors duration-200">
+        {/* Desktop Top Navbar ("Navbar บอกยศ & ควบคุมแถบเมนู") */}
+        <header className="hidden md:flex sticky top-0 z-30 bg-white/95 dark:bg-[#0b1120]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 px-6 py-3 items-center justify-between shadow-xs dark:shadow-sm transition-colors duration-200">
+          {/* Left: Sidebar Toggle Button + Breadcrumbs */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 hover:text-slate-900 dark:bg-slate-800/60 dark:hover:bg-slate-700/60 dark:border-slate-700/60 dark:text-slate-300 dark:hover:text-white transition-all flex items-center justify-center"
+              title={isCollapsed ? "ขยายแถบเมนู (Expand Sidebar)" : "ย่อแถบเมนู (Collapse Sidebar)"}
+              aria-label="ย่อ/ขยายเมนูด้านข้าง"
+            >
+              {isCollapsed ? (
+                <PanelLeftOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              ) : (
+                <PanelLeftClose className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+              )}
+            </button>
+
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-slate-500 dark:text-slate-400">หอพักสุขสบาย</span>
+              <span className="text-slate-300 dark:text-slate-600">/</span>
+              <span className="text-slate-900 dark:text-white font-semibold">
+                {currentNavItem?.name || "ระบบบริหารจัดการ"}
+              </span>
+            </div>
           </div>
 
-          {/* Right: Role & Rank Badge (ยศ Admin / Staff) */}
+          {/* Right: Theme Toggle & Role Badge & Logout */}
           <div className="flex items-center gap-3">
+            {/* Theme Swap Button (สลับธีม สว่าง/มืด) */}
+            <ThemeToggle />
+
             {/* Rank Badge */}
             {role === "admin" ? (
-              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-950/80 to-purple-950/60 border border-violet-500/40 shadow-sm shadow-violet-900/30">
-                <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-violet-600 to-fuchsia-600 flex items-center justify-center text-white shadow-xs">
+              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-blue-50/80 dark:bg-gradient-to-r dark:from-blue-950/60 dark:to-slate-900 border border-blue-200 dark:border-blue-500/40 shadow-xs dark:shadow-sm dark:shadow-blue-950/40">
+                <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-blue-600 to-sky-500 flex items-center justify-center text-white shadow-xs">
                   <Crown className="w-3.5 h-3.5 text-white" />
                 </div>
                 <div className="text-left">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-bold text-violet-300">
+                    <span className="text-[11px] font-bold text-blue-900 dark:text-blue-300">
                       ยศ: ผู้ดูแลระบบสูงสุด
                     </span>
-                    <span className="px-1.5 py-0.2 rounded-md bg-violet-500/30 text-[9px] font-extrabold text-violet-100 border border-violet-400/40">
+                    <span className="px-1.5 py-0.5 rounded-md bg-blue-600 text-white dark:bg-blue-500/30 text-[9px] font-extrabold dark:text-blue-100 border border-blue-600 dark:border-blue-400/40">
                       ADMIN
                     </span>
                   </div>
-                  <div className="text-[10px] text-slate-400 font-mono leading-none mt-0.5 truncate max-w-[150px]">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono leading-none mt-0.5 truncate max-w-[150px]">
                     {userName || userEmail || "System Admin"}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-950/80 to-teal-950/60 border border-emerald-500/40 shadow-sm shadow-emerald-900/30">
-                <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-600 flex items-center justify-center text-white shadow-xs">
+              <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-sky-50/80 dark:bg-gradient-to-r dark:from-sky-950/60 dark:to-slate-900 border border-sky-200 dark:border-sky-500/40 shadow-xs dark:shadow-sm dark:shadow-sky-950/40">
+                <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-sky-600 to-blue-500 flex items-center justify-center text-white shadow-xs">
                   <UserCheck className="w-3.5 h-3.5 text-white" />
                 </div>
                 <div className="text-left">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] font-bold text-emerald-300">
+                    <span className="text-[11px] font-bold text-sky-900 dark:text-sky-300">
                       ยศ: เจ้าหน้าที่นิติบุคคล
                     </span>
-                    <span className="px-1.5 py-0.2 rounded-md bg-emerald-500/30 text-[9px] font-extrabold text-emerald-100 border border-emerald-400/40">
+                    <span className="px-1.5 py-0.5 rounded-md bg-sky-600 text-white dark:bg-sky-500/30 text-[9px] font-extrabold dark:text-sky-100 border border-sky-600 dark:border-sky-400/40">
                       STAFF
                     </span>
                   </div>
-                  <div className="text-[10px] text-slate-400 font-mono leading-none mt-0.5 truncate max-w-[150px]">
+                  <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono leading-none mt-0.5 truncate max-w-[150px]">
                     {userName || userEmail || "Staff Member"}
                   </div>
                 </div>
@@ -347,11 +477,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <form action={logoutAction}>
               <button
                 type="submit"
-                className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/[0.04] hover:bg-rose-500/20 text-slate-300 hover:text-rose-300 border border-white/5 text-xs font-medium transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-600 border border-slate-200 dark:bg-slate-800/80 dark:hover:bg-rose-500/20 dark:text-slate-300 dark:hover:text-rose-300 dark:border-slate-700/60 text-xs font-medium transition-colors"
                 title="ออกจากระบบ"
               >
-                <LogOut className="w-3.5 h-3.5 text-rose-400" />
-                <span>ออกจากระบบ</span>
+                <LogOut className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
+                <span className="hidden sm:inline">ออกจากระบบ</span>
               </button>
             </form>
           </div>

@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { RepairCategory, RepairPriority, RepairStatus } from "@prisma/client";
 import { requireRepairAccess, requireStaffOrAdmin } from "@/lib/auth-guard";
+import { stripEmoji } from "@/lib/emoji";
+import { setToastCookie } from "@/lib/toast";
 
 export type RepairFormState = {
   error?: string;
@@ -26,11 +28,11 @@ export async function createRepairRequest(
 
   const auth = await requireRepairAccess(tenantId);
   if (!auth.authorized) return { error: auth.error };
-  const title = formData.get("title")?.toString().trim() || "";
-  const description = formData.get("description")?.toString().trim() || "";
+  const title = stripEmoji(formData.get("title")?.toString().trim() || "");
+  const description = stripEmoji(formData.get("description")?.toString().trim() || "");
   const categoryStr = formData.get("category")?.toString() || "other";
   const priorityStr = formData.get("priority")?.toString() || "normal";
-  const imageUrl = formData.get("imageUrl")?.toString().trim() || null;
+  const imageUrl = stripEmoji(formData.get("imageUrl")?.toString().trim() || "");
 
   const fieldErrors: Record<string, string> = {};
 
@@ -87,7 +89,7 @@ export async function createRepairRequest(
         description,
         category,
         priority,
-        imageUrl,
+        imageUrl: imageUrl || null,
         status: "open",
         reportedAt: new Date(),
       },
@@ -106,6 +108,7 @@ export async function createRepairRequest(
   revalidatePath("/me/repairs");
   revalidatePath("/dashboard");
   revalidatePath("/");
+  await setToastCookie("ส่งคำขอแจ้งซ่อมสำเร็จ", "success");
 
   if (fromTenantPortal && tenantId > 0) {
     redirect(`/me/repairs?tenantId=${tenantId}`);
@@ -125,8 +128,10 @@ export async function updateRepairStatus(
   if (!auth.authorized) return { error: auth.error };
 
   const targetStatus = formData.get("status")?.toString() as RepairStatus;
-  const assignedTo = formData.get("assignedTo")?.toString().trim() || null;
-  const resolutionNote = formData.get("resolutionNote")?.toString().trim() || null;
+  const rawAssignedTo = formData.get("assignedTo")?.toString().trim();
+  const assignedTo = rawAssignedTo ? stripEmoji(rawAssignedTo) : null;
+  const rawResolutionNote = formData.get("resolutionNote")?.toString().trim();
+  const resolutionNote = rawResolutionNote ? stripEmoji(rawResolutionNote) : null;
   const cost = parseFloat(formData.get("cost")?.toString() || "0");
   const isAdmin = auth.role === "admin";
 
@@ -203,6 +208,7 @@ export async function updateRepairStatus(
     revalidatePath("/dashboard");
     revalidatePath("/");
 
+    await setToastCookie("อัปเดตสถานะงานซ่อมเรียบร้อยแล้ว", "success");
     return { success: true, message: "อัปเดตสถานะงานซ่อมเรียบร้อยแล้ว" };
   } catch (err: any) {
     console.error("updateRepairStatus error:", err);
@@ -220,11 +226,12 @@ export async function updateRepairDetails(
   const auth = await requireStaffOrAdmin();
   if (!auth.authorized) return { error: auth.error };
 
-  const title = formData.get("title")?.toString().trim() || "";
-  const description = formData.get("description")?.toString().trim() || "";
+  const title = stripEmoji(formData.get("title")?.toString().trim() || "");
+  const description = stripEmoji(formData.get("description")?.toString().trim() || "");
   const categoryStr = formData.get("category")?.toString() || "other";
   const priorityStr = formData.get("priority")?.toString() || "normal";
-  const imageUrl = formData.get("imageUrl")?.toString().trim() || null;
+  const rawImageUrl = formData.get("imageUrl")?.toString().trim();
+  const imageUrl = rawImageUrl ? stripEmoji(rawImageUrl) : null;
 
   if (!title) return { error: "กรุณาระบุหัวข้องานซ่อม" };
   if (!description) return { error: "กรุณาระบุรายละเอียด" };

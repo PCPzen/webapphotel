@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { parseReadingMonth } from "@/lib/meters";
 import { requireStaffOrAdmin } from "@/lib/auth-guard";
+import { stripEmoji } from "@/lib/emoji";
+import { setToastCookie } from "@/lib/toast";
 
 export type MeterActionResult = {
   success?: boolean;
@@ -101,7 +103,7 @@ export async function saveMeterReading(
           elecPrev,
           elecCurr,
           readDate: recordDate,
-          note: note?.trim() || null,
+          note: note?.trim() ? stripEmoji(note.trim()) : null,
         },
       });
     } else {
@@ -115,7 +117,7 @@ export async function saveMeterReading(
           elecPrev,
           elecCurr,
           readDate: recordDate,
-          note: note?.trim() || null,
+          note: note?.trim() ? stripEmoji(note.trim()) : null,
         },
       });
     }
@@ -215,7 +217,7 @@ export async function saveMeterReadingsBatch(
             elecPrev: item.elecPrev,
             elecCurr: item.elecCurr,
             readDate: recordDate,
-            note: item.note?.trim() || null,
+            note: item.note?.trim() ? stripEmoji(item.note.trim()) : null,
           },
           create: {
             roomId: item.roomId,
@@ -225,7 +227,7 @@ export async function saveMeterReadingsBatch(
             elecPrev: item.elecPrev,
             elecCurr: item.elecCurr,
             readDate: recordDate,
-            note: item.note?.trim() || null,
+            note: item.note?.trim() ? stripEmoji(item.note.trim()) : null,
           },
         });
       }
@@ -238,6 +240,7 @@ export async function saveMeterReadingsBatch(
     const skippedCount = lockedMap.size;
     const savedCount = readings.length - skippedCount;
 
+    await setToastCookie(`บันทึกมิเตอร์สำเร็จ ${savedCount} ห้อง`, "success");
     return {
       success: true,
       message: `บันทึกมิเตอร์สำเร็จ ${savedCount} ห้อง${skippedCount > 0 ? ` (ข้าม ${skippedCount} ห้องที่ออกบิลแล้ว)` : ""}`,

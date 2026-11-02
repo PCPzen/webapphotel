@@ -10,7 +10,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
-  Sparkles,
   ArrowRight,
   Eye,
   Building2,
@@ -27,6 +26,7 @@ import {
   calculateDurationText,
 } from "@/lib/repairs";
 import { formatThaiDate } from "@/lib/invoices";
+import { handleEmojiInput } from "@/lib/emoji";
 
 export type RepairListItem = {
   id: number;
@@ -113,76 +113,91 @@ export default function RepairListClient({
     });
   }, [repairs, search, statusFilter]);
 
+  const renderCategoryIcon = (category: string) => {
+    switch (category) {
+      case "electric":
+        return <Zap className="w-3.5 h-3.5 text-amber-400" />;
+      case "plumbing":
+        return <Droplet className="w-3.5 h-3.5 text-blue-400" />;
+      case "aircon":
+        return <Wind className="w-3.5 h-3.5 text-sky-400" />;
+      case "furniture":
+        return <Home className="w-3.5 h-3.5 text-emerald-400" />;
+      default:
+        return <Wrench className="w-3.5 h-3.5 text-slate-400" />;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#120f24] rounded-3xl border border-violet-950/80 p-6 shadow-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0b1120] rounded-3xl border border-slate-800 p-6 shadow-2xl">
         <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-gradient-to-tr from-amber-600 via-orange-600 to-violet-600 text-white rounded-2xl shadow-lg shadow-amber-950/50 ring-1 ring-amber-400/40">
+          <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-950/50">
             <Wrench className="w-7 h-7" />
           </div>
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-2xl font-black text-white">ระบบแจ้งซ่อมแซม</h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
-                P18: Step 7
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                สเต็ป 7
               </span>
             </div>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              ติดตามงานซ่อม มอบหมายช่าง และบันทึกค่าใช้จ่ายงานบำรุงรักษา (กฎ 4.21, 4.22)
+            <p className="text-xs text-slate-400 mt-0.5">
+              ติดตามงานซ่อม มอบหมายช่าง และบันทึกค่าใช้จ่ายงานบำรุงรักษา
             </p>
           </div>
         </div>
 
         <Link
           href="/repairs/new"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white text-xs font-black shadow-lg shadow-amber-950/50 ring-1 ring-amber-400/40 transition-all hover:scale-105"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-950/50 transition-all hover:scale-105"
         >
           <Plus className="w-4 h-4" />
-          + แจ้งซ่อมแซมใหม่
+          แจ้งซ่อมแซมใหม่
         </Link>
       </div>
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-        <div className="p-4 rounded-2xl bg-[#120f24] border border-violet-950/80 space-y-1">
-          <span className="text-[11px] font-semibold text-zinc-500 block">รอดำเนินการ (Open)</span>
-          <p className="text-xl font-black text-cyan-300 font-mono">
-            {metrics.openCount} <span className="text-xs font-normal text-zinc-400">งาน</span>
+        <div className="p-4 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-1">
+          <span className="text-[11px] font-semibold text-slate-400 block">รอดำเนินการ (Open)</span>
+          <p className="text-xl font-black text-sky-400 font-mono">
+            {metrics.openCount} <span className="text-xs font-normal text-slate-400">งาน</span>
           </p>
-          <p className="text-[10px] text-zinc-500">รอเจ้าหน้าที่มอบหมายช่าง</p>
+          <p className="text-[10px] text-slate-400">รอเจ้าหน้าที่มอบหมายช่าง</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#120f24] border border-violet-950/80 space-y-1">
-          <span className="text-[11px] font-semibold text-zinc-500 block">กำลังดำเนินการ (In Progress)</span>
-          <p className="text-xl font-black text-amber-300 font-mono">
-            {metrics.inProgressCount} <span className="text-xs font-normal text-zinc-400">งาน</span>
+        <div className="p-4 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-1">
+          <span className="text-[11px] font-semibold text-slate-400 block">กำลังดำเนินการ (In Progress)</span>
+          <p className="text-xl font-black text-amber-400 font-mono">
+            {metrics.inProgressCount} <span className="text-xs font-normal text-slate-400">งาน</span>
           </p>
-          <p className="text-[10px] text-zinc-500">ช่างกำลังเข้าตรวจสอบ/ซ่อม</p>
+          <p className="text-[10px] text-slate-400">ช่างกำลังเข้าตรวจสอบหรือซ่อม</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#120f24] border border-violet-950/80 space-y-1">
-          <span className="text-[11px] font-semibold text-zinc-500 block">งานด่วนมาก (Urgent)</span>
+        <div className="p-4 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-1">
+          <span className="text-[11px] font-semibold text-slate-400 block">งานด่วนมาก (Urgent)</span>
           <div className="flex items-center gap-2">
-            <p className="text-xl font-black text-red-400 font-mono">
-              {metrics.urgentCount} <span className="text-xs font-normal text-zinc-400">งาน</span>
+            <p className="text-xl font-black text-rose-400 font-mono">
+              {metrics.urgentCount} <span className="text-xs font-normal text-slate-400">งาน</span>
             </p>
             {metrics.urgentCount > 0 && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] bg-red-950/80 text-red-300 border border-red-800 font-bold animate-pulse">
+              <span className="px-2 py-0.5 rounded-full text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold">
                 ต้องทำด่วน
               </span>
             )}
           </div>
-          <p className="text-[10px] text-zinc-500">ปัญหาฉุกเฉิน ไฟฟ้า/ประปา</p>
+          <p className="text-[10px] text-slate-400">ปัญหาฉุกเฉิน ไฟฟ้าหรือประปา</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#120f24] border border-violet-950/80 space-y-1">
-          <span className="text-[11px] font-semibold text-zinc-500 block">ซ่อมเสร็จสิ้น (Done)</span>
+        <div className="p-4 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-1">
+          <span className="text-[11px] font-semibold text-slate-400 block">ซ่อมเสร็จสิ้น (Done)</span>
           <p className="text-xl font-black text-emerald-400 font-mono">
-            {metrics.doneCount} <span className="text-xs font-normal text-zinc-400">งาน</span>
+            {metrics.doneCount} <span className="text-xs font-normal text-slate-400">งาน</span>
           </p>
-          <p className="text-[10px] text-zinc-500">
-            ค่าใช้จ่ายสะสม ฿{metrics.totalCost.toLocaleString()}
+          <p className="text-[10px] text-slate-400">
+            ค่าใช้จ่ายสะสม {metrics.totalCost.toLocaleString()} บาท
           </p>
         </div>
       </div>
@@ -194,8 +209,8 @@ export default function RepairListClient({
             onClick={() => setStatusFilter("all")}
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               statusFilter === "all"
-                ? "bg-violet-600 text-white font-bold shadow-md shadow-violet-950/60"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                ? "bg-blue-600 text-white font-bold shadow-md shadow-blue-950/60"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             ทั้งหมด ({repairs.length})
@@ -204,8 +219,8 @@ export default function RepairListClient({
             onClick={() => setStatusFilter("open")}
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               statusFilter === "open"
-                ? "bg-cyan-600 text-white font-bold shadow-md shadow-cyan-950/60"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                ? "bg-blue-600 text-white font-bold shadow-md shadow-blue-950/60"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             รอดำเนินการ ({metrics.openCount})
@@ -215,7 +230,7 @@ export default function RepairListClient({
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               statusFilter === "in_progress"
                 ? "bg-amber-600 text-white font-bold shadow-md shadow-amber-950/60"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             กำลังซ่อม ({metrics.inProgressCount})
@@ -224,8 +239,8 @@ export default function RepairListClient({
             onClick={() => setStatusFilter("urgent")}
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               statusFilter === "urgent"
-                ? "bg-red-600 text-white font-bold shadow-md shadow-red-950/60"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                ? "bg-rose-600 text-white font-bold shadow-md shadow-rose-950/60"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             ด่วนมาก ({metrics.urgentCount})
@@ -235,7 +250,7 @@ export default function RepairListClient({
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               statusFilter === "done"
                 ? "bg-emerald-600 text-white font-bold shadow-md shadow-emerald-950/60"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             เสร็จสิ้น ({metrics.doneCount})
@@ -244,8 +259,8 @@ export default function RepairListClient({
             onClick={() => setStatusFilter("cancelled")}
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               statusFilter === "cancelled"
-                ? "bg-zinc-700 text-white font-bold shadow-md"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                ? "bg-slate-700 text-white font-bold shadow-md"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             ยกเลิกแล้ว
@@ -253,23 +268,24 @@ export default function RepairListClient({
         </div>
 
         <div className="relative w-full sm:w-64">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="ค้นหาหัวข้อ, เลขห้อง, หรือช่าง..."
             value={search}
+            onInput={handleEmojiInput}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#120f24] border border-violet-950 text-xs text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
+            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#0b1120] border border-slate-800 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>
 
       {/* Main Repairs Table */}
-      <div className="bg-[#120f24] rounded-3xl border border-violet-950/80 shadow-2xl overflow-hidden">
+      <div className="bg-[#0b1120] rounded-3xl border border-slate-800 shadow-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-violet-950/80 bg-[#16122d]/80 text-zinc-300 font-bold">
+              <tr className="border-b border-slate-800 bg-[#0f172a] text-slate-300 font-bold">
                 <th className="py-3.5 px-4 w-16 text-center">รหัส</th>
                 <th className="py-3.5 px-3 w-28">ห้อง / ชั้น</th>
                 <th className="py-3.5 px-3 w-40">หมวดหมู่</th>
@@ -281,11 +297,11 @@ export default function RepairListClient({
                 <th className="py-3.5 px-4 text-center w-20">ดู</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-violet-950/50">
+            <tbody className="divide-y divide-slate-800/80">
               {filteredRepairs.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-zinc-500">
-                    <Wrench className="w-8 h-8 mx-auto text-zinc-600 mb-2 opacity-50" />
+                  <td colSpan={9} className="py-12 text-center text-slate-400">
+                    <Wrench className="w-8 h-8 mx-auto text-slate-400 mb-2 opacity-50" />
                     ไม่พบรายการแจ้งซ่อมตามเงื่อนไขที่เลือก
                   </td>
                 </tr>
@@ -299,24 +315,24 @@ export default function RepairListClient({
                   return (
                     <tr
                       key={r.id}
-                      className={`hover:bg-[#16122d]/60 transition-colors ${
+                      className={`hover:bg-[#0f172a]/60 transition-colors ${
                         r.priority === "urgent" && r.status !== "done" && r.status !== "cancelled"
-                          ? "bg-red-950/10"
+                          ? "bg-rose-500/5"
                           : ""
                       } ${r.status === "cancelled" ? "opacity-50" : ""}`}
                     >
-                      <td className="py-3 px-4 text-center font-mono font-bold text-zinc-400">
+                      <td className="py-3 px-4 text-center font-mono font-bold text-slate-400">
                         #{r.id}
                       </td>
 
                       <td className="py-3 px-3">
-                        <span className="font-black text-white block">ห้อง {r.roomNo}</span>
-                        <span className="text-[10px] text-zinc-500">ชั้น {r.floor}</span>
+                        <span className="font-bold text-white block">ห้อง {r.roomNo}</span>
+                        <span className="text-[10px] text-slate-400">ชั้น {r.floor}</span>
                       </td>
 
                       <td className="py-3 px-3">
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[#0a0716] border border-violet-950 text-[11px] text-zinc-300">
-                          <span>{cat.icon}</span>
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-[#080c15] border border-slate-800 text-[11px] text-slate-300">
+                          {renderCategoryIcon(r.category)}
                           <span>{cat.label}</span>
                         </span>
                       </td>
@@ -324,15 +340,15 @@ export default function RepairListClient({
                       <td className="py-3 px-4">
                         <Link
                           href={`/repairs/${r.id}`}
-                          className="font-bold text-white hover:text-amber-400 transition-colors block text-sm"
+                          className="font-bold text-white hover:text-blue-400 transition-colors block text-sm"
                         >
                           {r.title}
                         </Link>
-                        <span className="text-[11px] text-zinc-400 line-clamp-1 mt-0.5">
+                        <span className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
                           {r.description}
                         </span>
                         {r.tenantName && (
-                          <span className="text-[10px] text-zinc-500 block mt-0.5">
+                          <span className="text-[10px] text-slate-400 block mt-0.5">
                             ผู้แจ้ง: คุณ {r.tenantName}
                           </span>
                         )}
@@ -348,17 +364,17 @@ export default function RepairListClient({
 
                       <td className="py-3 px-3">
                         {r.assignedTo ? (
-                          <span className="font-medium text-zinc-200 block truncate max-w-[120px]">
+                          <span className="font-medium text-slate-200 block truncate max-w-[120px]">
                             {r.assignedTo}
                           </span>
                         ) : (
-                          <span className="text-zinc-600 text-[11px] italic">- ยังไม่ได้มอบหมาย -</span>
+                          <span className="text-slate-400 text-[11px] italic">- ยังไม่ได้มอบหมาย -</span>
                         )}
                       </td>
 
-                      <td className="py-3 px-3 text-zinc-400 text-[11px]">
+                      <td className="py-3 px-3 text-slate-400 text-[11px]">
                         <span>{duration}</span>
-                        <span className="block text-[10px] text-zinc-600">
+                        <span className="block text-[10px] text-slate-400">
                           {formatThaiDate(r.reportedAt)}
                         </span>
                       </td>
@@ -374,7 +390,7 @@ export default function RepairListClient({
                       <td className="py-3 px-4 text-center">
                         <Link
                           href={`/repairs/${r.id}`}
-                          className="p-1.5 rounded-lg bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 inline-block transition-colors"
+                          className="p-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 inline-block transition-colors border border-blue-500/20"
                           title="ดูรายละเอียดและอัปเดตงานซ่อม"
                         >
                           <Eye className="w-3.5 h-3.5" />

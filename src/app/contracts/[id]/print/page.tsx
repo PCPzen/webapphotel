@@ -63,7 +63,7 @@ export default async function PrintContractPage({
   const endDateThai = formatThaiDate(contract.endDate);
 
   return (
-    <div className="min-h-screen bg-[#07050f] text-zinc-100 print:bg-white print:text-black print:min-h-0 print:p-0">
+    <div className="min-h-screen bg-[#080c15] text-slate-100 print:bg-white print:text-black print:min-h-0 print:p-0">
       <PrintContractClient contractId={contract.id} roomNo={contract.room.roomNo} />
 
       {/* A4 Sheet Container */}

@@ -13,17 +13,14 @@ import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
-  DollarSign,
-  Droplet,
-  Zap,
   CheckSquare,
   Square,
-  Clock,
   ExternalLink,
-  ShieldAlert,
+  X,
 } from "lucide-react";
 import { generateInvoicesBatch, GenerateInvoiceItemInput } from "@/actions/invoices";
 import { roundHalfUp } from "@/lib/invoices";
+import { handleEmojiInput } from "@/lib/emoji";
 
 export type ReadyInvoiceRoom = {
   contractId: number;
@@ -189,19 +186,19 @@ export default function GenerateInvoicesClient({
   return (
     <div className="space-y-6">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#120f24] rounded-3xl border border-violet-950/80 p-6 shadow-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0b1120] rounded-3xl border border-slate-800 p-6 shadow-2xl">
         <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-gradient-to-tr from-emerald-600 via-teal-600 to-violet-600 text-white rounded-2xl shadow-lg shadow-emerald-950/40 ring-1 ring-emerald-400/40">
+          <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-950/50 border border-blue-500/30">
             <Sparkles className="w-7 h-7" />
           </div>
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-2xl font-black text-white">ออกใบแจ้งหนี้ประจำเดือน</h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                P14: Step 5
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                สเต็ป 5
               </span>
             </div>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               คำนวณค่าน้ำ-ไฟตามมิเตอร์ ค่าเช่า และออกใบแจ้งหนี้พร้อมกันทั้งหอพัก (BR-05 & BR-06)
             </p>
           </div>
@@ -210,7 +207,7 @@ export default function GenerateInvoicesClient({
         <div className="flex items-center gap-2.5">
           <Link
             href="/invoices"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 text-xs font-bold border border-violet-800/40 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             กลับหน้ารายการบิล
@@ -219,31 +216,31 @@ export default function GenerateInvoicesClient({
       </div>
 
       {/* Month Switcher Bar */}
-      <div className="bg-[#120f24] rounded-2xl border border-violet-950/70 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+      <div className="bg-[#0b1120] rounded-2xl border border-slate-800 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-violet-400" />
-          <span className="text-xs text-zinc-400">รอบบิลประจำเดือน:</span>
+          <Calendar className="w-4 h-4 text-blue-400" />
+          <span className="text-xs text-slate-400">รอบบิลประจำเดือน:</span>
           <span className="text-base font-black text-white">{thaiMonthName}</span>
-          <span className="text-xs font-mono text-zinc-500">({monthStr})</span>
+          <span className="text-xs font-mono text-slate-500">({monthStr})</span>
         </div>
 
         <div className="flex items-center gap-2">
           <Link
             href={`/invoices/generate?month=${prevMonthStr}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 text-xs font-semibold border border-violet-800/30 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
             เดือนก่อนหน้า
           </Link>
           <Link
             href={`/invoices/generate`}
-            className="px-3 py-1.5 rounded-xl bg-[#0c0a18] hover:bg-zinc-800 text-zinc-300 text-xs font-bold border border-violet-950 transition-colors"
+            className="px-3 py-1.5 rounded-xl bg-[#080c15] hover:bg-slate-800 text-slate-300 text-xs font-bold border border-slate-800 transition-colors"
           >
             เดือนปัจจุบัน
           </Link>
           <Link
             href={`/invoices/generate?month=${nextMonthStr}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 text-xs font-semibold border border-violet-800/30 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors"
           >
             เดือนถัดไป
             <ChevronRight className="w-4 h-4" />
@@ -268,22 +265,22 @@ export default function GenerateInvoicesClient({
             )}
             <span className="font-semibold">{feedback.text}</span>
           </div>
-          <button onClick={() => setFeedback(null)} className="text-zinc-500 hover:text-zinc-300 text-xs font-bold">
-            ✕
+          <button onClick={() => setFeedback(null)} className="text-slate-500 hover:text-slate-300">
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {/* Missing Meters Warning */}
       {missingMeterRooms.length > 0 && (
-        <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-200">
+        <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-700/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-800 dark:text-amber-200 shadow-2xs">
           <div className="flex items-center gap-2.5">
-            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+            <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
             <div>
-              <strong className="text-amber-300 block font-bold">
+              <strong className="text-amber-900 dark:text-amber-300 block font-bold">
                 มี {missingMeterRooms.length} ห้องที่ยังไม่ได้จดมิเตอร์น้ำ-ไฟประจำเดือนนี้
               </strong>
-              <span className="text-zinc-400 text-[11px]">
+              <span className="text-slate-600 dark:text-slate-400 text-[11px]">
                 ห้องที่ยังไม่มีมิเตอร์จะถูกข้ามและไม่สามารถออกบิลได้:{" "}
                 {missingMeterRooms.map((r) => r.roomNo).join(", ")}
               </span>
@@ -291,7 +288,7 @@ export default function GenerateInvoicesClient({
           </div>
           <Link
             href={`/meters?month=${monthStr}`}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold border border-amber-500/40 transition-colors whitespace-nowrap self-start sm:self-center"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 dark:bg-amber-500/20 dark:hover:bg-amber-500/30 dark:text-amber-300 text-xs font-bold border border-amber-300 dark:border-amber-500/40 transition-colors whitespace-nowrap self-start sm:self-center"
           >
             ไปจดมิเตอร์ห้องเหล่านี้
             <ExternalLink className="w-3.5 h-3.5" />
@@ -300,14 +297,14 @@ export default function GenerateInvoicesClient({
       )}
 
       {/* 1. Main Ready Rooms Table */}
-      <div className="bg-[#120f24] rounded-3xl border border-violet-950/80 shadow-2xl overflow-hidden space-y-4">
-        <div className="p-6 border-b border-violet-950/60 bg-[#16122d]/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white dark:bg-[#0b1120] rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm dark:shadow-2xl overflow-hidden space-y-4">
+        <div className="p-6 border-b border-slate-800 bg-[#0f172a] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-base font-black text-white flex items-center gap-2">
-              <FileText className="w-4 h-4 text-emerald-400" />
+              <FileText className="w-4 h-4 text-blue-400" />
               ห้องพักที่พร้อมออกบิล ({readyRooms.length} ห้อง)
             </h2>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               ตรวจทานหน่วยน้ำ-ไฟ เพิ่มค่าใช้จ่ายอื่น ๆ (ถ้ามี) แล้วกดปุ่มออกใบแจ้งหนี้
             </p>
           </div>
@@ -316,7 +313,7 @@ export default function GenerateInvoicesClient({
             <button
               type="button"
               onClick={handleToggleSelectAll}
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#0c0a18] hover:bg-zinc-800 text-xs font-bold text-zinc-300 border border-violet-950 transition-colors"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#080c15] hover:bg-slate-800 text-xs font-bold text-slate-300 border border-slate-800 transition-colors"
             >
               {selectedContractIds.length === readyRooms.length ? (
                 <>
@@ -325,7 +322,7 @@ export default function GenerateInvoicesClient({
                 </>
               ) : (
                 <>
-                  <Square className="w-4 h-4 text-zinc-500" />
+                  <Square className="w-4 h-4 text-slate-500" />
                   เลือกทั้งหมด ({readyRooms.length})
                 </>
               )}
@@ -334,12 +331,12 @@ export default function GenerateInvoicesClient({
         </div>
 
         {readyRooms.length === 0 ? (
-          <div className="p-12 text-center text-zinc-500 space-y-2">
+          <div className="p-12 text-center text-slate-500 space-y-2">
             <CheckCircle2 className="w-10 h-10 text-emerald-500/60 mx-auto" />
-            <p className="text-sm font-bold text-zinc-300">
+            <p className="text-sm font-bold text-slate-300">
               ไม่มีห้องที่ค้างออกใบแจ้งหนี้สำหรับรอบเดือนนี้
             </p>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-slate-500">
               ทุกห้องอาจถูกออกบิลไปแล้ว หรือยังไม่ได้บันทึกมิเตอร์น้ำ-ไฟประจำเดือน
             </p>
           </div>
@@ -347,24 +344,24 @@ export default function GenerateInvoicesClient({
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-violet-950/80 bg-[#0e0b1f] text-zinc-400 font-bold">
+                <tr className="border-b border-slate-800 bg-[#080c15] text-slate-400 font-bold">
                   <th className="py-2.5 px-4 w-12 text-center">เลือก</th>
                   <th className="py-2.5 px-3 w-28">ห้อง / ชั้น</th>
                   <th className="py-2.5 px-3 w-40">ผู้เช่าหลัก</th>
                   <th className="py-2.5 px-3 text-right w-24">ค่าเช่าห้อง</th>
-                  <th className="py-2.5 px-3 bg-cyan-950/20 text-cyan-300 text-right w-36">
+                  <th className="py-2.5 px-3 bg-blue-950/20 text-blue-300 text-right w-36">
                     ค่าน้ำ (หน่วย x ฿)
                   </th>
                   <th className="py-2.5 px-3 bg-amber-950/20 text-amber-300 text-right w-36">
                     ค่าไฟ (หน่วย x ฿)
                   </th>
                   <th className="py-2.5 px-3 w-48">ค่าอื่น ๆ (บาท / รายละเอียด)</th>
-                  <th className="py-2.5 px-4 text-right w-28 text-emerald-400 font-black">
+                  <th className="py-2.5 px-4 text-right w-28 text-blue-400 font-black">
                     รวมสุทธิ (฿)
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-violet-950/50">
+              <tbody className="divide-y divide-slate-800/60">
                 {readyRooms.map((r) => {
                   const isSelected = selectedContractIds.includes(r.contractId);
                   const waterAmt = roundHalfUp(r.waterUnits * r.waterRate, 2);
@@ -381,47 +378,47 @@ export default function GenerateInvoicesClient({
                   return (
                     <tr
                       key={r.contractId}
-                      className={`hover:bg-[#16122d]/60 transition-colors ${
-                        isSelected ? "bg-violet-950/20" : "opacity-60"
+                      className={`hover:bg-slate-800/40 transition-colors ${
+                        isSelected ? "bg-blue-950/15" : "opacity-60"
                       }`}
                     >
                       <td className="py-3 px-4 text-center">
                         <button
                           type="button"
                           onClick={() => handleToggleRoom(r.contractId)}
-                          className="p-1 rounded text-zinc-400 hover:text-white"
+                          className="p-1 rounded text-slate-400 hover:text-white"
                         >
                           {isSelected ? (
                             <CheckSquare className="w-4 h-4 text-emerald-400" />
                           ) : (
-                            <Square className="w-4 h-4 text-zinc-600" />
+                            <Square className="w-4 h-4 text-slate-600" />
                           )}
                         </button>
                       </td>
 
                       <td className="py-3 px-3">
                         <span className="font-black text-white text-sm block">{r.roomNo}</span>
-                        <span className="text-[10px] text-zinc-500">
+                        <span className="text-[10px] text-slate-500">
                           ชั้น {r.floor} • {r.roomType}
                         </span>
                       </td>
 
                       <td className="py-3 px-3">
-                        <span className="font-bold text-zinc-200 block truncate max-w-[140px]">
+                        <span className="font-bold text-slate-200 block truncate max-w-[140px]">
                           {r.tenantName}
                         </span>
-                        <span className="text-[10px] text-zinc-500">โทร: {r.tenantPhone}</span>
+                        <span className="text-[10px] text-slate-500">โทร: {r.tenantPhone}</span>
                       </td>
 
-                      <td className="py-3 px-3 text-right font-mono font-bold text-zinc-300">
+                      <td className="py-3 px-3 text-right font-mono font-bold text-slate-300">
                         ฿{r.monthlyRent.toLocaleString()}
                       </td>
 
-                      <td className="py-3 px-3 text-right bg-cyan-950/10 font-mono">
-                        <span className="text-cyan-300 font-bold block">
+                      <td className="py-3 px-3 text-right bg-blue-950/10 font-mono">
+                        <span className="text-blue-300 font-bold block">
                           ฿{waterAmt.toLocaleString()}
                         </span>
-                        <span className="text-[10px] text-zinc-500">
+                        <span className="text-[10px] text-slate-500">
                           {r.waterUnits} หน่วย @฿{r.waterRate}
                         </span>
                       </td>
@@ -430,7 +427,7 @@ export default function GenerateInvoicesClient({
                         <span className="text-amber-300 font-bold block">
                           ฿{elecAmt.toLocaleString()}
                         </span>
-                        <span className="text-[10px] text-zinc-500">
+                        <span className="text-[10px] text-slate-500">
                           {r.elecUnits} หน่วย @฿{r.electricRate}
                         </span>
                       </td>
@@ -446,7 +443,7 @@ export default function GenerateInvoicesClient({
                             onChange={(e) =>
                               handleOtherFeeChange(r.contractId, "amount", e.target.value)
                             }
-                            className="w-20 px-2 py-1 rounded bg-[#090714] border border-violet-950 text-xs font-mono text-white text-right focus:outline-none focus:ring-1 focus:ring-violet-500"
+                            className="w-20 px-2 py-1 rounded bg-[#080c15] border border-slate-800 text-xs font-mono text-white text-right focus:outline-none focus:ring-1 focus:ring-blue-500"
                           />
                           <input
                             type="text"
@@ -455,12 +452,13 @@ export default function GenerateInvoicesClient({
                             onChange={(e) =>
                               handleOtherFeeChange(r.contractId, "note", e.target.value)
                             }
-                            className="w-full px-2 py-1 rounded bg-[#090714] border border-violet-950 text-[11px] text-zinc-300 focus:outline-none focus:ring-1 focus:ring-violet-500"
+                            onInput={handleEmojiInput}
+                            className="w-full px-2 py-1 rounded bg-[#080c15] border border-slate-800 text-[11px] text-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
                           />
                         </div>
                       </td>
 
-                      <td className="py-3 px-4 text-right font-mono text-sm font-black text-emerald-300">
+                      <td className="py-3 px-4 text-right font-mono text-sm font-black text-blue-400">
                         ฿{rowTotal.toLocaleString()}
                       </td>
                     </tr>
@@ -473,29 +471,29 @@ export default function GenerateInvoicesClient({
 
         {/* Calculation Summary & Submit Box */}
         {readyRooms.length > 0 && (
-          <div className="p-6 bg-[#16122d]/80 border-t border-violet-950/80 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="p-6 bg-[#0f172a] border-t border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
               <div>
-                <span className="text-zinc-500 block text-[11px]">เลือกออกบิล</span>
+                <span className="text-slate-400 block text-[11px]">เลือกออกบิล</span>
                 <strong className="text-white text-sm">
                   {calculationSummary.selectedCount} / {readyRooms.length} ห้อง
                 </strong>
               </div>
               <div>
-                <span className="text-zinc-500 block text-[11px]">ค่าน้ำประปารวม</span>
-                <strong className="text-cyan-300 text-sm font-mono">
+                <span className="text-slate-400 block text-[11px]">ค่าน้ำประปารวม</span>
+                <strong className="text-blue-300 text-sm font-mono">
                   ฿{calculationSummary.totalWater.toLocaleString()}
                 </strong>
               </div>
               <div>
-                <span className="text-zinc-500 block text-[11px]">ค่าไฟฟ้ารวม</span>
+                <span className="text-slate-400 block text-[11px]">ค่าไฟฟ้ารวม</span>
                 <strong className="text-amber-300 text-sm font-mono">
                   ฿{calculationSummary.totalElectric.toLocaleString()}
                 </strong>
               </div>
               <div>
-                <span className="text-zinc-500 block text-[11px]">ยอดเรียกเก็บรวมสุทธิ</span>
-                <strong className="text-emerald-400 text-base font-black font-mono">
+                <span className="text-slate-400 block text-[11px]">ยอดเรียกเก็บรวมสุทธิ</span>
+                <strong className="text-blue-400 text-base font-black font-mono">
                   ฿{calculationSummary.grandTotal.toLocaleString()}
                 </strong>
               </div>
@@ -505,12 +503,12 @@ export default function GenerateInvoicesClient({
               type="button"
               onClick={handleGenerate}
               disabled={isPending || calculationSummary.selectedCount === 0}
-              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-violet-600 hover:from-emerald-500 hover:to-violet-500 text-white text-sm font-black shadow-xl shadow-emerald-950/50 ring-1 ring-emerald-400/40 transition-all hover:scale-[1.02] disabled:opacity-50 whitespace-nowrap"
+              className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-black shadow-xl shadow-blue-950/50 border border-blue-500/30 transition-all hover:scale-[1.02] disabled:opacity-50 whitespace-nowrap"
             >
               <Sparkles className="w-4 h-4" />
               {isPending
                 ? "กำลังออกใบแจ้งหนี้..."
-                : `⚡ สร้างใบแจ้งหนี้ที่เลือก (${calculationSummary.selectedCount} ฉบับ)`}
+                : `สร้างใบแจ้งหนี้ที่เลือก (${calculationSummary.selectedCount} ฉบับ)`}
             </button>
           </div>
         )}
@@ -518,15 +516,15 @@ export default function GenerateInvoicesClient({
 
       {/* 2. Already Generated Invoices */}
       {alreadyGenerated.length > 0 && (
-        <div className="bg-[#120f24] rounded-3xl border border-violet-950/80 p-6 space-y-4 shadow-xl">
+        <div className="bg-[#0b1120] rounded-3xl border border-slate-800 p-6 space-y-4 shadow-xl">
           <div className="flex items-center justify-between">
-            <h3 className="text-sm font-black text-zinc-300 flex items-center gap-2">
+            <h3 className="text-sm font-black text-slate-300 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               ห้องที่ออกใบแจ้งหนี้ของรอบเดือนนี้ไปแล้ว ({alreadyGenerated.length} ห้อง)
             </h3>
             <Link
               href={`/invoices?month=${monthStr}`}
-              className="text-xs text-violet-400 hover:text-violet-300 font-semibold flex items-center gap-1"
+              className="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center gap-1"
             >
               ดูรายการใบแจ้งหนี้ทั้งหมด <ArrowRight className="w-3.5 h-3.5" />
             </Link>
@@ -537,22 +535,22 @@ export default function GenerateInvoicesClient({
               <Link
                 key={inv.invoiceId}
                 href={`/invoices/${inv.invoiceId}`}
-                className="p-3.5 rounded-2xl bg-[#0b0818] border border-violet-950 hover:border-violet-800 transition-all flex items-center justify-between group"
+                className="p-3.5 rounded-2xl bg-[#080c15] border border-slate-800 hover:border-slate-700 transition-all flex items-center justify-between group"
               >
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-black text-white text-sm">ห้อง {inv.roomNo}</span>
-                    <span className="text-[10px] font-mono text-zinc-500">{inv.invoiceNo}</span>
+                    <span className="text-[10px] font-mono text-slate-500">{inv.invoiceNo}</span>
                   </div>
-                  <span className="text-[11px] text-zinc-400 block truncate max-w-[140px]">
+                  <span className="text-[11px] text-slate-400 block truncate max-w-[140px]">
                     {inv.tenantName}
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="font-mono font-bold text-sm text-emerald-300 block">
+                  <span className="font-mono font-bold text-sm text-blue-400 block">
                     ฿{inv.totalAmount.toLocaleString()}
                   </span>
-                  <span className="text-[10px] text-zinc-500 uppercase">{inv.status}</span>
+                  <span className="text-[10px] text-slate-500 uppercase">{inv.status}</span>
                 </div>
               </Link>
             ))}

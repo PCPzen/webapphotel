@@ -16,9 +16,11 @@ import {
   ExternalLink,
   ShieldAlert,
   ArrowUpRight,
+  CheckCircle,
 } from "lucide-react";
 import ReportTabs from "@/components/ReportTabs";
 import { formatThaiDate } from "@/lib/invoices";
+import { handleEmojiInput } from "@/lib/emoji";
 
 export type OverdueInvoiceItem = {
   id: number;
@@ -81,20 +83,20 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
             <AlertTriangle className="w-6 h-6 text-rose-400" />
             รายงานยอดค้างชำระและเร่งรัดหนี้สิน
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            ติดตามบิลที่เกินกำหนดชำระตามกฎ BR-07 พร้อมข้อมูลติดต่อผู้เช่าเพื่อเร่งรัดหนี้สิน
+            ติดตามบิลที่เกินกำหนดชำระ พร้อมข้อมูลติดต่อผู้เช่าเพื่อเร่งรัดหนี้สิน
           </p>
         </div>
 
         <button
           onClick={() => window.print()}
-          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-slate-200 border border-white/10 text-xs font-medium self-start sm:self-auto transition-all"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#0b1120] hover:bg-slate-800 text-slate-200 border border-slate-800 text-xs font-semibold self-start sm:self-auto transition-all"
         >
-          <Printer className="w-3.5 h-3.5 text-violet-400" />
+          <Printer className="w-3.5 h-3.5 text-blue-400" />
           <span>พิมพ์ใบทวงหนี้รวม</span>
         </button>
       </div>
@@ -102,12 +104,12 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Total Overdue Debt */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#291118] to-[#18090f] border border-rose-900/40 shadow-lg">
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#0b1120] border border-slate-800 shadow-lg">
           <div className="flex items-center justify-between text-rose-300 text-xs mb-2">
             <span>ยอดหนี้ค้างรวม</span>
             <DollarSign className="w-4 h-4 text-rose-400" />
           </div>
-          <div className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+          <div className="text-xl sm:text-2xl font-black text-white tracking-tight">
             ฿{data.totalOverdueBalance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
           </div>
           <div className="text-[11px] text-rose-400/80 mt-1">
@@ -116,12 +118,12 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
         </div>
 
         {/* Critical Overdue (>30 Days) */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#241c12] to-[#1a140d] border border-amber-900/30 shadow-md">
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#0b1120] border border-slate-800 shadow-md">
           <div className="flex items-center justify-between text-amber-400 text-xs mb-2">
             <span>ค้างเกิน 30 วัน</span>
             <ShieldAlert className="w-4 h-4 text-amber-400" />
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-amber-300 tracking-tight">
+          <div className="text-xl sm:text-2xl font-black text-amber-400 tracking-tight">
             {data.criticalOverdueCount} <span className="text-xs font-normal text-slate-400">บิล</span>
           </div>
           <div className="text-[11px] text-amber-400/80 mt-1">
@@ -130,12 +132,12 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
         </div>
 
         {/* Max Days Overdue */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#16122d] to-[#120f24] border border-violet-900/30 shadow-md">
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#0b1120] border border-slate-800 shadow-md">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
             <span>ค้างชำระนานที่สุด</span>
-            <Clock className="w-4 h-4 text-violet-400" />
+            <Clock className="w-4 h-4 text-blue-400" />
           </div>
-          <div className="text-xl sm:text-2xl font-bold text-violet-300 tracking-tight">
+          <div className="text-xl sm:text-2xl font-black text-blue-400 tracking-tight">
             {data.maxDaysOverdue} <span className="text-xs font-normal text-slate-400">วัน</span>
           </div>
           <div className="text-[11px] text-slate-400 mt-1">
@@ -143,18 +145,18 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
           </div>
         </div>
 
-        {/* Overdue Ratio */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-[#16122d] to-[#120f24] border border-violet-900/30 shadow-md">
+        {/* Action Link */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-[#0b1120] border border-slate-800 shadow-md">
           <div className="flex items-center justify-between text-slate-400 text-xs mb-2">
             <span>การดำเนินการ</span>
-            <CreditCard className="w-4 h-4 text-indigo-400" />
+            <CreditCard className="w-4 h-4 text-emerald-400" />
           </div>
-          <div className="text-sm font-semibold text-white mt-1">
-            พร้อมรับชำระ & คิดค่าปรับ
+          <div className="text-sm font-bold text-white mt-1">
+            พร้อมรับชำระ และคิดค่าปรับ
           </div>
           <Link
             href="/payments"
-            className="inline-flex items-center gap-1 text-xs text-violet-400 hover:text-violet-300 mt-2 font-medium"
+            className="inline-flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300 mt-2 font-semibold"
           >
             ไปที่บันทึกรับเงิน <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>
@@ -162,11 +164,11 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
       </div>
 
       {/* Main Ledger Table Card */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-[#120f24] border border-violet-900/30 space-y-4">
+      <div className="p-5 sm:p-6 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-semibold text-white">ตารางรายการหนี้ค้างชำระ</h2>
-            <span className="px-2 py-0.5 rounded-full text-[11px] bg-rose-500/20 text-rose-300 border border-rose-500/30">
+            <h2 className="text-sm font-bold text-white">ตารางรายการหนี้ค้างชำระ</h2>
+            <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
               {filteredInvoices.length} รายการ
             </span>
           </div>
@@ -174,46 +176,47 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
           <div className="flex flex-wrap items-center gap-2">
             {/* Search */}
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-500" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
               <input
                 type="text"
                 placeholder="ค้นหาห้อง, ชื่อผู้เช่า..."
                 value={search}
+                onInput={handleEmojiInput}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-8 pr-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-violet-500"
+                className="pl-8 pr-3 py-1.5 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
               />
             </div>
 
             {/* Severity Filter */}
-            <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5 text-xs">
+            <div className="flex items-center gap-1 bg-[#080c15] p-1 rounded-xl border border-slate-800 text-xs">
               <button
                 onClick={() => setFilterSeverity("all")}
-                className={`px-2.5 py-1 rounded-lg transition-colors ${
-                  filterSeverity === "all" ? "bg-violet-600 text-white font-medium" : "text-slate-400 hover:text-white"
+                className={`px-2.5 py-1 rounded-lg transition-colors font-semibold ${
+                  filterSeverity === "all" ? "bg-blue-600 text-white" : "text-slate-400 hover:text-white"
                 }`}
               >
                 ทั้งหมด
               </button>
               <button
                 onClick={() => setFilterSeverity("critical")}
-                className={`px-2.5 py-1 rounded-lg transition-colors ${
-                  filterSeverity === "critical" ? "bg-rose-600 text-white font-medium" : "text-slate-400 hover:text-white"
+                className={`px-2.5 py-1 rounded-lg transition-colors font-semibold ${
+                  filterSeverity === "critical" ? "bg-rose-600 text-white" : "text-slate-400 hover:text-white"
                 }`}
               >
                 วิกฤต (&gt;30 วัน)
               </button>
               <button
                 onClick={() => setFilterSeverity("warning")}
-                className={`px-2.5 py-1 rounded-lg transition-colors ${
-                  filterSeverity === "warning" ? "bg-amber-600 text-white font-medium" : "text-slate-400 hover:text-white"
+                className={`px-2.5 py-1 rounded-lg transition-colors font-semibold ${
+                  filterSeverity === "warning" ? "bg-amber-600 text-white" : "text-slate-400 hover:text-white"
                 }`}
               >
                 8-30 วัน
               </button>
               <button
                 onClick={() => setFilterSeverity("recent")}
-                className={`px-2.5 py-1 rounded-lg transition-colors ${
-                  filterSeverity === "recent" ? "bg-cyan-600 text-white font-medium" : "text-slate-400 hover:text-white"
+                className={`px-2.5 py-1 rounded-lg transition-colors font-semibold ${
+                  filterSeverity === "recent" ? "bg-sky-600 text-white" : "text-slate-400 hover:text-white"
                 }`}
               >
                 1-7 วัน
@@ -223,9 +226,9 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
         </div>
 
         {/* Table */}
-        <div className="overflow-x-auto rounded-xl border border-white/5">
+        <div className="overflow-x-auto rounded-xl border border-slate-800">
           <table className="w-full text-xs text-left">
-            <thead className="bg-black/40 text-slate-400 border-b border-white/5 font-semibold">
+            <thead className="bg-[#0f172a] text-slate-300 border-b border-slate-800 font-bold">
               <tr>
                 <th className="py-3 px-3">ห้อง</th>
                 <th className="py-3 px-3">ผู้เช่า / ติดต่อ</th>
@@ -239,11 +242,11 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
                 <th className="py-3 px-3 text-center">จัดการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-slate-800/80">
               {filteredInvoices.map((inv) => (
-                <tr key={inv.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="py-3 px-3 font-semibold text-white">
-                    <Link href={`/rooms/${inv.roomId}`} className="hover:text-violet-300 hover:underline">
+                <tr key={inv.id} className="hover:bg-[#0f172a]/60 transition-colors">
+                  <td className="py-3 px-3 font-bold text-white">
+                    <Link href={`/rooms/${inv.roomId}`} className="hover:text-blue-400 hover:underline">
                       ห้อง {inv.roomNo}
                     </Link>
                   </td>
@@ -253,7 +256,7 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
                     <div className="flex items-center gap-2 mt-0.5 text-[11px]">
                       <a
                         href={`tel:${inv.tenantPhone}`}
-                        className="text-violet-400 hover:text-violet-300 flex items-center gap-1 font-mono"
+                        className="text-blue-400 hover:text-blue-300 flex items-center gap-1 font-mono font-bold"
                       >
                         <Phone className="w-3 h-3 text-emerald-400" />
                         {inv.tenantPhone}
@@ -269,7 +272,7 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
                   <td className="py-3 px-3">
                     <Link
                       href={`/invoices/${inv.id}`}
-                      className="font-mono text-violet-400 hover:underline flex items-center gap-1"
+                      className="font-mono text-blue-400 hover:underline flex items-center gap-1 font-bold"
                     >
                       {inv.invoiceNo}
                       <ExternalLink className="w-2.5 h-2.5 opacity-60" />
@@ -284,16 +287,16 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
 
                   <td className="py-3 px-3 text-center">
                     {inv.daysOverdue > 30 ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
                         <AlertTriangle className="w-3 h-3" />
                         {inv.daysOverdue} วัน
                       </span>
                     ) : inv.daysOverdue >= 8 ? (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
                         {inv.daysOverdue} วัน
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">
                         {inv.daysOverdue} วัน
                       </span>
                     )}
@@ -314,7 +317,7 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
                   <td className="py-3 px-3 text-center">
                     <Link
                       href={`/payments?invoiceId=${inv.id}`}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-[11px] font-medium transition-colors"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold transition-colors shadow-sm"
                     >
                       <CreditCard className="w-3 h-3" /> รับชำระ
                     </Link>
@@ -324,8 +327,9 @@ export default function OverdueReportClient({ data }: { data: OverdueReportData 
 
               {filteredInvoices.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="py-8 text-center text-slate-500">
-                    🎉 ไม่มียอดหนี้ค้างชำระตามเงื่อนไขที่เลือก
+                  <td colSpan={10} className="py-8 text-center text-slate-400">
+                    <CheckCircle className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
+                    ไม่มียอดหนี้ค้างชำระตามเงื่อนไขที่เลือก
                   </td>
                 </tr>
               )}

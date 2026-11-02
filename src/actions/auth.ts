@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { setToastCookie } from "@/lib/toast";
 
 export type AuthFormState = {
   error?: string;
@@ -37,6 +38,7 @@ export async function loginTenant(
     });
 
     if (tenant) {
+      const isProd = process.env.NODE_ENV === "production";
       const cookieStore = await cookies();
       cookieStore.set("webhotel_tenant_id", tenant.id.toString(), {
         path: "/",
@@ -51,6 +53,7 @@ export async function loginTenant(
         sameSite: "lax",
       });
 
+      await setToastCookie(`เข้าสู่ระบบผู้เช่าสำเร็จ ยินดีต้อนรับคุณ ${tenant.firstName}`, "success");
       redirect(`/me?tenantId=${tenant.id}`);
     }
   }
@@ -130,6 +133,7 @@ export async function loginTenant(
       sameSite: "lax",
     });
 
+    await setToastCookie(`เข้าสู่ระบบผู้เช่าสำเร็จ ยินดีต้อนรับคุณ ${activeContract.tenant.firstName}`, "success");
     redirect(`/me?tenantId=${activeContract.tenant.id}`);
   } catch (err: any) {
     if (err?.message?.includes("NEXT_REDIRECT")) {
@@ -224,7 +228,7 @@ export async function loginStaff(
       secure: isProd,
       sameSite: "lax",
     });
-    cookieStore.set("webhotel_user_name", encodeURIComponent(profile.fullName), {
+    cookieStore.set("webhotel_user_name", profile.fullName, {
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
       httpOnly: false,
@@ -232,6 +236,7 @@ export async function loginStaff(
       sameSite: "lax",
     });
 
+    await setToastCookie(`เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ ${profile.fullName}`, "success");
     redirect("/dashboard");
   } catch (err: any) {
     if (err?.message?.includes("NEXT_REDIRECT")) {
@@ -254,7 +259,7 @@ export async function switchRoleAction(targetRole: "admin" | "staff"): Promise<v
   });
 
   if (targetRole === "admin") {
-    cookieStore.set("webhotel_user_name", encodeURIComponent("ผู้ดูแลระบบสูงสุด (System Admin)"), {
+    cookieStore.set("webhotel_user_name", "ผู้ดูแลระบบสูงสุด (System Admin)", {
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
       httpOnly: false,
@@ -267,7 +272,7 @@ export async function switchRoleAction(targetRole: "admin" | "staff"): Promise<v
       sameSite: "lax",
     });
   } else {
-    cookieStore.set("webhotel_user_name", encodeURIComponent("เจ้าหน้าที่นิติบุคคล (Staff)"), {
+    cookieStore.set("webhotel_user_name", "เจ้าหน้าที่นิติบุคคล (Staff)", {
       path: "/",
       maxAge: 60 * 60 * 24 * 7,
       httpOnly: false,
@@ -281,6 +286,7 @@ export async function switchRoleAction(targetRole: "admin" | "staff"): Promise<v
     });
   }
 
+  await setToastCookie(`สลับบทบาทเป็น ${targetRole === "admin" ? "Admin" : "Staff"} เรียบร้อยแล้ว`, "info");
   redirect("/dashboard");
 }
 
@@ -298,5 +304,6 @@ export async function logoutAction(): Promise<void> {
   cookieStore.delete("webhotel_user_email");
   cookieStore.delete("webhotel_user_name");
 
+  await setToastCookie("ออกจากระบบเรียบร้อยแล้ว", "info");
   redirect("/");
 }

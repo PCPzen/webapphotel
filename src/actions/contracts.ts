@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ContractStatus } from "@prisma/client";
 import { requireStaffOrAdmin } from "@/lib/auth-guard";
+import { stripEmoji } from "@/lib/emoji";
+import { setToastCookie } from "@/lib/toast";
 
 export type ContractFormState = {
   error?: string;
@@ -136,6 +138,7 @@ export async function createContract(
   revalidatePath("/rooms");
   revalidatePath("/dashboard");
   revalidatePath("/");
+  await setToastCookie("สร้างสัญญาเช่าใหม่สำเร็จ", "success");
   redirect(`/contracts/${createdContractId}`);
 }
 
@@ -151,7 +154,8 @@ export async function endContract(
 
   const movedOutDateStr = formData.get("movedOutDate")?.toString().trim() || "";
   const damageAmount = parseFloat(formData.get("damageAmount")?.toString() || "0");
-  const exitNote = formData.get("exitNote")?.toString().trim() || null;
+  const rawExitNote = formData.get("exitNote")?.toString().trim();
+  const exitNote = rawExitNote ? stripEmoji(rawExitNote) : null;
 
   if (!movedOutDateStr) {
     return { error: "กรุณาระบุวันที่ย้ายออกจริง" };
@@ -266,6 +270,7 @@ export async function endContract(
   revalidatePath("/rooms");
   revalidatePath("/dashboard");
   revalidatePath("/");
+  await setToastCookie("สิ้นสุดสัญญาและคำนวณเงินมัดจำเรียบร้อย", "info");
   redirect(`/contracts/${contractId}`);
 }
 
@@ -337,7 +342,8 @@ export async function renewContract(
   const startElectricMeter = parseInt(formData.get("startElectricMeter")?.toString() || "0", 10);
   const keyCount = parseInt(formData.get("keyCount")?.toString() || "1", 10);
   const keyCardCount = parseInt(formData.get("keyCardCount")?.toString() || "0", 10);
-  const renewNote = formData.get("renewNote")?.toString().trim() || "";
+  const rawRenewNote = formData.get("renewNote")?.toString().trim() || "";
+  const renewNote = stripEmoji(rawRenewNote);
 
   if (!startDateStr || !endDateStr) {
     return { error: "กรุณาระบุวันเริ่มต้นและสิ้นสุดสัญญาใหม่" };
@@ -419,5 +425,6 @@ export async function renewContract(
   revalidatePath("/rooms");
   revalidatePath("/dashboard");
   revalidatePath("/");
+  await setToastCookie("ต่ออายุสัญญาเช่าใหม่สำเร็จ", "success");
   redirect(`/contracts/${newContractId}`);
 }

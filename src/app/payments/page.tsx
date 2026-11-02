@@ -36,11 +36,11 @@ async function PaymentsData({ invoiceIdParam }: { invoiceIdParam?: string }) {
     tenantPhone: p.invoice.contract.tenant.phone,
     billingMonthThai: getThaiMonthName(p.invoice.billingMonth),
     amount: Number(p.amount),
-    method: p.method,
+    method: p.method as "cash" | "bank_transfer" | "deposit_offset" | "other",
     paidAt: p.paidAt.toISOString(),
     slipImageUrl: p.slipImageUrl,
     referenceNote: p.referenceNote,
-    status: p.status,
+    status: p.status as "valid" | "voided",
     voidReason: p.voidReason,
     voidedAt: p.voidedAt ? p.voidedAt.toISOString() : null,
   }));
@@ -111,8 +111,8 @@ export default async function PaymentsPage({
         fallback={
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-zinc-400 text-sm">กำลังโหลดข้อมูลประวัติการชำระเงินและใบเสร็จ...</p>
+              <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-slate-400 text-sm">กำลังโหลดข้อมูลประวัติการชำระเงินและใบเสร็จ...</p>
             </div>
           </div>
         }

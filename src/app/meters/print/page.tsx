@@ -84,7 +84,7 @@ export default async function PrintMeterWalksheetPage({
   });
 
   return (
-    <div className="min-h-screen bg-[#07050f] text-zinc-100 print:bg-white print:text-black print:min-h-0 print:p-0">
+    <div className="min-h-screen bg-[#080c15] text-slate-100 print:bg-white print:text-black print:min-h-0 print:p-0">
       <PrintWalksheetClient monthStr={monthStr} thaiMonthName={thaiMonthName} />
 
       {/* A4 Sheet */}

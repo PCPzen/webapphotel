@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { UserRole } from "@prisma/client";
 import { requireAdmin } from "@/lib/auth-guard";
+import { stripEmoji } from "@/lib/emoji";
+import { setToastCookie } from "@/lib/toast";
 
 export type UserActionState = {
   success?: boolean;
@@ -21,9 +23,10 @@ export async function createStaffProfile(
   const auth = await requireAdmin();
   if (!auth.authorized) return { error: auth.error };
 
-  const fullName = formData.get("fullName")?.toString().trim() || "";
-  const email = formData.get("email")?.toString().trim().toLowerCase() || "";
-  const phone = formData.get("phone")?.toString().trim() || null;
+  const fullName = stripEmoji(formData.get("fullName")?.toString().trim() || "");
+  const email = stripEmoji(formData.get("email")?.toString().trim().toLowerCase() || "");
+  const rawPhone = formData.get("phone")?.toString().trim();
+  const phone = rawPhone ? stripEmoji(rawPhone) : null;
   const roleStr = formData.get("role")?.toString() || "staff";
 
   if (!fullName) return { error: "กรุณาระบุชื่อ-นามสกุล" };
@@ -69,8 +72,9 @@ export async function updateUserProfile(
 
   if (!userId) return { error: "ไม่พบรหัสผู้ใช้" };
 
-  const fullName = formData.get("fullName")?.toString().trim() || "";
-  const phone = formData.get("phone")?.toString().trim() || null;
+  const fullName = stripEmoji(formData.get("fullName")?.toString().trim() || "");
+  const rawPhone = formData.get("phone")?.toString().trim();
+  const phone = rawPhone ? stripEmoji(rawPhone) : null;
   const roleStr = formData.get("role")?.toString() || "staff";
   const isActive = formData.get("isActive")?.toString() === "true";
 
@@ -101,6 +105,7 @@ export async function updateUserProfile(
     });
 
     revalidatePath("/admin/users");
+    await setToastCookie("อัปเดตข้อมูลผู้ใช้งานสำเร็จ", "success");
     return { success: true, message: "อัปเดตข้อมูลผู้ใช้งานสำเร็จ" };
   } catch (err: any) {
     return { error: err.message || "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้" };
@@ -151,13 +156,13 @@ export async function updateSystemSettings(
   const auth = await requireAdmin();
   if (!auth.authorized) return { error: auth.error };
 
-  const dormName = formData.get("dormName")?.toString().trim() || "หอพักสุขสบาย";
-  const dormAddress = formData.get("dormAddress")?.toString().trim() || "";
-  const dormPhone = formData.get("dormPhone")?.toString().trim() || "";
-  const bankName = formData.get("bankName")?.toString().trim() || "";
-  const bankAccountNo = formData.get("bankAccountNo")?.toString().trim() || "";
-  const bankAccountName = formData.get("bankAccountName")?.toString().trim() || "";
-  const promptpayId = formData.get("promptpayId")?.toString().trim() || "";
+  const dormName = stripEmoji(formData.get("dormName")?.toString().trim() || "หอพักสุขสบาย");
+  const dormAddress = stripEmoji(formData.get("dormAddress")?.toString().trim() || "");
+  const dormPhone = stripEmoji(formData.get("dormPhone")?.toString().trim() || "");
+  const bankName = stripEmoji(formData.get("bankName")?.toString().trim() || "");
+  const bankAccountNo = stripEmoji(formData.get("bankAccountNo")?.toString().trim() || "");
+  const bankAccountName = stripEmoji(formData.get("bankAccountName")?.toString().trim() || "");
+  const promptpayId = stripEmoji(formData.get("promptpayId")?.toString().trim() || "");
 
   const defaultWaterRate = parseFloat(formData.get("defaultWaterRate")?.toString() || "18");
   const defaultElectricRate = parseFloat(formData.get("defaultElectricRate")?.toString() || "8");

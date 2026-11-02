@@ -201,6 +201,11 @@ model Invoice {
   totalAmount    Decimal        @map("total_amount") @db.Decimal(10, 2)
   dueDate        DateTime       @map("due_date") @db.Date
   status         InvoiceStatus  @default(unpaid)
+  slipUrl            String?        @map("slip_url") @db.Text
+  slipUploadedAt     DateTime?      @map("slip_uploaded_at") @db.Timestamptz()
+  slipNote           String?        @map("slip_note") @db.VarChar(200)
+  slipStatus         String?        @default("not_submitted") @map("slip_status") @db.VarChar(20)
+  slipRejectedReason String?        @map("slip_rejected_reason") @db.Text
   issuedAt       DateTime       @default(now()) @map("issued_at") @db.Timestamptz()
   createdBy      String?        @map("created_by") @db.Uuid
 

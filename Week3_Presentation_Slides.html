@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>เอกสารนำเสนอสัปดาห์ที่ 3 - ระบบบริหารจัดการหอพัก (Dormitory Management System)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    body {
+      font-family: 'Sarabun', sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+      line-height: 1.45;
+    }
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Prompt', sans-serif;
+    }
+    .slide {
+      width: 297mm;
+      height: 210mm;
+      background: #ffffff;
+      position: relative;
+      page-break-after: always;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 14mm 18mm 12mm 18mm;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .slide:last-child {
+      page-break-after: auto;
+    }
+    /* Slide Cover */
+    .slide-cover {
+      background: linear-gradient(135deg, #0b1120 0%, #0f172a 55%, #1e3a8a 100%);
+      color: #ffffff;
+      justify-content: center;
+      padding: 22mm 24mm;
+    }
+    .cover-badge {
+      display: inline-block;
+      background: rgba(37, 99, 235, 0.25);
+      border: 1px solid rgba(96, 165, 250, 0.45);
+      color: #93c5fd;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-family: 'Prompt', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      letter-spacing: 0.5px;
+    }
+    .cover-title {
+      font-size: 38px;
+      font-weight: 800;
+      line-height: 1.2;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+    .cover-subtitle {
+      font-size: 18px;
+      color: #cbd5e1;
+      font-weight: 400;
+      margin-bottom: 28px;
+      max-width: 820px;
+    }
+    .cover-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 24px;
+      margin-top: 10px;
+    }
+    .cover-box {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 14px;
+      padding: 18px 20px;
+    }
+    .cover-box h3 {
+      font-size: 14px;
+      color: #60a5fa;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+    }
+    /* Header & Footer inside standard slides */
+    .slide-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
+    }
+    .slide-header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .step-pill {
+      background: #2563eb;
+      color: #ffffff;
+      font-family: 'Prompt', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 8px;
+    }
+    .slide-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .slide-subtitle {
+      font-size: 12.5px;
+      color: #64748b;
+      font-weight: 500;
+    }
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 12px;
+    }
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 8px;
+      font-size: 11px;
+      color: #64748b;
+      font-family: 'Prompt', sans-serif;
+    }
+    /* Layout helpers */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .card-white {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    .card-blue {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .card-emerald {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .card-amber {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .card-rose {
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .card-dark {
+      background: #0f172a;
+      color: #f8fafc;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .card-title {
+      font-family: 'Prompt', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-blue .card-title { color: #1d4ed8; }
+    .card-emerald .card-title { color: #047857; }
+    .card-amber .card-title { color: #b45309; }
+    .card-rose .card-title { color: #be123c; }
+    .card-dark .card-title { color: #60a5fa; }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      background: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th {
+      background: #0f172a;
+      color: #ffffff;
+      font-family: 'Prompt', sans-serif;
+      font-weight: 600;
+      text-align: left;
+      padding: 7px 10px;
+      font-size: 11.5px;
+    }
+    td {
+      padding: 6.5px 10px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #1e293b;
+      vertical-align: top;
+    }
+    tr:nth-child(even) td {
+      background: #f8fafc;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-family: 'Prompt', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .badge-must { background: #dbeafe; color: #1d4ed8; border: 1px solid #93c5fd; }
+    .badge-should { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+    .badge-pass { background: #d1fae5; color: #047857; border: 1px solid #6ee7b7; }
+    .badge-role { background: #e2e8f0; color: #0f172a; }
+
+    ul.clean-list {
+      list-style: none;
+      padding-left: 0;
+    }
+    ul.clean-list li {
+      position: relative;
+      padding-left: 14px;
+      margin-bottom: 5px;
+      font-size: 12.5px;
+      color: #334155;
+    }
+    ul.clean-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #2563eb;
+      font-weight: bold;
+    }
+
+    /* Visual Flowchart Nodes */
+    .flow-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: 6px;
+      margin-bottom: 6px;
+    }
+    .flow-node {
+      flex: 1;
+      background: #ffffff;
+      border: 1.5px solid #94a3b8;
+      border-radius: 10px;
+      padding: 8px 10px;
+      text-align: center;
+      font-size: 11.5px;
+    }
+    .flow-node.start {
+      background: #0f172a;
+      color: #ffffff;
+      border-color: #0f172a;
+      border-radius: 999px;
+      flex: 0.7;
+    }
+    .flow-node.decision {
+      background: #fffbeb;
+      border-color: #f59e0b;
+      color: #92400e;
+      font-weight: 600;
+    }
+    .flow-node.db {
+      background: #eff6ff;
+      border-color: #2563eb;
+      color: #1e40af;
+      font-weight: 600;
+    }
+    .flow-node.success {
+      background: #ecfdf5;
+      border-color: #10b981;
+      color: #047857;
+      font-weight: 700;
+    }
+    .flow-arrow {
+      font-weight: bold;
+      color: #64748b;
+      font-size: 14px;
+    }
+    .db-tag {
+      display: inline-block;
+      background: #1e293b;
+      color: #93c5fd;
+      font-family: monospace;
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 4px;
+      margin-top: 3px;
+    }
+    .kpi-num {
+      font-family: 'Prompt', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      color: #2563eb;
+      line-height: 1.1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =====================================================================
+       SLIDE 1: COVER & PROJECT OVERVIEW
+       ===================================================================== -->
+  <section class="slide slide-cover">
+    <div>
+      <div class="cover-badge">รายวิชา 31903-2011 การพัฒนาระบบจัดการฐานข้อมูล • ชิ้นงานสัปดาห์ที่ 3 (Scope Locked & Architecture)</div>
+      <h1 class="cover-title">ระบบบริหารจัดการหอพักแบบบูรณาการ<br/><span style="color:#60a5fa;">(Dormitory Management System : หอพักสุขสบาย เพลส)</span></h1>
+      <p class="cover-subtitle">
+        เอกสารข้อเสนอโครงการ ผังระบบงาน สถาปัตยกรรมซอฟต์แวร์ และการทวนสอบความต้องการ (อ้างอิงจาก Source Code ต้นแบบที่ใช้งานได้จริง เชื่อมต่อฐานข้อมูล PostgreSQL บน Supabase Singapore)
+      </p>
+
+      <div class="cover-grid">
+        <div class="cover-box">
+          <h3>สรุปข้อมูลโครงการ (Project Baseline)</h3>
+          <table style="background:transparent; color:#f8fafc; font-size:13px;">
+            <tr style="background:transparent;">
+              <td style="color:#94a3b8; border-color:rgba(255,255,255,0.1); width:140px;">ขนาดระบบเป้าหมาย</td>
+              <td style="color:#ffffff; border-color:rgba(255,255,255,0.1);">หอพัก 20–40 ห้อง (1 อาคาร) • สกุลเงินบาท (THB) • ภาษาไทย</td>
+            </tr>
+            <tr style="background:transparent;">
+              <td style="color:#94a3b8; border-color:rgba(255,255,255,0.1);">สถาปัตยกรรมหลัก</td>
+              <td style="color:#ffffff; border-color:rgba(255,255,255,0.1);">Next.js 16.4.3 + React 19.3 + TypeScript + Tailwind CSS v4</td>
+            </tr>
+            <tr style="background:transparent;">
+              <td style="color:#94a3b8; border-color:rgba(255,255,255,0.1);">ระบบฐานข้อมูล</td>
+              <td style="color:#ffffff; border-color:rgba(255,255,255,0.1);">PostgreSQL (Supabase AWS ap-southeast-1) + Prisma ORM 6.19.3</td>
+            </tr>
+            <tr style="background:transparent;">
+              <td style="color:#94a3b8; border-color:none;">ขอบเขตฐานข้อมูลจริง</td>
+              <td style="color:#60a5fa; border-color:none; font-weight:700;">9 ตารางหลัก • 29 ความต้องการฟังก์ชัน • 36 เส้นทางเว็บไซต์ (Routes)</td>
+            </tr>
+          </table>
+        </div>
+
+        <div class="cover-box">
+          <h3>คณะผู้จัดทำ (ทีมนักศึกษา 4 คน)</h3>
+          <table style="background:transparent; color:#f8fafc; font-size:13px;">
+            <tr>
+              <td style="color:#ffffff; border-color:rgba(255,255,255,0.1); font-weight:600;">1. นายวชิรวิทย์ นวลคำ</td>
+              <td style="color:#93c5fd; border-color:rgba(255,255,255,0.1);">Project Lead / Backend</td>
+            </tr>
+            <tr>
+              <td style="color:#ffffff; border-color:rgba(255,255,255,0.1); font-weight:600;">2. นายพชรรักษ์ ติสระ</td>
+              <td style="color:#93c5fd; border-color:rgba(255,255,255,0.1);">Database / Business Logic</td>
+            </tr>
+            <tr>
+              <td style="color:#ffffff; border-color:rgba(255,255,255,0.1); font-weight:600;">3. นายณัฐดนัย วงศ์ใจมา</td>
+              <td style="color:#93c5fd; border-color:rgba(255,255,255,0.1);">Frontend / UI & UX</td>
+            </tr>
+            <tr>
+              <td style="color:#ffffff; border-color:none; font-weight:600;">4. นายสัณห์พิชญ์ มาละเสน</td>
+              <td style="color:#93c5fd; border-color:none;">QA / Testing & Documentation</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       SLIDE 2: PAIN POINTS (AS-IS vs TO-BE) & MEASURABLE OBJECTIVES
+       ===================================================================== -->
+  <section class="slide">
+    <div>
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="step-pill">ส่วนที่ 1</span>
+          <div>
+            <div class="slide-title">ปัญหาของระบบเดิม (As-Is) สู่ระบบใหม่ (To-Be) และวัตถุประสงค์</div>
+            <div class="slide-subtitle">งานที่ 1: เอกสารข้อเสนอโครงการ (Project Proposal) — เปลี่ยนการจดมือและไฟล์กระจัดกระจายเป็นฐานข้อมูลกลาง</div>
+          </div>
+        </div>
+        <div class="slide-subtitle">หน้า 2 / 8</div>
+      </div>
+
+      <div class="slide-body">
+        <!-- 4 KPI Cards -->
+        <div class="grid-4">
+          <div class="card-blue">
+            <div class="card-title">1. ลดเวลาออกบิลรายเดือน</div>
+            <div class="kpi-num">&le; 10 วินาที</div>
+            <p style="font-size:11.5px; color:#334155; margin-top:4px;">ออกใบแจ้งหนี้พร้อมกัน 40 ห้อง (Batch Generation) จากเดิมใช้เวลาคำนวณมือ 2–3 ชั่วโมง</p>
+          </div>
+          <div class="card-emerald">
+            <div class="card-title">2. ความแม่นยำการคำนวณเงิน</div>
+            <div class="kpi-num">ตรง 100%</div>
+            <p style="font-size:11.5px; color:#334155; margin-top:4px;">ใช้ชนิดข้อมูล <code>Decimal(10,2)</code> ปัดเศษแบบ Half-up ตามกฎ BR-05, BR-09, BR-10 (NFR-08)</p>
+          </div>
+          <div class="card-amber">
+            <div class="card-title">3. ความเร็วตอบสนองหน้าเว็บ</div>
+            <div class="kpi-num">&le; 3 วินาที</div>
+            <p style="font-size:11.5px; color:#334155; margin-top:4px;">แสดงผลรายการและรายงานที่ P95 เมื่อมีข้อมูลห้องพัก 40 ห้อง และบิลสะสม 1,500 ใบ (NFR-01)</p>
+          </div>
+          <div class="card-white">
+            <div class="card-title">4. ความง่ายในการใช้งานจริง</div>
+            <div class="kpi-num">&le; 5 นาที</div>
+            <p style="font-size:11.5px; color:#334155; margin-top:4px;">ผู้ใช้ใหม่เรียนรู้ไม่เกิน 10 นาที สามารถจดมิเตอร์และออกบิล 1 ห้องสำเร็จภายใน 5 นาที (NFR-07)</p>
+          </div>
+        </div>
+
+        <!-- Comparison Table As-Is vs To-Be -->
+        <div class="grid-2" style="margin-top:4px;">
+          <div>
+            <h3 style="font-size:14px; margin-bottom:6px; color:#0f172a;">ตารางเปรียบเทียบกระบวนการทำงาน (As-Is vs To-Be)</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:24%;">มิติการทำงาน</th>
+                  <th style="width:38%;">ระบบเดิม (As-Is : สมุด/Excel)</th>
+                  <th style="width:38%;">ระบบใหม่ (To-Be : Web + PostgreSQL)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>1. ข้อมูลผู้เช่า/สัญญา</strong></td>
+                  <td>เก็บกระดาษ/ไฟล์แยก ค้นหายาก เสี่ยงทำสัญญาซ้อนห้องเดียวกัน</td>
+                  <td>เก็บในตาราง <code>tenants</code>, <code>contracts</code> บังคับ 1 ห้อง 1 สัญญา active (BR-02)</td>
+                </tr>
+                <tr>
+                  <td><strong>2. จดมิเตอร์น้ำ-ไฟ</strong></td>
+                  <td>จดใส่กระดาษแล้วพิมพ์ซ้ำลง Excel เสี่ยงกรอกเลขย้อนหลังผิด</td>
+                  <td>กรอกผ่านตาราง <code>meter_readings</code> ดึงเลขเดือนก่อนอัตโนมัติ ห้ามน้อยกว่าเดิม (BR-04)</td>
+                </tr>
+                <tr>
+                  <td><strong>3. การออกบิล/รับชำระ</strong></td>
+                  <td>คำนวณผิดพลาดง่าย สลิปโอนเงินปะปนในแชท ตามหนี้ค้างยาก</td>
+                  <td>ผู้เช่าแนบสลิปผ่านเว็บ แอดมินกดอนุมัติ ออกใบเสร็จ <code>RCP</code> อัตโนมัติ (BR-07, BR-08)</td>
+                </tr>
+                <tr>
+                  <td><strong>4. แจ้งซ่อมบำรุง</strong></td>
+                  <td>แจ้งทางโทรศัพท์หรือพูดปากเปล่า ลืมงาน ไม่มีประวัติรายห้อง</td>
+                  <td>บันทึกใน <code>repair_requests</code> ติดตามสถานะ (Open &rarr; In Progress &rarr; Done)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Target Users (3 Actors) -->
+          <div>
+            <h3 style="font-size:14px; margin-bottom:6px; color:#0f172a;">กลุ่มผู้ใช้งานระบบ 3 บทบาท (Actors & RBAC)</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:25%;">บทบาท (Role)</th>
+                  <th style="width:48%;">หน้าที่และความต้องการหลักในระบบ</th>
+                  <th style="width:27%;">การควบคุมสิทธิ์</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>1. เจ้าของหอพัก (Admin)</strong></td>
+                  <td>จัดการผู้ใช้/บทบาท, ตั้งค่าเรทค่าน้ำ-ไฟกลาง, ยกเลิกบิล/ใบเสร็จ (Void), แก้มิเตอร์ตั้งต้น, ดูรายงานการเงิน</td>
+                  <td>เข้าถึงได้ทุกเมนู รวมถึง <code>/admin/users</code></td>
+                </tr>
+                <tr>
+                  <td><strong>2. เจ้าหน้าที่ (Staff)</strong></td>
+                  <td>บันทึกห้องพัก ผู้เช่า สัญญาเช่า จดมิเตอร์ ออกบิล ตรวจสลิปและรับชำระเงิน อัปเดตงานซ่อม</td>
+                  <td>เข้าถึงโมดูลปฏิบัติการ (จำกัดสิทธิ์ลบ/Void)</td>
+                </tr>
+                <tr>
+                  <td><strong>3. ผู้เช่า (Tenant)</strong></td>
+                  <td>ดูบิลรายเดือนของตนเอง, <strong>แนบสลิปโอนเงินผ่านมือถือ/PC</strong>, แจ้งซ่อมและติดตามสถานะงานซ่อม</td>
+                  <td>เฉพาะพอร์ทัลผู้เช่า (<code>/me/*</code>) ล็อกอินด้วยห้อง+เบอร์+เลขบัตร 4 ตัวท้าย</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>โครงการระบบจัดการหอพัก (หอพักสุขสบาย เพลส) • รายวิชา 31903-2011</span>
+      <span>งานที่ 1: บทนำ วัตถุประสงค์ และกลุ่มเป้าหมาย</span>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       SLIDE 3: SCOPE (IN/OUT) & 10 FUNCTIONAL MODULES (29 REQUIREMENTS)
+       ===================================================================== -->
+  <section class="slide">
+    <div>
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="step-pill">ส่วนที่ 2</span>
+          <div>
+            <div class="slide-title">ขอบเขตโครงการ (In/Out of Scope) และโมดูลฟังก์ชัน A–J (29 ข้อ)</div>
+            <div class="slide-subtitle">เชื่อมโยงความต้องการเชิงฟังก์ชัน (Must 22 ข้อ / Should 7 ข้อ) เข้ากับตารางฐานข้อมูลจริง 9 ตาราง</div>
+          </div>
+        </div>
+        <div class="slide-subtitle">หน้า 3 / 8</div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Table of 10 Modules A-J -->
+          <div>
+            <h3 style="font-size:13.5px; margin-bottom:6px;">สรุป 10 โมดูลในขอบเขต (In-Scope) เชื่อมตารางฐานข้อมูลและหน้าจอ</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>โมดูล</th>
+                  <th>รหัส SRD (Must / Should)</th>
+                  <th>ตารางฐานข้อมูลที่ใช้</th>
+                  <th>หน้าจอหลัก</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>A. ผู้ใช้และสิทธิ์</strong></td>
+                  <td>2.1, 2.2 <span class="badge badge-must">Must</span> + ตั้งค่ากลาง</td>
+                  <td><code>profiles</code>, <code>system_settings</code></td>
+                  <td>P01, P25</td>
+                </tr>
+                <tr>
+                  <td><strong>B. ห้องพัก</strong></td>
+                  <td>2.3, 2.4 <span class="badge badge-must">Must</span> (ผังห้องเรียลไทม์)</td>
+                  <td><code>rooms</code>, <code>contracts</code></td>
+                  <td>P02, P03, P04, P05</td>
+                </tr>
+                <tr>
+                  <td><strong>C. ผู้เช่า</strong></td>
+                  <td>2.5–2.9 <span class="badge badge-must">Must</span> (ตรวจบัตร 13 หลัก)</td>
+                  <td><code>tenants</code></td>
+                  <td>P06, P07, P08</td>
+                </tr>
+                <tr>
+                  <td><strong>D. สัญญาเช่า</strong></td>
+                  <td>2.10, 2.12 <span class="badge badge-must">Must</span> / 2.11, 2.13 <span class="badge badge-should">Should</span></td>
+                  <td><code>contracts</code>, <code>rooms</code></td>
+                  <td>P09, P10, P11</td>
+                </tr>
+                <tr>
+                  <td><strong>E. มิเตอร์น้ำ-ไฟ</strong></td>
+                  <td>2.14, 2.15 <span class="badge badge-must">Must</span> (ตรวจเลขไม่ลดลง)</td>
+                  <td><code>meter_readings</code></td>
+                  <td>P12</td>
+                </tr>
+                <tr>
+                  <td><strong>F. ใบแจ้งหนี้</strong></td>
+                  <td>2.16–2.18 <span class="badge badge-must">Must</span> (ออกบิล/พิมพ์ PDF)</td>
+                  <td><code>invoices</code>, <code>meter_readings</code></td>
+                  <td>P13, P14, P15</td>
+                </tr>
+                <tr>
+                  <td><strong>G. การชำระเงิน</strong></td>
+                  <td>2.19, 2.20 <span class="badge badge-must">Must</span> (+ตรวจสลิปโอนเงิน)</td>
+                  <td><code>payments</code>, <code>invoices</code></td>
+                  <td>P15, P16, P17</td>
+                </tr>
+                <tr>
+                  <td><strong>H. งานซ่อมบำรุง</strong></td>
+                  <td>2.21, 2.22 <span class="badge badge-must">Must</span> / 2.23 <span class="badge badge-should">Should</span></td>
+                  <td><code>repair_requests</code></td>
+                  <td>P18, P19, P20</td>
+                </tr>
+                <tr>
+                  <td><strong>I. พอร์ทัลผู้เช่า</strong></td>
+                  <td>2.24, 2.25 <span class="badge badge-should">Should</span> (+แนบสลิปโอนเงิน)</td>
+                  <td><code>invoices</code>, <code>repair_requests</code></td>
+                  <td>P26, P27, P28, P29</td>
+                </tr>
+                <tr>
+                  <td><strong>J. รายงานสรุป</strong></td>
+                  <td>2.26, 2.28 <span class="badge badge-must">Must</span> / 2.27, 2.29 <span class="badge badge-should">Should</span></td>
+                  <td>ทุกตารางธุรกรรม</td>
+                  <td>P21, P22, P23, P24</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Out of Scope & Constraints -->
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <div class="card-rose">
+              <div class="card-title">สิ่งที่อยู่นอกขอบเขต (Out-of-Scope) พร้อมเหตุผล</div>
+              <ul class="clean-list">
+                <li><strong>ตัดชำระเงินออนไลน์/เช็กยอดธนาคารอัตโนมัติ (Payment Gateway API):</strong> มีค่าธรรมเนียมและต้องจดทะเบียนนิติบุคคล จึงใช้ <em>"ระบบผู้เช่าแนบสลิปให้แอดมินกดอนุมัติ"</em> แทน</li>
+                <li><strong>แจ้งเตือนผ่าน LINE OA / Email อัตโนมัติ:</strong> ลดการพึ่งพาโควตา API ภายนอก ให้ดูสถานะผ่านเว็บพอร์ทัลโดยตรง</li>
+                <li><strong>อัตราค่าน้ำ-ไฟแบบขั้นบันได & คิดค่าเช่ารายวัน (Pro-rate):</strong> หอพักขนาด 20–40 ห้องใช้อัตราคงที่ต่อหน่วยและคิดเต็มเดือน (OI-07, OI-08)</li>
+                <li><strong>ระบบบัญชีแยกประเภท/ยื่นภาษี & แอปมือถือ Native & หลายอาคาร:</strong> เกินขอบเขตเวลา 15 สัปดาห์ ใช้ Responsive Web (ตั้งแต่ 360px) แทน</li>
+              </ul>
+            </div>
+
+            <div class="card-blue">
+              <div class="card-title">จุดเด่นที่พัฒนาเพิ่มใน Source Code จริง (Value-Added Features)</div>
+              <ul class="clean-list">
+                <li><strong>ระบบแนบสลิปโอนเงิน (Tenant Slip Upload):</strong> ผู้เช่าอัปโหลดรูปสลิปจากมือถือ/PC บันทึกในฟิลด์ <code>slip_url</code>, <code>slip_status</code> ให้แอดมินตรวจสอบและกดอนุมัติออกใบเสร็จได้ในคลิกเดียว</li>
+                <li><strong>ตารางตั้งค่ากลาง (<code>system_settings</code>) & โปรไฟล์ (<code>profiles</code>):</strong> ขยายจาก 7 ตารางเป็น 9 ตาราง เพื่อรองรับการตั้งค่าเรทค่าน้ำ-ไฟและเลขบัญชีพร้อมเพย์จากหน้าเว็บโดยไม่ต้องแก้โค้ด (แก้ประเด็น OI-01)</li>
+                <li><strong>UI/UX มาตรฐานสูง:</strong> รองรับสลับธีม สว่าง/มืด (Light/Dark Swap), แถบเมนูย่อ-ขยายได้, ระบบแจ้งเตือน Toast Popup, และระบบป้องกันการกรอก Emoji 100%</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>โครงการระบบจัดการหอพัก (หอพักสุขสบาย เพลส) • รายวิชา 31903-2011</span>
+      <span>งานที่ 1: ขอบเขตโครงการ (Scope Locked) และความต้องการเชิงฟังก์ชัน</span>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       SLIDE 4: BUSINESS RULES (BR-01 TO BR-14) & NFR
+       ===================================================================== -->
+  <section class="slide">
+    <div>
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="step-pill">ส่วนที่ 3</span>
+          <div>
+            <div class="slide-title">กฎธุรกิจหลัก (BR-01 ถึง BR-14) และข้อกำหนดที่ไม่ใช่ฟังก์ชัน (NFR)</div>
+            <div class="slide-subtitle">บังคับใช้จริงทั้งระดับ Frontend Validation, Server Action และ Database Constraints</div>
+          </div>
+        </div>
+        <div class="slide-subtitle">หน้า 4 / 8</div>
+      </div>
+
+      <div class="slide-body">
+        <div class="grid-2">
+          <!-- Left: BR-01 to BR-14 -->
+          <div>
+            <h3 style="font-size:13.5px; margin-bottom:6px;">สรุปกฎธุรกิจหลัก 14 ข้อ (Business Rules)</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:16%;">รหัส</th>
+                  <th style="width:84%;">รายละเอียดการบังคับใช้ในระบบและฐานข้อมูล</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>BR-01, 13, 14</strong></td>
+                  <td><strong>ข้อมูลผู้เช่า & PDPA:</strong> บัตร ปชช. 13 หลักตรวจสูตร Mod 11 Checksum · หน้าตารางปิดบังเป็น <code>•••••••••0121</code> (BR-13) · เบอร์โทร 10 หลักขึ้นต้นด้วย 0 ตัดขีดอัตโนมัติ (BR-14)</td>
+                </tr>
+                <tr>
+                  <td><strong>BR-02, 03</strong></td>
+                  <td><strong>สัญญาเช่า & สถานะห้อง:</strong> 1 ห้องมีสัญญา <code>active</code> ได้ไม่เกิน 1 ฉบับ (Partial Unique Index) · เปิดสัญญา &rarr; ห้องเป็น <code>occupied</code> · สิ้นสุดสัญญา &rarr; ห้องเป็น <code>vacant</code> ใน Transaction เดียวกัน</td>
+                </tr>
+                <tr>
+                  <td><strong>BR-04</strong></td>
+                  <td><strong>เลขมิเตอร์น้ำ-ไฟ:</strong> จำนวนเต็มไม่ติดลบ <code>ค่าปัจจุบัน &ge; ค่าก่อนหน้า</code> · Unique <code>(room_id, reading_month)</code> · กรณีเปลี่ยนมิเตอร์ Admin แก้เลขตั้งต้นได้พร้อมหมายเหตุ</td>
+                </tr>
+                <tr>
+                  <td><strong>BR-05, 06</strong></td>
+                  <td><strong>สูตรคำนวณบิล:</strong> <code>ยอดรวม = ค่าเช่า + ปัด2ตำแหน่ง(หน่วยน้ำ×เรทน้ำ) + ปัด2ตำแหน่ง(หน่วยไฟ×เรทไฟ) + ค่าอื่น + ค่าปรับ</code> ชนิด <code>Decimal(10,2)</code> · Unique <code>(contract_id, billing_month)</code></td>
+                </tr>
+                <tr>
+                  <td><strong>BR-07, 08, 09</strong></td>
+                  <td><strong>สถานะบิล & การรับชำระ:</strong> คำนวณจากผลรวมยอดชำระที่ <code>valid</code> (0=<code>unpaid</code>, บางส่วน=<code>partial</code>, ครบ=<code>paid</code>) · ห้ามลบใบเสร็จ ใช้การ <code>voided</code> พร้อมเหตุผล · ค่าปรับคิดได้ครั้งเดียวเมื่อเลย <code>due_date</code></td>
+                </tr>
+                <tr>
+                  <td><strong>BR-10</strong></td>
+                  <td><strong>การคืนเงินมัดจำ:</strong> <code>A = max(0, D &minus; X)</code>, หักยอดค้าง <code>min(A, O)</code> ด้วยวิธีชำระ <code>deposit_offset</code>, เงินคืนผู้เช่า = <code>A &minus; หักยอดค้าง</code></td>
+                </tr>
+                <tr>
+                  <td><strong>BR-11, 12</strong></td>
+                  <td><strong>เลขเอกสาร & Audit Trail:</strong> บิล <code>INV-YYYYMM-ห้อง</code>, ใบเสร็จ <code>RCP-YYYYMM-XXXX</code> · ห้ามลบข้อมูลธุรกรรม (Soft Status: <code>ended</code>, <code>cancelled</code>, <code>voided</code>)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Right: NFRs -->
+          <div style="display:flex; flex-direction:column; gap:10px;">
+            <h3 style="font-size:13.5px; margin-bottom:0px;">ข้อกำหนดที่ไม่ใช่ฟังก์ชัน (NFR-01 ถึง NFR-10)</h3>
+            <div class="card-white">
+              <div class="card-title">ความปลอดภัยและข้อมูลส่วนบุคคล (NFR-03, NFR-04) <span class="badge badge-must">Must</span></div>
+              <ul class="clean-list">
+                <li>ตรวจสอบสิทธิ์และบทบาท (Session & Role) ที่ฝั่งเซิร์ฟเวอร์ทุก Action</li>
+                <li>คิวรีผ่าน Prisma ORM แบบ Parameterized ป้องกัน SQL Injection 100%</li>
+                <li>ปฏิบัติตาม พ.ร.บ. PDPA: ไม่เก็บไฟล์ภาพบัตรประชาชน ปิดบังเลขบัตรในหน้ารายการ และไม่ส่งเลขบัตรผ่าน URL หรือ Log</li>
+              </ul>
+            </div>
+
+            <div class="card-white">
+              <div class="card-title">ความจุ ประสิทธิภาพ และการสำรองข้อมูล (NFR-01, 02, 05, 06) <span class="badge badge-must">Must</span></div>
+              <ul class="clean-list">
+                <li><strong>ความจุ (NFR-02):</strong> ข้อมูลข้อความ 40 ห้อง นาน 3 ปี ใช้พื้นที่ฐานข้อมูลไม่เกิน 50 MB (อยู่ในโควตา 500 MB ของ Supabase Free)</li>
+                <li><strong>การสำรองข้อมูล (NFR-06):</strong> รันคำสั่ง <code>pg_dump</code> สัปดาห์ละ 1 ครั้ง และก่อนปิดรอบบิลรายเดือน เก็บไฟล์แยกนอก Git Repository</li>
+                <li><strong>ความพร้อมใช้งาน (NFR-05):</strong> ปลุกโปรเจกต์ Supabase ล่วงหน้าก่อนนำเสนอทุกครั้ง</li>
+              </ul>
+            </div>
+
+            <div class="card-emerald">
+              <div class="card-title">คุณภาพโค้ดและการแสดงผล (NFR-07, 08, 09, 10)</div>
+              <ul class="clean-list">
+                <li><strong>TypeScript Strict Mode:</strong> ผ่านการตรวจ <code>tsc --noEmit</code> และ <code>next build</code> 0 Error</li>
+                <li><strong>Responsive & Thai Date:</strong> รองรับหน้าจอมือถือ 360px ขึ้นไป แสดงวันที่รูปแบบ พ.ศ. ไทย และเก็บในฐานข้อมูลเป็น ISO Date มาตรฐาน</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>โครงการระบบจัดการหอพัก (หอพักสุขสบาย เพลส) • รายวิชา 31903-2011</span>
+      <span>งานที่ 1: กฎธุรกิจ (BR) และข้อกำหนดที่ไม่ใช่ฟังก์ชัน (NFR)</span>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       SLIDE 5: 3 CORE PROCESS FLOWCHARTS (TASK 2A)
+       ===================================================================== -->
+  <section class="slide">
+    <div>
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="step-pill">ส่วนที่ 4</span>
+          <div>
+            <div class="slide-title">ผังงานหลัก 3 กระบวนการ (Core Process Flowcharts)</div>
+            <div class="slide-subtitle">งานที่ 2 (ส่วน A): แสดงการไหลของข้อมูลจากหน้าเว็บ (Input) ผ่านการตรวจกฎธุรกิจ (BR) ลงสู่ฐานข้อมูล (Storage)</div>
+          </div>
+        </div>
+        <div class="slide-subtitle">หน้า 5 / 8</div>
+      </div>
+
+      <div class="slide-body" style="gap:10px;">
+        <!-- Flowchart 1 -->
+        <div class="card-white" style="padding:10px 14px;">
+          <div class="card-title" style="font-size:13px; margin-bottom:4px;">
+            <span>ผังงานที่ 1: การเพิ่มผู้เช่าและทำสัญญาเช่าห้องพัก (อ้างอิง BR-01, BR-02, BR-03)</span>
+            <span class="badge badge-must">ตาราง: tenants, contracts, rooms</span>
+          </div>
+          <div class="flow-container">
+            <div class="flow-node start">เริ่มต้น</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">กรอกข้อมูลผู้เช่า<br/>และเลขบัตร 13 หลัก</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node decision">ตรวจ Checksum (BR-01)<br/>และข้อมูลซ้ำ?</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node db">บันทึกผู้เช่าใหม่<br/><span class="db-tag">INSERT tenants</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node decision">ห้องว่างและไร้สัญญา<br/>active? (BR-02)</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node db">สร้างสัญญา + ปรับห้อง<br/><span class="db-tag">TX: contracts &amp; rooms</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node success">สำเร็จ (ห้อง=occupied)</div>
+          </div>
+          <div style="font-size:11px; color:#475569;">
+            <strong>คำอธิบาย:</strong> เจ้าหน้าที่กรอกข้อมูลผู้เช่า ระบบตรวจสูตรเลขบัตร 13 หลัก (BR-01) หากไม่ผ่านให้แจ้งแก้ไข เมื่อผ่านจึงบันทึกใน <code>tenants</code> จากนั้นเลือกห้องว่าง ระบบตรวจ Partial Unique Index (BR-02) และรัน Database Transaction บันทึก <code>contracts</code> พร้อมเปลี่ยนสถานะ <code>rooms</code> เป็น <code>occupied</code> (BR-03)
+          </div>
+        </div>
+
+        <!-- Flowchart 2 (Main Highlight) -->
+        <div class="card-blue" style="padding:10px 14px; border-width:2px;">
+          <div class="card-title" style="font-size:13px; margin-bottom:4px;">
+            <span>ผังงานที่ 2 [ภาพหลักสำหรับนำเสนอ]: รอบบิลรายเดือน จดมิเตอร์ ออกบิล แนบสลิป และรับชำระ (BR-04 ถึง BR-09)</span>
+            <span class="badge badge-must">ตาราง: meter_readings, invoices, payments</span>
+          </div>
+          <div class="flow-container">
+            <div class="flow-node start">เริ่มรอบบิล</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">จดเลขมิเตอร์น้ำ-ไฟ<br/>ประจำเดือน M</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node decision">เลขปัจจุบัน &ge; ก่อนหน้า?<br/>(BR-04)</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node db">บันทึกมิเตอร์ &amp; ออกบิล<br/><span class="db-tag">meter_readings / invoices</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">ผู้เช่าแนบสลิปโอนเงิน<br/>หรือจ่ายที่นิติบุคคล</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node decision">แอดมินตรวจสลิป<br/>ยอดเงิน &le; ยอดค้าง? (BR-08)</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node db">ออกใบเสร็จ &amp; อัปเดตบิล<br/><span class="db-tag">payments / invoices (BR-07)</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node success">เสร็จสิ้น (paid/partial)</div>
+          </div>
+          <div style="font-size:11px; color:#1e3a8a;">
+            <strong>เหตุผลที่เลือกเป็นภาพหลักในการนำเสนอ:</strong> เพราะแสดงหัวใจของระบบฐานข้อมูลหอพักครบวงจร ตั้งแต่การป้องกันจดมิเตอร์ผิด (BR-04) การคำนวณเงินด้วย Decimal (BR-05) การเชื่อมโยงผู้เช่าแนบสลิปผ่านเว็บ ไปจนถึงการออกใบเสร็จและอัปเดตสถานะบิลอัตโนมัติ (BR-07, BR-08)
+          </div>
+        </div>
+
+        <!-- Flowchart 3 -->
+        <div class="card-white" style="padding:10px 14px;">
+          <div class="card-title" style="font-size:13px; margin-bottom:4px;">
+            <span>ผังงานที่ 3: การแจ้งซ่อมบำรุงและติดตามสถานะงานซ่อม (อ้างอิง ความต้องการ 2.21–2.25)</span>
+            <span class="badge badge-should">ตาราง: repair_requests</span>
+          </div>
+          <div class="flow-container">
+            <div class="flow-node start">เริ่มต้น</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">ผู้เช่า/Staff กรอกเรื่องแจ้งซ่อม<br/>หมวดหมู่ และความเร่งด่วน</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node decision">ข้อมูลครบถ้วน<br/>และไม่มี Emoji?</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node db">สร้างใบแจ้งซ่อม (open)<br/><span class="db-tag">INSERT repair_requests</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node">มอบหมายช่างดำเนินการ<br/>(สถานะ in_progress)</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node decision">ซ่อมเสร็จสิ้น<br/>หรือยกเลิก?</div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node db">บันทึกค่าซ่อม/วิธีแก้ไข<br/><span class="db-tag">UPDATE repair_requests</span></div>
+            <div class="flow-arrow">&rarr;</div>
+            <div class="flow-node success">ปิดงานซ่อม (done)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>โครงการระบบจัดการหอพัก (หอพักสุขสบาย เพลส) • รายวิชา 31903-2011</span>
+      <span>งานที่ 2 (ส่วน A): ผังระบบงาน (Flowchart) และการเชื่อมโยงกฎธุรกิจ</span>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       SLIDE 6: SITE MAP (29 PAGES) & 9 DATABASE TABLES (TASK 2B)
+       ===================================================================== -->
+  <section class="slide">
+    <div>
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="step-pill">ส่วนที่ 5</span>
+          <div>
+            <div class="slide-title">แผนผังเว็บไซต์ (Site Map P01–P29) และความสัมพันธ์กับ 9 ตารางฐานข้อมูล</div>
+            <div class="slide-subtitle">งานที่ 2 (ส่วน B): ออกแบบตามกฎ 3-Click Rule แยกสิทธิ์ชัดเจน พร้อมตรวจความครบถ้วน 100%</div>
+          </div>
+        </div>
+        <div class="slide-subtitle">หน้า 6 / 8</div>
+      </div>
+
+      <div class="slide-body">
+        <!-- Visual Site Map Tree -->
+        <div class="grid-3">
+          <div class="card-blue">
+            <div class="card-title">1. กลุ่มบริหารห้องพัก ผู้เช่า และสัญญา (Admin/Staff)</div>
+            <ul class="clean-list" style="font-size:11.5px;">
+              <li><strong>P01 เข้าสู่ระบบ</strong> (<code>/login</code>) &rarr; คัดกรองบทบาท (2.1)</li>
+              <li><strong>P02 แดชบอร์ด &amp; ผังห้อง</strong> (<code>/dashboard</code>) &rarr; ภาพรวม (2.4, 2.11)</li>
+              <li><strong>P03–P05 ห้องพัก</strong> (<code>/rooms</code>, <code>/new</code>, <code>/[id]</code>) &rarr; ตาราง <code>rooms</code> (2.3, 2.23)</li>
+              <li><strong>P06–P08 ผู้เช่า</strong> (<code>/tenants</code>, <code>/new</code>, <code>/[id]</code>) &rarr; ตาราง <code>tenants</code> (2.5–2.9)</li>
+              <li><strong>P09–P11 สัญญาเช่า</strong> (<code>/contracts</code>, <code>/new</code>, <code>/[id]</code>) &rarr; ตาราง <code>contracts</code> (2.10–2.13)</li>
+            </ul>
+          </div>
+
+          <div class="card-emerald">
+            <div class="card-title">2. กลุ่มการเงิน งานซ่อม และรายงาน (Admin/Staff)</div>
+            <ul class="clean-list" style="font-size:11.5px;">
+              <li><strong>P12 จดมิเตอร์รายเดือน</strong> (<code>/meters</code>) &rarr; <code>meter_readings</code> (2.14, 2.15)</li>
+              <li><strong>P13–P15 ใบแจ้งหนี้</strong> (<code>/invoices</code>, <code>/generate</code>, <code>/[id]</code>) &rarr; <code>invoices</code> (2.16–2.18)</li>
+              <li><strong>P16–P17 การชำระเงิน &amp; ใบเสร็จ</strong> (<code>/payments</code>, <code>/receipt</code>) &rarr; <code>payments</code> (2.19, 2.20)</li>
+              <li><strong>P18–P20 งานแจ้งซ่อม</strong> (<code>/repairs</code>, <code>/new</code>, <code>/[id]</code>) &rarr; <code>repair_requests</code> (2.21–2.23)</li>
+              <li><strong>P21–P24 รายงาน 4 ฉบับ</strong> (<code>/reports/*</code>) &amp; <strong>P25 ผู้ใช้</strong> (<code>/admin/users</code>) (2.2, 2.26–2.29)</li>
+            </ul>
+          </div>
+
+          <div class="card-amber">
+            <div class="card-title">3. กลุ่มพอร์ทัลผู้เช่า (Tenant Portal) &amp; Wireframe</div>
+            <ul class="clean-list" style="font-size:11.5px;">
+              <li><strong>P26 หน้าแรกผู้เช่า</strong> (<code>/me</code>) &rarr; สรุปสัญญา ยอดบิล และบัญชีโอนเงิน (2.24)</li>
+              <li><strong>P27 บิลและแนบสลิปของฉัน</strong> (<code>/me/invoices</code>) &rarr; ดูบิล + อัปโหลดสลิป (2.24)</li>
+              <li><strong>P28–P29 แจ้งซ่อมผู้เช่า</strong> (<code>/me/repairs</code>, <code>/new</code>) &rarr; แจ้งและติดตามซ่อม (2.25)</li>
+            </ul>
+            <div style="margin-top:8px; padding-top:8px; border-top:1px dashed #f59e0b; font-size:11px; color:#78350f;">
+              <strong>3 หน้าที่แนะนำทำ UI Wireframe ก่อนในสัปดาห์ถัดไป:</strong><br/>
+              1) <strong>P02 แดชบอร์ดผังห้อง</strong> (ศูนย์รวมข้อมูลทุกตาราง)<br/>
+              2) <strong>P12 บันทึกมิเตอร์รายเดือน</strong> (ตารางกรอกข้อมูลหลายห้องพร้อมกัน)<br/>
+              3) <strong>P15 รายละเอียดบิล/ตรวจสลิป/รับชำระ</strong> (จุดตัดยอดเงินสำคัญที่สุด)
+            </div>
+          </div>
+        </div>
+
+        <!-- 9 Database Tables Mapping Table -->
+        <div>
+          <h3 style="font-size:13.5px; margin-bottom:6px;">ตารางตรวจสอบความครบถ้วน: 9 ตารางฐานข้อมูลจริง &harr; หน้าเว็บ (P01–P29) &harr; ความต้องการ (2.1–2.29)</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>ลำดับ</th>
+                <th>ชื่อตารางในฐานข้อมูล (PostgreSQL)</th>
+                <th>บทบาทหน้าที่หลักและข้อจำกัด (Constraints)</th>
+                <th>หน้าเว็บที่อ่าน/เขียนข้อมูล</th>
+                <th>ข้อกำหนด SRD ที่รองรับ</th>
+                <th>ผลตรวจ</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1–2</td>
+                <td><code>profiles</code>, <code>system_settings</code></td>
+                <td>เก็บผู้ใช้ 3 บทบาท (RBAC) และเรทค่าน้ำ/ไฟ/ค่าปรับ/บัญชีธนาคารกลาง</td>
+                <td>P01, P10, P25, P26</td>
+                <td>ข้อ 2.1, 2.2 (แก้ประเด็น OI-01)</td>
+                <td><span class="badge badge-pass">ครบ 100%</span></td>
+              </tr>
+              <tr>
+                <td>3–4</td>
+                <td><code>rooms</code>, <code>tenants</code></td>
+                <td>ข้อมูลห้องพัก (Unique <code>room_no</code>) และผู้เช่า (Unique <code>id_card_no</code> 13 หลัก)</td>
+                <td>P02–P08</td>
+                <td>ข้อ 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9</td>
+                <td><span class="badge badge-pass">ครบ 100%</span></td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td><code>contracts</code></td>
+                <td>เชื่อมห้องกับผู้เช่า (M:N), Partial Unique Index 1 สัญญา active ต่อห้อง</td>
+                <td>P02, P05, P08, P09–P11</td>
+                <td>ข้อ 2.10, 2.11, 2.12, 2.13</td>
+                <td><span class="badge badge-pass">ครบ 100%</span></td>
+              </tr>
+              <tr>
+                <td>6–7</td>
+                <td><code>meter_readings</code>, <code>invoices</code></td>
+                <td>เลขมิเตอร์รายเดือน และใบแจ้งหนี้พร้อมสถานะสลิปโอนเงิน (<code>slip_status</code>)</td>
+                <td>P12, P13–P15, P21, P23, P27</td>
+                <td>ข้อ 2.14–2.18, 2.24, 2.26, 2.28</td>
+                <td><span class="badge badge-pass">ครบ 100%</span></td>
+              </tr>
+              <tr>
+                <td>8–9</td>
+                <td><code>payments</code>, <code>repair_requests</code></td>
+                <td>ใบเสร็จรับเงิน (ห้ามลบ ใช้ <code>voided</code>) และใบแจ้งซ่อมรายห้อง</td>
+                <td>P15–P20, P24, P28–P29</td>
+                <td>ข้อ 2.19–2.23, 2.25, 2.29</td>
+                <td><span class="badge badge-pass">ครบ 100%</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>โครงการระบบจัดการหอพัก (หอพักสุขสบาย เพลส) • รายวิชา 31903-2011</span>
+      <span>งานที่ 2 (ส่วน B): แผนผังเว็บไซต์ (Site Map) และการจับคู่ตารางฐานข้อมูล</span>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       SLIDE 7: TECH STACK SELECTION & DECISION MATRIX (TASK 3)
+       ===================================================================== -->
+  <section class="slide">
+    <div>
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="step-pill">ส่วนที่ 6</span>
+          <div>
+            <div class="slide-title">การเลือกใช้สถาปัตยกรรม (Tech Stack Selection) และตารางตัดสินใจ</div>
+            <div class="slide-subtitle">งานที่ 3: สถาปัตยกรรม 3 ชั้น (3-Tier Architecture) ที่สอดคล้องกับกฎธุรกิจและข้อจำกัดแผนฟรี</div>
+          </div>
+        </div>
+        <div class="slide-subtitle">หน้า 7 / 8</div>
+      </div>
+
+      <div class="slide-body">
+        <!-- 3-Tier Architecture Visual -->
+        <div class="grid-3">
+          <div class="card-blue">
+            <div class="card-title">1. ชั้นแสดงผล (Web UI Layer)</div>
+            <p style="font-size:12px; font-weight:700; color:#1e40af; margin-bottom:4px;">Tailwind CSS v4 + React 19.3 Client/Server Components</p>
+            <ul class="clean-list" style="font-size:11.5px;">
+              <li>เทียบกับ Bootstrap: Tailwind CSS ปรับแต่ง Responsive (360px+) และทำระบบสลับธีม <strong>Light/Dark Mode</strong> ได้คล่องตัวกว่า ไม่ติดหน้าตาสำเร็จรูป</li>
+              <li>มี Client Validation ดักเลขบัตร 13 หลัก และบล็อก Emoji ทันทีขณะพิมพ์</li>
+            </ul>
+          </div>
+
+          <div class="card-emerald">
+            <div class="card-title">2. ชั้นประมวลผล (Server / Logic Layer)</div>
+            <p style="font-size:12px; font-weight:700; color:#065f46; margin-bottom:4px;">Next.js 16.4.3 (App Router) + TypeScript + Prisma ORM</p>
+            <ul class="clean-list" style="font-size:11.5px;">
+              <li><em>หมายเหตุสำคัญ:</em> React เป็นเพียง UI Library ส่วน <strong>Next.js</strong> คือ Full-stack Framework ที่รวมทั้งฝั่งหน้าเว็บและ Server Actions ไว้ในโปรเจกต์เดียว</li>
+              <li>ลดภาระการดูแล 2 โค้ดเบส ใช้ภาษา TypeScript เดียวกันตั้งแต่หน้าจอถึงฐานข้อมูล</li>
+            </ul>
+          </div>
+
+          <div class="card-amber">
+            <div class="card-title">3. ชั้นฐานข้อมูล (Database Layer)</div>
+            <p style="font-size:12px; font-weight:700; color:#92400e; margin-bottom:4px;">PostgreSQL บน Supabase (AWS Singapore Region)</p>
+            <ul class="clean-list" style="font-size:11.5px;">
+              <li>เทียบกับ MySQL: <strong>PostgreSQL</strong> รองรับ <strong>Partial Unique Index</strong> (<code>WHERE status = 'active'</code>) ตามกฎ BR-02 ได้โดยตรง</li>
+              <li>รองรับ ACID Transaction (BR-03) และชนิด <code>NUMERIC/Decimal</code> แม่นยำสูง (BR-05)</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Decision Matrix & Free Plan Mitigation -->
+        <div class="grid-2">
+          <div>
+            <h3 style="font-size:13.5px; margin-bottom:6px;">ตารางตัดสินใจแบบถ่วงน้ำหนัก (Weighted Decision Matrix) [สมมติฐานน้ำหนักโดยทีม]</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>เกณฑ์การประเมิน (น้ำหนัก)</th>
+                  <th>Next.js + PostgreSQL</th>
+                  <th>Laravel + MySQL</th>
+                  <th>Django + PostgreSQL</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1. ความเข้ากันกับกฎธุรกิจ BR-02/BR-05 (25%)</td>
+                  <td><strong>9.5 / 10</strong> (รองรับ Partial Index)</td>
+                  <td>7.5 / 10 (MySQL ไม่มี Partial Index)</td>
+                  <td>9.0 / 10 (รองรับครบ)</td>
+                </tr>
+                <tr>
+                  <td>2. ความเร็วในการพัฒนาภายใน 15 สัปดาห์ (20%)</td>
+                  <td><strong>9.0 / 10</strong> (Type-safe ทั้งระบบ)</td>
+                  <td>8.5 / 10 (ต้องแยกภาษา PHP/JS)</td>
+                  <td>8.0 / 10 (ต้องแยก Python/JS)</td>
+                </tr>
+                <tr>
+                  <td>3. ความถนัดของทีมและเอกสารศึกษา (20%)</td>
+                  <td><strong>9.0 / 10</strong> (ทีมคุ้นเคย TS/React)</td>
+                  <td>7.5 / 10</td>
+                  <td>7.0 / 10</td>
+                </tr>
+                <tr>
+                  <td>4. ต้นทุนโฮสติ้งฟรีเพื่อการศึกษา (15%)</td>
+                  <td><strong>9.5 / 10</strong> (Vercel + Supabase Free)</td>
+                  <td>6.5 / 10 (หาโฮสต์ PHP ฟรียาก)</td>
+                  <td>7.0 / 10</td>
+                </tr>
+                <tr>
+                  <td>5. ประสิทธิภาพและการ Deploy อัตโนมัติ (10%)</td>
+                  <td><strong>9.5 / 10</strong> (CI/CD ผ่าน GitHub)</td>
+                  <td>7.5 / 10</td>
+                  <td>7.5 / 10</td>
+                </tr>
+                <tr>
+                  <td>6. ความปลอดภัยและ ORM Type Safety (10%)</td>
+                  <td><strong>9.5 / 10</strong> (Prisma + Strict TS)</td>
+                  <td>8.5 / 10 (Eloquent ORM)</td>
+                  <td>8.5 / 10 (Django ORM)</td>
+                </tr>
+                <tr style="background:#eff6ff; font-weight:700;">
+                  <td><strong>คะแนนรวมถ่วงน้ำหนัก (เต็ม 10.0)</strong></td>
+                  <td style="color:#1d4ed8;"><strong>9.25 / 10 (ชนะเลิศ)</strong></td>
+                  <td>7.65 / 10 (แผนสำรอง Plan B)</td>
+                  <td>8.00 / 10</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div>
+            <h3 style="font-size:13.5px; margin-bottom:6px;">มาตรการรับมือข้อจำกัดแผนฟรีและความเสี่ยง (Risk Mitigation)</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:32%;">ข้อจำกัด / ความเสี่ยง</th>
+                  <th style="width:68%;">แผนรับมือที่ปฏิบัติจริงในโครงการ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Supabase Free พักโปรเจกต์เมื่อไร้การใช้งาน 7 วัน</strong></td>
+                  <td>ตั้งตารางเข้าใช้งานทุกสัปดาห์ และมี Checklist กดกู้คืน/ตรวจสอบสถานะฐานข้อมูลล่วงหน้า 24 ชม. ก่อนวันนำเสนอทุกครั้ง (NFR-05)</td>
+                </tr>
+                <tr>
+                  <td><strong>โควตาฐานข้อมูล 500 MB &amp; ไม่มี Auto Backup</strong></td>
+                  <td>ข้อมูล 40 ห้อง 3 ปีใช้ไม่เกิน 50 MB; สั่งสำรองข้อมูลด้วย <code>pg_dump</code> ทุกสัปดาห์เก็บในเครื่องส่วนตัวของทีม (NFR-02, NFR-06)</td>
+                </tr>
+                <tr>
+                  <td><strong>Vercel Hobby จำกัดเฉพาะ非พาณิชย์ (Non-Commercial)</strong></td>
+                  <td>ใช้เพื่อการศึกษาในรายวิชาเท่านั้น หากเจ้าของหอพักนำไปใช้งานจริงเชิงพาณิชย์ มีเอกสารคู่มือย้ายขึ้น VPS หรือ Vercel Pro ทันที (OI-12)</td>
+                </tr>
+                <tr>
+                  <td><strong>เวลาเขียนโค้ดมีจำกัด (สัปดาห์ 7–10 รวม ~80 ชม.)</strong></td>
+                  <td>จัดลำดับพัฒนา <strong>Core MVP (Must 22 ข้อ)</strong> ให้เสร็จสมบูรณ์ก่อน แล้วจึงต่อยอดข้อ Should 7 ข้อ (ปัจจุบันทีมทำต้นแบบครบทั้ง 29 ข้อแล้ว)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>โครงการระบบจัดการหอพัก (หอพักสุขสบาย เพลส) • รายวิชา 31903-2011</span>
+      <span>งานที่ 3: เอกสารสรุปการเลือกใช้สถาปัตยกรรม (Tech Stack Selection)</span>
+    </div>
+  </section>
+
+  <!-- =====================================================================
+       SLIDE 8: PITCH SCRIPT, Q&A DEFENSE & 5-PILLAR VERIFICATION (TASKS 4 & 5)
+       ===================================================================== -->
+  <section class="slide">
+    <div>
+      <div class="slide-header">
+        <div class="slide-header-left">
+          <span class="step-pill">ส่วนที่ 7</span>
+          <div>
+            <div class="slide-title">แผนการนำเสนอ (Pitching), ตอบคำถามกรรมการ และการทวนสอบ 5 เสาหลัก</div>
+            <div class="slide-subtitle">งานที่ 4 และ งานที่ 5: แบ่งบทพูดทีม 4 คน เก็งคำถามป้องกันโครงการ และผลตรวจ Requirement Verification</div>
+          </div>
+        </div>
+        <div class="slide-subtitle">หน้า 8 / 8</div>
+      </div>
+
+      <div class="slide-body">
+        <!-- Pitching Roles for 4 Members -->
+        <div class="grid-4">
+          <div class="card-white" style="padding:10px 12px;">
+            <div class="card-title" style="font-size:12.5px;">ผู้พูด 1: วชิรวิทย์ (1.5 นาที)</div>
+            <p style="font-size:11px; color:#334155;"><strong>เปิดด้วย Storytelling:</strong> เล่าเหตุการณ์สิ้นเดือนที่เจ้าของหอต้องเปิดสมุดจดมิเตอร์เทียบ Excel หลายไฟล์ คิดบิลผิดและสลิปตกหล่น แล้วสรุปขอบเขต In/Out-of-Scope</p>
+          </div>
+          <div class="card-white" style="padding:10px 12px;">
+            <div class="card-title" style="font-size:12.5px;">ผู้พูด 2: พชรรักษ์ (1.5 นาที)</div>
+            <p style="font-size:11px; color:#334155;"><strong>เจาะลึก Flowchart &amp; กฎธุรกิจ:</strong> อธิบายผังงานรอบบิลรายเดือน การป้องกันเลขมิเตอร์ถอยหลัง (BR-04) การคำนวณเงิน Decimal (BR-05) และการแนบสลิป</p>
+          </div>
+          <div class="card-white" style="padding:10px 12px;">
+            <div class="card-title" style="font-size:12.5px;">ผู้พูด 3: ณัฐดนัย (1.0 นาที)</div>
+            <p style="font-size:11px; color:#334155;"><strong>อธิบาย Site Map &amp; UI/UX:</strong> แสดงโครงสร้าง 29 หน้าใน 3 คลิก แยกพอร์ทัลผู้เช่ากับแอดมิน พร้อมสาธิตหน้าเว็บจริงที่สลับธีม สว่าง/มืด ได้</p>
+          </div>
+          <div class="card-white" style="padding:10px 12px;">
+            <div class="card-title" style="font-size:12.5px;">ผู้พูด 4: สัณห์พิชญ์ (1.0 นาที)</div>
+            <p style="font-size:11px; color:#334155;"><strong>Tech Stack &amp; ความเป็นไปได้:</strong> สรุปเหตุผลที่เลือก Next.js + PostgreSQL (Supabase Singapore), แผนสำรองข้อมูล <code>pg_dump</code> และขออนุมัติล็อกขอบเขต</p>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- Top Q&A Defense -->
+          <div>
+            <h3 style="font-size:13.5px; margin-bottom:6px;">ชุดคำตอบคำถามคณะกรรมการ (Defend the Feasibility)</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:36%;">คำถามสำคัญจากกรรมการ</th>
+                  <th style="width:64%;">คำตอบสั้นกระชับพร้อมหลักฐานอ้างอิง</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>1. ทำไมไม่เชื่อมระบบตัดเงินอัตโนมัติ แต่ใช้วิธีแนบสลิปแทน?</strong></td>
+                  <td>เพื่อควบคุมขอบเขตให้เสร็จใน 15 สัปดาห์และไม่ต้องเสียค่าธรรมเนียม Payment Gateway โดยผู้เช่าแนบสลิปเข้าตาราง <code>invoices</code> แล้วให้ Staff กดอนุมัติสร้างใบเสร็จใน <code>payments</code> (BR-07, BR-08)</td>
+                </tr>
+                <tr>
+                  <td><strong>2. ทำไมเลือก PostgreSQL แทน MySQL?</strong></td>
+                  <td>เพราะกฎ <strong>BR-02</strong> กำหนดให้ 1 ห้องมีสัญญา <code>active</code> ได้เพียง 1 สัญญา ซึ่ง PostgreSQL รองรับการสร้าง <em>Partial Unique Index</em> (<code>WHERE status = 'active'</code>) ในระดับฐานข้อมูลโดยตรง</td>
+                </tr>
+                <tr>
+                  <td><strong>3. ข้อมูลเลขบัตรประชาชนปลอดภัยตาม PDPA อย่างไร?</strong></td>
+                  <td>ระบบเก็บเฉพาะตัวเลข 13 หลักที่ผ่าน Checksum (BR-01) ไม่เก็บไฟล์รูปบัตร ปิดบัง 9 หลักแรกเป็น <code>•••••••••0121</code> ในหน้ารายการ (BR-13) และตรวจสิทธิ์ฝั่งเซิร์ฟเวอร์ทุกครั้ง (NFR-03, NFR-04)</td>
+                </tr>
+                <tr>
+                  <td><strong>4. หากทำไม่ทันในสัปดาห์ที่ 7–10 จะตัดอะไรก่อน?</strong></td>
+                  <td>ยึดแผน MVP ตัวเลือก A คือส่งมอบข้อ <strong>Must 22 ข้อ</strong> (ห้อง-ผู้เช่า-สัญญา-มิเตอร์-บิล-รับชำระ) ให้สมบูรณ์ 100% ก่อน ส่วนข้อ Should 7 ข้อจัดเป็นส่วนขยาย (ปัจจุบันทำต้นแบบครบแล้ว)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 5 Pillars Verification -->
+          <div>
+            <h3 style="font-size:13.5px; margin-bottom:6px;">ผลการทวนสอบความต้องการด้วย 5 เสาหลัก (5-Pillar Verification)</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:24%;">เสาหลักการทวนสอบ</th>
+                  <th style="width:16%;">ผลตรวจ</th>
+                  <th style="width:60%;">หลักฐานยืนยันจากเอกสารและซอร์สโค้ดจริง</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>1. Validity</strong><br/>(แก้ปัญหาตรงจุด)</td>
+                  <td><span class="badge badge-pass">PASS</span></td>
+                  <td>ทุกฟังก์ชันตอบโจทย์ปัญหาบิลล่าช้า คิดเลขผิด และตามหนี้ยากของหอพัก 20–40 ห้องโดยตรง</td>
+                </tr>
+                <tr>
+                  <td><strong>2. Consistency</strong><br/>(ไม่ขัดแย้งกัน)</td>
+                  <td><span class="badge badge-pass">PASS</span></td>
+                  <td>รหัส 2.1–2.29, กฎ BR-01–BR-14 และ NFR-01–NFR-10 สอดคล้องตรงกันทั้งเอกสารและโค้ด</td>
+                </tr>
+                <tr>
+                  <td><strong>3. Completeness</strong><br/>(ครบถ้วนสมบูรณ์)</td>
+                  <td><span class="badge badge-pass">PASS</span></td>
+                  <td>ครบทั้ง 9 ตารางฐานข้อมูล มีหน้าเว็บ P01–P29 รองรับทุกตาราง ไม่มีตารางลอยหรือหน้าเว็บว่าง</td>
+                </tr>
+                <tr>
+                  <td><strong>4. Feasibility</strong><br/>(ทำจริงได้ทันเวลา)</td>
+                  <td><span class="badge badge-pass">PASS</span></td>
+                  <td>มี Working Prototype ที่ผ่าน <code>next build</code> ทั้ง 36 Routes และเชื่อม Supabase จริงแล้ว</td>
+                </tr>
+                <tr>
+                  <td><strong>5. Verifiability</strong><br/>(ตรวจสอบวัดผลได้)</td>
+                  <td><span class="badge badge-pass">PASS</span></td>
+                  <td>ไร้คำกำกวม ทุกข้อมีเกณฑ์วัดผลชัดเจน (เช่น &le; 3 วินาที, ปัดเศษ 2 ตำแหน่งตรง 100%)</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="margin-top:6px; font-size:11px; color:#475569; background:#f8fafc; padding:6px 10px; border-radius:8px; border:1px solid #e2e8f0;">
+              <strong>ประเด็นที่ต้องยืนยันกับอาจารย์ที่ปรึกษา (Open Issues):</strong> (1) ยืนยันขอบเขตพอร์ทัลผู้เช่า [OI-02] (2) ยืนยันเกณฑ์ล็อกอินผิด 5 ครั้ง [OI-03] (3) ยืนยันการไม่ต้องส่ง DFD เนื่องจากใช้ Flowchart + Site Map ตามสไลด์สัปดาห์ที่ 2 [OI-04] (4) ขออนุญาตใช้ AI IDE ช่วยตรวจสอบโค้ดภายใต้การทำ Code Review ของทีม
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span>โครงการระบบจัดการหอพัก (หอพักสุขสบาย เพลส) • รายวิชา 31903-2011</span>
+      <span>งานที่ 4 และ 5: สคริปต์นำเสนอ ถาม-ตอบ และการทวนสอบ 5 เสาหลัก</span>
+    </div>
+  </section>
+
+</body>
+</html>

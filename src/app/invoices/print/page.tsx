@@ -1,9 +1,8 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import { Printer, ArrowLeft } from "lucide-react";
 import prisma from "@/lib/prisma";
+import Link from "next/link";
 import { parseReadingMonth, getThaiMonthName } from "@/lib/meters";
 import { formatThaiDate } from "@/lib/invoices";
+import PrintBatchInvoicesClient from "./PrintBatchInvoicesClient";
 
 export default async function PrintBatchInvoicesPage({
   searchParams,
@@ -52,44 +51,26 @@ export default async function PrintBatchInvoicesPage({
   const billingMonthThai = getThaiMonthName(billingMonth);
 
   return (
-    <div className="min-h-screen bg-[#07050f] text-zinc-100 print:bg-white print:text-black print:min-h-0 print:p-0">
-      {/* Top Floating Bar */}
-      <div className="print:hidden sticky top-0 z-50 bg-[#0c0a18]/90 backdrop-blur-md border-b border-violet-950/80 px-6 py-3.5 mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link
-            href={`/invoices?month=${monthStr}`}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 text-xs font-bold border border-violet-800/40 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            กลับหน้ารายการใบแจ้งหนี้
-          </Link>
-          <span className="text-xs text-zinc-400 hidden sm:inline">
-            พิมพ์ใบแจ้งหนี้ทั้งเดือน: <strong className="text-white">{billingMonthThai}</strong> ({invoices.length} ห้อง)
-          </span>
-        </div>
-
-        <button
-          onClick={() => {}}
-          className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-black shadow-lg shadow-violet-950/60 transition-all hover:scale-105"
-        >
-          <Printer className="w-4 h-4" />
-          สั่งพิมพ์ทั้งหมด ({invoices.length} ฉบับ)
-        </button>
-      </div>
+    <div className="min-h-screen bg-[#080c15] text-slate-100 print:bg-white print:text-black print:min-h-0 print:p-0">
+      <PrintBatchInvoicesClient
+        monthStr={monthStr}
+        billingMonthThai={billingMonthThai}
+        count={invoices.length}
+      />
 
       {invoices.length === 0 ? (
-        <div className="max-w-md mx-auto p-12 text-center text-zinc-400 bg-[#120f24] rounded-3xl border border-violet-950 mt-12">
+        <div className="max-w-md mx-auto p-12 text-center text-slate-400 bg-[#0b1120] rounded-3xl border border-slate-800 mt-12">
           <p className="text-sm font-bold text-white">ไม่มีใบแจ้งหนี้ในรอบเดือน {billingMonthThai}</p>
           <Link
             href={`/invoices/generate?month=${monthStr}`}
-            className="inline-block mt-4 text-xs text-emerald-400 font-bold hover:underline"
+            className="inline-block mt-4 text-xs text-blue-400 font-bold hover:underline"
           >
             ไปที่หน้าออกใบแจ้งหนี้ประจำเดือน →
           </Link>
         </div>
       ) : (
         <div className="space-y-8 print:space-y-0">
-          {invoices.map((invoice, index) => {
+          {invoices.map((invoice) => {
             const totalAmount = Number(invoice.totalAmount);
             const paidAmount = invoice.payments.reduce((sum, p) => sum + Number(p.amount), 0);
             const balance = Math.max(0, totalAmount - paidAmount);
@@ -232,13 +213,13 @@ export default async function PrintBatchInvoicesPage({
                 {/* Footer notes & Bank */}
                 <div className="grid grid-cols-2 gap-4 border border-zinc-300 rounded p-2.5 text-[10px] mb-4">
                   <div>
-                    <p className="font-bold text-zinc-900">🏦 โอนชำระเงินได้ที่:</p>
+                    <p className="font-bold text-zinc-900">ช่องทางการชำระเงิน (โอนผ่านธนาคาร):</p>
                     <p>ธนาคาร {bankName} • บัญชี <strong className="font-mono text-zinc-950">{bankAccountNo}</strong></p>
                     <p>ชื่อบัญชี {bankAccountName}</p>
                     {promptpayId && <p>พร้อมเพย์: <strong className="font-mono">{promptpayId}</strong></p>}
                   </div>
                   <div className="border-l border-zinc-200 pl-3 text-zinc-600">
-                    <p className="font-bold text-zinc-900">⚠️ กำหนดชำระ:</p>
+                    <p className="font-bold text-zinc-900">หมายเหตุและข้อกำหนด:</p>
                     <p>กรุณาชำระภายในวันที่ <strong>{dueDateThai}</strong></p>
                     <p>หากล่าช้าจะมีค่าปรับวันละ {Number(invoice.contract.lateFee)} บาท ตามระเบียบสัญญา</p>
                   </div>

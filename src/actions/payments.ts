@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { PaymentMethod } from "@prisma/client";
 import { roundHalfUp } from "@/lib/invoices";
 import { requireStaffOrAdmin } from "@/lib/auth-guard";
+import { stripEmoji } from "@/lib/emoji";
+import { setToastCookie } from "@/lib/toast";
 
 export type PaymentActionResult = {
   success?: boolean;
@@ -57,7 +59,8 @@ export async function recordPayment(formData: FormData): Promise<PaymentActionRe
   const amount = parseFloat(formData.get("amount")?.toString() || "0");
   const methodStr = formData.get("method")?.toString() || "bank_transfer";
   const paidAtStr = formData.get("paidAt")?.toString() || "";
-  const referenceNote = formData.get("referenceNote")?.toString().trim() || null;
+  const rawRefNote = formData.get("referenceNote")?.toString().trim();
+  const referenceNote = rawRefNote ? stripEmoji(rawRefNote) : null;
   const slipImageUrl = formData.get("slipImageUrl")?.toString().trim() || null;
 
   if (!invoiceId || invoiceId <= 0) {
@@ -177,6 +180,7 @@ export async function recordPayment(formData: FormData): Promise<PaymentActionRe
     revalidatePath("/dashboard");
     revalidatePath("/");
 
+    await setToastCookie(`บันทึกรับเงินสำเร็จ ออกใบเสร็จเลขที่ ${createdReceiptNo}`, "success");
     return {
       success: true,
       message: `บันทึกการรับชำระเงินสำเร็จ ออกใบเสร็จเลขที่ ${createdReceiptNo}`,
@@ -199,7 +203,8 @@ export async function voidPayment(
   const auth = await requireStaffOrAdmin();
   if (!auth.authorized) return { error: auth.error };
 
-  const reason = voidReason?.trim();
+  const rawReason = voidReason?.trim();
+  const reason = rawReason ? stripEmoji(rawReason) : "";
   if (!reason) {
     return { error: "กรุณาระบุเหตุผลในการยกเลิกใบเสร็จ (ตามกฎ BR-08)" };
   }
@@ -270,6 +275,7 @@ export async function voidPayment(
     revalidatePath("/dashboard");
     revalidatePath("/");
 
+    await setToastCookie(`ยกเลิกใบเสร็จรับเงิน ${payment.receiptNo} เรียบร้อยแล้ว`, "info");
     return {
       success: true,
       message: `ยกเลิกใบเสร็จรับเงิน ${payment.receiptNo} เรียบร้อยแล้ว`,

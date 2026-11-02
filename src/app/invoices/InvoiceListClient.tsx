@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   FileText,
   Search,
-  Plus,
   Calendar,
   AlertTriangle,
   CheckCircle2,
@@ -14,15 +13,13 @@ import {
   ChevronLeft,
   ChevronRight,
   Sparkles,
-  ArrowRight,
   Eye,
-  CreditCard,
-  DollarSign,
-  AlertCircle,
   Zap,
+  X,
 } from "lucide-react";
 import { applyLateFee } from "@/actions/invoices";
 import { formatThaiDate } from "@/lib/invoices";
+import { handleEmojiInput } from "@/lib/emoji";
 
 export type InvoiceListItem = {
   id: number;
@@ -164,19 +161,19 @@ export default function InvoiceListClient({
   return (
     <div className="space-y-6">
       {/* Top Header & Quick Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#120f24] rounded-3xl border border-violet-950/80 p-6 shadow-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0b1120] rounded-3xl border border-slate-800 p-6 shadow-2xl">
         <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-gradient-to-tr from-violet-600 via-purple-600 to-fuchsia-600 text-white rounded-2xl shadow-lg shadow-violet-950/60 ring-1 ring-violet-400/40">
+          <div className="p-3 bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-950/50 border border-blue-500/30">
             <FileText className="w-7 h-7" />
           </div>
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-2xl font-black text-white">ระบบใบแจ้งหนี้รายเดือน</h1>
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-violet-500/20 text-violet-300 border border-violet-500/40">
-                P13: Step 5
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                สเต็ป 5
               </span>
             </div>
-            <p className="text-xs text-zinc-400 mt-0.5">
+            <p className="text-xs text-slate-400 mt-0.5">
               จัดการใบแจ้งหนี้ ติดตามยอดค้างชำระ และคำนวณค่าปรับตามกำหนดเวลา (BR-05, BR-06, BR-07, BR-09)
             </p>
           </div>
@@ -186,16 +183,16 @@ export default function InvoiceListClient({
           {monthStr && (
             <Link
               href={`/invoices/print?month=${monthStr}`}
-              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 text-xs font-bold border border-violet-800/40 shadow-sm transition-all hover:scale-105"
+              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 shadow-sm transition-all hover:scale-105"
             >
-              <Printer className="w-4 h-4 text-violet-400" />
+              <Printer className="w-4 h-4 text-blue-400" />
               พิมพ์บิลทั้งเดือน A4
             </Link>
           )}
 
           <Link
             href={`/invoices/generate${monthStr ? `?month=${monthStr}` : ""}`}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black shadow-lg shadow-emerald-950/50 ring-1 ring-emerald-400/40 transition-all hover:scale-105"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-lg shadow-blue-950/50 border border-blue-500/30 transition-all hover:scale-105"
           >
             <Sparkles className="w-4 h-4" />
             + ออกใบแจ้งหนี้รอบเดือน
@@ -204,18 +201,18 @@ export default function InvoiceListClient({
       </div>
 
       {/* Month Switcher Bar */}
-      <div className="bg-[#120f24] rounded-2xl border border-violet-950/70 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
+      <div className="bg-[#0b1120] rounded-2xl border border-slate-800 p-4 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-lg">
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-violet-400" />
-          <span className="text-xs text-zinc-400">รอบบิลประจำเดือน:</span>
+          <Calendar className="w-4 h-4 text-blue-400" />
+          <span className="text-xs text-slate-400">รอบบิลประจำเดือน:</span>
           <span className="text-base font-black text-white">{thaiMonthName}</span>
-          {monthStr && <span className="text-xs font-mono text-zinc-500">({monthStr})</span>}
+          {monthStr && <span className="text-xs font-mono text-slate-500">({monthStr})</span>}
         </div>
 
         <div className="flex items-center gap-2">
           <Link
             href={`/invoices?month=${prevMonthStr}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 text-xs font-semibold border border-violet-800/30 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
             เดือนก่อน
@@ -224,15 +221,15 @@ export default function InvoiceListClient({
             href="/invoices"
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
               !monthStr
-                ? "bg-violet-600 text-white"
-                : "bg-[#0c0a18] hover:bg-zinc-800 text-zinc-300 border border-violet-950"
+                ? "bg-blue-600 text-white"
+                : "bg-[#080c15] hover:bg-slate-800 text-slate-300 border border-slate-800"
             }`}
           >
             ทุกล็อตบิล
           </Link>
           <Link
             href={`/invoices?month=${nextMonthStr}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 text-xs font-semibold border border-violet-800/30 transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors"
           >
             เดือนถัดไป
             <ChevronRight className="w-4 h-4" />
@@ -257,43 +254,43 @@ export default function InvoiceListClient({
             )}
             <span className="font-semibold">{feedback.text}</span>
           </div>
-          <button onClick={() => setFeedback(null)} className="text-zinc-500 hover:text-zinc-300 font-bold">
-            ✕
+          <button onClick={() => setFeedback(null)} className="text-slate-500 hover:text-slate-300">
+            <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
       {/* Financial Metrics Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-        <div className="p-4 rounded-2xl bg-[#120f24] border border-violet-950/80 space-y-1">
-          <span className="text-[11px] font-semibold text-zinc-500 block">ยอดเรียกเก็บรวม (Invoiced)</span>
+        <div className="p-4 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-1">
+          <span className="text-[11px] font-semibold text-slate-400 block">ยอดเรียกเก็บรวม (Invoiced)</span>
           <p className="text-xl font-black text-white font-mono">
             ฿{metrics.totalInvoiced.toLocaleString()}
           </p>
-          <p className="text-[10px] text-zinc-500">ทั้งหมด {metrics.totalCount} ฉบับ</p>
+          <p className="text-[10px] text-slate-500">ทั้งหมด {metrics.totalCount} ฉบับ</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#120f24] border border-violet-950/80 space-y-1">
-          <span className="text-[11px] font-semibold text-zinc-500 block">ยอดรับชำระแล้ว (Paid)</span>
+        <div className="p-4 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-1">
+          <span className="text-[11px] font-semibold text-slate-400 block">ยอดรับชำระแล้ว (Paid)</span>
           <p className="text-xl font-black text-emerald-300 font-mono">
             ฿{metrics.totalPaid.toLocaleString()}
           </p>
           <p className="text-[10px] text-emerald-400/80">ชำระครบแล้ว {metrics.paidCount} ห้อง</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#120f24] border border-violet-950/80 space-y-1">
-          <span className="text-[11px] font-semibold text-zinc-500 block">ยอดคงค้างรวม (Outstanding)</span>
+        <div className="p-4 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-1">
+          <span className="text-[11px] font-semibold text-slate-400 block">ยอดคงค้างรวม (Outstanding)</span>
           <p className="text-xl font-black text-rose-300 font-mono">
             ฿{metrics.totalBalance.toLocaleString()}
           </p>
-          <p className="text-[10px] text-zinc-500">รอชำระ {metrics.unpaidCount} ห้อง</p>
+          <p className="text-[10px] text-slate-500">รอชำระ {metrics.unpaidCount} ห้อง</p>
         </div>
 
-        <div className="p-4 rounded-2xl bg-[#120f24] border border-violet-950/80 space-y-1">
-          <span className="text-[11px] font-semibold text-zinc-500 block">เกินกำหนดชำระ (Overdue)</span>
+        <div className="p-4 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-1">
+          <span className="text-[11px] font-semibold text-slate-400 block">เกินกำหนดชำระ (Overdue)</span>
           <div className="flex items-center gap-2">
             <p className="text-xl font-black text-amber-300 font-mono">
-              {metrics.overdueCount} <span className="text-xs font-normal text-zinc-400">ห้อง</span>
+              {metrics.overdueCount} <span className="text-xs font-normal text-slate-400">ห้อง</span>
             </p>
             {metrics.overdueCount > 0 && (
               <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">
@@ -301,7 +298,7 @@ export default function InvoiceListClient({
               </span>
             )}
           </div>
-          <p className="text-[10px] text-zinc-500">ตามกฎ BR-07 (วันปัจจุบัน &gt; due_date)</p>
+          <p className="text-[10px] text-slate-500">ตามกฎ BR-07 (วันปัจจุบัน &gt; due_date)</p>
         </div>
       </div>
 
@@ -312,8 +309,8 @@ export default function InvoiceListClient({
             onClick={() => setStatusFilter("all")}
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               statusFilter === "all"
-                ? "bg-violet-600 text-white font-bold shadow-md shadow-violet-950/60"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                ? "bg-blue-600 text-white font-bold shadow-md shadow-blue-950/60"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             ทั้งหมด ({invoices.length})
@@ -322,8 +319,8 @@ export default function InvoiceListClient({
             onClick={() => setStatusFilter("unpaid")}
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               statusFilter === "unpaid"
-                ? "bg-cyan-600 text-white font-bold shadow-md shadow-cyan-950/60"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                ? "bg-blue-600 text-white font-bold shadow-md shadow-blue-950/60"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             รอชำระ
@@ -332,8 +329,8 @@ export default function InvoiceListClient({
             onClick={() => setStatusFilter("partial")}
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               statusFilter === "partial"
-                ? "bg-blue-600 text-white font-bold shadow-md"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                ? "bg-blue-600 text-white font-bold shadow-md shadow-blue-950/60"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             ชำระบางส่วน
@@ -343,7 +340,7 @@ export default function InvoiceListClient({
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               statusFilter === "overdue"
                 ? "bg-rose-600 text-white font-bold shadow-md"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             เกินกำหนด ({metrics.overdueCount})
@@ -353,7 +350,7 @@ export default function InvoiceListClient({
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               statusFilter === "paid"
                 ? "bg-emerald-600 text-white font-bold shadow-md shadow-emerald-950/60"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             ชำระแล้ว ({metrics.paidCount})
@@ -362,8 +359,8 @@ export default function InvoiceListClient({
             onClick={() => setStatusFilter("cancelled")}
             className={`px-3.5 py-2 rounded-xl transition-all whitespace-nowrap ${
               statusFilter === "cancelled"
-                ? "bg-zinc-700 text-white font-bold shadow-md"
-                : "bg-[#120f24] text-zinc-400 hover:text-white border border-violet-950"
+                ? "bg-slate-700 text-white font-bold shadow-md"
+                : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
             }`}
           >
             ยกเลิกแล้ว
@@ -371,23 +368,24 @@ export default function InvoiceListClient({
         </div>
 
         <div className="relative w-full sm:w-64">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
           <input
             type="text"
             placeholder="ค้นหาเลขที่บิล, เลขห้อง, หรือผู้เช่า..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#120f24] border border-violet-950 text-xs text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500"
+            onInput={handleEmojiInput}
+            className="w-full pl-9 pr-4 py-2 rounded-xl bg-[#0b1120] border border-slate-800 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>
 
       {/* Main Invoices Table */}
-      <div className="bg-[#120f24] rounded-3xl border border-violet-950/80 shadow-2xl overflow-hidden">
+      <div className="bg-[#0b1120] rounded-3xl border border-slate-800 shadow-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="border-b border-violet-950/80 bg-[#16122d]/80 text-zinc-300 font-bold">
+              <tr className="border-b border-slate-800 bg-[#0f172a] text-slate-300 font-bold">
                 <th className="py-3.5 px-4 w-36">เลขที่บิล</th>
                 <th className="py-3.5 px-3 w-28">ห้อง / ชั้น</th>
                 <th className="py-3.5 px-3 w-36">ผู้เช่า</th>
@@ -400,11 +398,11 @@ export default function InvoiceListClient({
                 <th className="py-3.5 px-4 text-center w-28">จัดการ</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-violet-950/50">
+            <tbody className="divide-y divide-slate-800/60">
               {filteredInvoices.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-12 text-center text-zinc-500">
-                    <FileText className="w-8 h-8 mx-auto text-zinc-600 mb-2 opacity-50" />
+                  <td colSpan={10} className="py-12 text-center text-slate-500">
+                    <FileText className="w-8 h-8 mx-auto text-slate-600 mb-2 opacity-50" />
                     ไม่พบรายการใบแจ้งหนี้ตามเงื่อนไขที่เลือก
                   </td>
                 </tr>
@@ -412,36 +410,36 @@ export default function InvoiceListClient({
                 filteredInvoices.map((inv) => (
                   <tr
                     key={inv.id}
-                    className={`hover:bg-[#16122d]/60 transition-colors ${
-                      inv.isOverdue ? "bg-amber-950/10" : ""
+                    className={`hover:bg-slate-800/40 transition-colors ${
+                      inv.isOverdue ? "bg-amber-950/15" : ""
                     } ${inv.status === "cancelled" ? "opacity-50 line-through" : ""}`}
                   >
                     <td className="py-3 px-4">
                       <Link
                         href={`/invoices/${inv.id}`}
-                        className="font-mono font-bold text-white hover:text-violet-300 transition-colors block"
+                        className="font-mono font-bold text-white hover:text-blue-400 transition-colors block"
                       >
                         {inv.invoiceNo}
                       </Link>
-                      <span className="text-[10px] text-zinc-500 block">
+                      <span className="text-[10px] text-slate-500 block">
                         ออก {formatThaiDate(inv.issuedAt)}
                       </span>
                     </td>
 
                     <td className="py-3 px-3">
                       <span className="font-black text-white block">ห้อง {inv.roomNo}</span>
-                      <span className="text-[10px] text-zinc-500">ชั้น {inv.floor}</span>
+                      <span className="text-[10px] text-slate-500">ชั้น {inv.floor}</span>
                     </td>
 
                     <td className="py-3 px-3">
-                      <span className="font-bold text-zinc-200 block truncate max-w-[130px]">
+                      <span className="font-bold text-slate-200 block truncate max-w-[130px]">
                         {inv.tenantName}
                       </span>
-                      <span className="text-[10px] text-zinc-500">{inv.tenantPhone}</span>
+                      <span className="text-[10px] text-slate-500">{inv.tenantPhone}</span>
                     </td>
 
                     <td className="py-3 px-3">
-                      <span className="font-medium text-zinc-300">{inv.billingMonthThai}</span>
+                      <span className="font-medium text-slate-300">{inv.billingMonthThai}</span>
                     </td>
 
                     <td className="py-3 px-3 text-right font-mono font-bold text-white">
@@ -464,7 +462,7 @@ export default function InvoiceListClient({
                     <td className="py-3 px-3">
                       <span
                         className={`block font-medium ${
-                          inv.isOverdue ? "text-rose-400 font-bold" : "text-zinc-300"
+                          inv.isOverdue ? "text-rose-400 font-bold" : "text-slate-300"
                         }`}
                       >
                         {inv.dueDateThai}
@@ -493,12 +491,12 @@ export default function InvoiceListClient({
                         </span>
                       )}
                       {inv.status === "unpaid" && !inv.isOverdue && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30">
                           <Clock className="w-3 h-3" /> รอชำระ
                         </span>
                       )}
                       {inv.status === "cancelled" && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-zinc-800 text-zinc-400 border border-zinc-700">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
                           ยกเลิกแล้ว
                         </span>
                       )}
@@ -508,14 +506,14 @@ export default function InvoiceListClient({
                       <div className="flex items-center justify-center gap-1">
                         <Link
                           href={`/invoices/${inv.id}`}
-                          className="p-1.5 rounded-lg bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 transition-colors"
+                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
                           title="ดูรายละเอียดบิล"
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </Link>
                         <Link
                           href={`/invoices/${inv.id}/print`}
-                          className="p-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 transition-colors"
+                          className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
                           title="พิมพ์ใบแจ้งหนี้ A4"
                         >
                           <Printer className="w-3.5 h-3.5" />

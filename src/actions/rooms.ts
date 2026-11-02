@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { RoomStatus } from "@prisma/client";
 import { requireStaffOrAdmin } from "@/lib/auth-guard";
+import { stripEmoji } from "@/lib/emoji";
+import { setToastCookie } from "@/lib/toast";
 
 export type FormState = {
   error?: string;
@@ -19,11 +21,14 @@ export async function createRoom(prevState: FormState, formData: FormData): Prom
   const auth = await requireStaffOrAdmin();
   if (!auth.authorized) return { error: auth.error };
 
-  const roomNo = formData.get("roomNo")?.toString().trim();
+  const rawRoomNo = formData.get("roomNo")?.toString().trim();
+  const roomNo = rawRoomNo ? stripEmoji(rawRoomNo) : "";
   const floor = parseInt(formData.get("floor")?.toString() || "1", 10);
-  const roomType = formData.get("roomType")?.toString().trim() || "พัดลม";
+  const rawRoomType = formData.get("roomType")?.toString().trim() || "พัดลม";
+  const roomType = stripEmoji(rawRoomType);
   const baseRent = parseFloat(formData.get("baseRent")?.toString() || "0");
-  const note = formData.get("note")?.toString().trim() || null;
+  const rawNote = formData.get("note")?.toString().trim();
+  const note = rawNote ? stripEmoji(rawNote) : null;
   const statusInput = formData.get("status")?.toString() as RoomStatus;
 
   // ห้องใหม่มีสถานะเป็น vacant หรือ maintenance เท่านั้น (ห้าม occupied โดยตรง)
@@ -63,6 +68,7 @@ export async function createRoom(prevState: FormState, formData: FormData): Prom
 
   revalidatePath("/rooms");
   revalidatePath("/");
+  await setToastCookie(`เพิ่มห้องพัก ${roomNo} สำเร็จเรียบร้อยแล้ว`, "success");
   redirect("/rooms");
 }
 
@@ -76,14 +82,18 @@ export async function createRoomsBatch(prevState: FormState, formData: FormData)
   const floor = parseInt(formData.get("floor")?.toString() || "1", 10);
   const startNum = parseInt(formData.get("startNum")?.toString() || "1", 10);
   const endNum = parseInt(formData.get("endNum")?.toString() || "10", 10);
-  const roomType = formData.get("roomType")?.toString().trim() || "พัดลม";
+  const rawRoomType = formData.get("roomType")?.toString().trim() || "พัดลม";
+  const roomType = stripEmoji(rawRoomType);
   const baseRent = parseFloat(formData.get("baseRent")?.toString() || "3500");
 
   if (isNaN(floor) || floor < 0) {
     return { error: "กรุณาระบุชั้นที่ถูกต้อง" };
   }
-  if (isNaN(startNum) || isNaN(endNum) || startNum > endNum || startNum < 1 || endNum > 99) {
-    return { error: "ช่วงหมายเลขห้องต้องอยู่ระหว่าง 1 ถึง 99" };
+  if (isNaN(startNum) || isNaN(endNum) || startNum <= 0 || endNum < startNum) {
+    return { error: "ช่วงหมายเลขห้องไม่ถูกต้อง (เลขเริ่มต้นต้องน้อยกว่าหรือเท่ากับเลขสิ้นสุด)" };
+  }
+  if (endNum - startNum + 1 > 50) {
+    return { error: "สามารถสร้างห้องพร้อมกันได้ไม่เกิน 50 ห้องต่อครั้ง" };
   }
   if (isNaN(baseRent) || baseRent <= 0) {
     return { error: "กรุณาระบุค่าเช่ามาตรฐานมากกว่า 0 บาท" };
@@ -92,10 +102,7 @@ export async function createRoomsBatch(prevState: FormState, formData: FormData)
   try {
     const roomsToCreate = [];
     for (let i = startNum; i <= endNum; i++) {
-      // ตัวอย่าง: ชั้น 1, หมายเลข 1 -> "101", หมายเลข 12 -> "112"
-      const paddedNum = i < 10 ? `0${i}` : `${i}`;
-      const roomNo = `${floor}${paddedNum}`;
-
+      const roomNo = `${floor}${i.toString().padStart(2, "0")}`;
       roomsToCreate.push({
         roomNo,
         floor,
@@ -105,7 +112,7 @@ export async function createRoomsBatch(prevState: FormState, formData: FormData)
       });
     }
 
-    // กรองห้องที่ซ้ำในระบบออก
+    // ตรวจสอบห้องที่มีอยู่แล้ว
     const existingRooms = await prisma.room.findMany({
       where: {
         roomNo: { in: roomsToCreate.map((r) => r.roomNo) },
@@ -126,9 +133,11 @@ export async function createRoomsBatch(prevState: FormState, formData: FormData)
 
     revalidatePath("/rooms");
     revalidatePath("/");
+    const msg = `สร้างห้องพักสำเร็จ ${finalRooms.length} ห้อง (${finalRooms.map((r) => r.roomNo).join(", ")})`;
+    await setToastCookie(msg, "success");
     return {
       success: true,
-      message: `สร้างห้องพักสำเร็จ ${finalRooms.length} ห้อง (${finalRooms.map((r) => r.roomNo).join(", ")})`,
+      message: msg,
     };
   } catch (err: any) {
     return { error: err.message || "เกิดข้อผิดพลาดในการสร้างห้องพักแบบชุด" };
@@ -146,11 +155,14 @@ export async function updateRoom(
   const auth = await requireStaffOrAdmin();
   if (!auth.authorized) return { error: auth.error };
 
-  const roomNo = formData.get("roomNo")?.toString().trim();
+  const rawRoomNo = formData.get("roomNo")?.toString().trim();
+  const roomNo = rawRoomNo ? stripEmoji(rawRoomNo) : "";
   const floor = parseInt(formData.get("floor")?.toString() || "1", 10);
-  const roomType = formData.get("roomType")?.toString().trim() || "พัดลม";
+  const rawRoomType = formData.get("roomType")?.toString().trim() || "พัดลม";
+  const roomType = stripEmoji(rawRoomType);
   const baseRent = parseFloat(formData.get("baseRent")?.toString() || "0");
-  const note = formData.get("note")?.toString().trim() || null;
+  const rawNote = formData.get("note")?.toString().trim();
+  const note = rawNote ? stripEmoji(rawNote) : null;
   const statusInput = formData.get("status")?.toString() as RoomStatus;
 
   if (!roomNo) {
@@ -215,6 +227,7 @@ export async function updateRoom(
   revalidatePath("/rooms");
   revalidatePath(`/rooms/${id}`);
   revalidatePath("/");
+  await setToastCookie(`บันทึกการแก้ไขห้องพัก ${roomNo} สำเร็จ`, "success");
   redirect(`/rooms/${id}`);
 }
 
@@ -248,5 +261,6 @@ export async function deleteRoom(id: number): Promise<FormState> {
 
   revalidatePath("/rooms");
   revalidatePath("/");
+  await setToastCookie("ลบห้องพักสำเร็จเรียบร้อยแล้ว", "info");
   redirect("/rooms");
 }

@@ -56,7 +56,7 @@ async function EditRoomContent({ params }: { params: Promise<{ id: string }> }) 
       <div className="flex items-center justify-between">
         <Link
           href={`/rooms/${room.id}`}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> กลับหน้ารายละเอียดห้องพัก
         </Link>
@@ -74,7 +74,7 @@ export default function EditRoomPage({ params }: { params: Promise<{ id: string 
       <div className="p-6 md:p-10 max-w-2xl mx-auto space-y-6">
         <Suspense
           fallback={
-            <div className="h-96 bg-violet-950/20 rounded-3xl border border-violet-900/20 animate-pulse"></div>
+            <div className="h-96 bg-slate-900/40 rounded-3xl border border-slate-800 animate-pulse"></div>
           }
         >
           <EditRoomContent params={params} />

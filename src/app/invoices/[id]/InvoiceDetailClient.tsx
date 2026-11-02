@@ -19,14 +19,12 @@ import {
   Edit3,
   XCircle,
   Sparkles,
-  DollarSign,
-  AlertCircle,
   Receipt,
-  Phone,
   Landmark,
-  QrCode,
+  X,
 } from "lucide-react";
 import { updateInvoiceOtherFee, applyLateFee, cancelInvoice } from "@/actions/invoices";
+import { handleEmojiInput } from "@/lib/emoji";
 
 export type InvoiceDetailData = {
   id: number;
@@ -142,25 +140,25 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
       <div className="flex items-center justify-between">
         <Link
           href="/invoices"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> กลับหน้ารายการใบแจ้งหนี้
         </Link>
       </div>
 
       {/* Top Banner Card */}
-      <div className="bg-[#120f24] rounded-3xl border border-violet-950/80 shadow-2xl p-6 md:p-8 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-violet-950/60 pb-6">
+      <div className="bg-[#0b1120] rounded-3xl border border-slate-800 shadow-2xl p-6 md:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-6">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-violet-600 via-purple-600 to-fuchsia-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-violet-950/60 ring-1 ring-violet-400/40">
+            <div className="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-blue-950/50 border border-blue-500/30">
               <FileText className="w-7 h-7" />
             </div>
             <div>
               <div className="flex items-center gap-2.5">
                 <h1 className="text-2xl font-black text-white">{invoice.invoiceNo}</h1>
                 {invoice.status === "paid" && (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                    🟢 ชำระแล้ว
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 inline-flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3 h-3" /> ชำระแล้ว
                   </span>
                 )}
                 {invoice.status === "partial" && (
@@ -169,24 +167,24 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
                   </span>
                 )}
                 {invoice.status === "unpaid" && invoice.isOverdue && (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                    🔴 เกินกำหนดชำระ
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 inline-flex items-center gap-1.5">
+                    <AlertTriangle className="w-3 h-3" /> เกินกำหนดชำระ
                   </span>
                 )}
                 {invoice.status === "unpaid" && !invoice.isOverdue && (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                    รอชำระ
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30 inline-flex items-center gap-1.5">
+                    <Clock className="w-3 h-3" /> รอชำระ
                   </span>
                 )}
                 {invoice.status === "cancelled" && (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-zinc-800 text-zinc-400 border border-zinc-700">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700">
                     ยกเลิกแล้ว
                   </span>
                 )}
               </div>
-              <p className="text-xs text-zinc-400 mt-1">
+              <p className="text-xs text-slate-400 mt-1">
                 ห้อง {invoice.room.roomNo} (ชั้น {invoice.room.floor}) • รอบบิลประจำเดือน{" "}
-                <strong className="text-zinc-200">{invoice.billingMonthThai}</strong>
+                <strong className="text-slate-200">{invoice.billingMonthThai}</strong>
               </p>
             </div>
           </div>
@@ -195,9 +193,9 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
           <div className="flex flex-wrap items-center gap-2.5">
             <Link
               href={`/invoices/${invoice.id}/print`}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-violet-950/60 hover:bg-violet-900/60 text-violet-300 text-xs font-bold border border-violet-800/40 transition-colors shadow-sm"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition-colors shadow-sm"
             >
-              <Printer className="w-4 h-4 text-violet-400" />
+              <Printer className="w-4 h-4 text-blue-400" />
               พิมพ์ใบแจ้งหนี้ A4
             </Link>
 
@@ -205,7 +203,7 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
             {invoice.status !== "paid" && invoice.status !== "cancelled" && (
               <Link
                 href={`/payments?invoiceId=${invoice.id}`}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black shadow-lg shadow-emerald-950/40 transition-all hover:scale-105"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-lg shadow-blue-950/40 border border-blue-500/30 transition-all hover:scale-105"
               >
                 <CreditCard className="w-4 h-4" />
                 รับชำระเงิน (สเต็ป 6)
@@ -256,16 +254,16 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
               )}
               <span className="font-semibold">{feedback.text}</span>
             </div>
-            <button onClick={() => setFeedback(null)} className="text-zinc-500 hover:text-zinc-300 font-bold">
-              ✕
+            <button onClick={() => setFeedback(null)} className="text-slate-500 hover:text-slate-300">
+              <X className="w-4 h-4" />
             </button>
           </div>
         )}
 
         {/* Financial Highlights Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
-          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-1">
-            <span className="text-[11px] font-semibold text-zinc-500">ยอดรวมเรียกเก็บสุทธิ</span>
+          <div className="p-4 rounded-2xl bg-[#080c15] border border-slate-800 space-y-1">
+            <span className="text-[11px] font-semibold text-slate-500">ยอดรวมเรียกเก็บสุทธิ</span>
             <p className="text-xl font-black text-white font-mono">
               ฿{invoice.totalAmount.toLocaleString()}
             </p>
@@ -276,23 +274,23 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
             )}
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-1">
-            <span className="text-[11px] font-semibold text-zinc-500">ชำระแล้ว</span>
+          <div className="p-4 rounded-2xl bg-[#080c15] border border-slate-800 space-y-1">
+            <span className="text-[11px] font-semibold text-slate-500">ชำระแล้ว</span>
             <p className="text-xl font-black text-emerald-400 font-mono">
               ฿{invoice.paidAmount.toLocaleString()}
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-1">
-            <span className="text-[11px] font-semibold text-zinc-500">ยอดคงค้างชำระ</span>
+          <div className="p-4 rounded-2xl bg-[#080c15] border border-slate-800 space-y-1">
+            <span className="text-[11px] font-semibold text-slate-500">ยอดคงค้างชำระ</span>
             <p className="text-xl font-black text-rose-400 font-mono">
               ฿{invoice.balance.toLocaleString()}
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-1">
-            <span className="text-[11px] font-semibold text-zinc-500">ครบกำหนดชำระ</span>
-            <p className={`text-sm font-bold ${invoice.isOverdue ? "text-rose-400" : "text-zinc-200"}`}>
+          <div className="p-4 rounded-2xl bg-[#080c15] border border-slate-800 space-y-1">
+            <span className="text-[11px] font-semibold text-slate-500">ครบกำหนดชำระ</span>
+            <p className={`text-sm font-bold ${invoice.isOverdue ? "text-rose-400" : "text-slate-200"}`}>
               {invoice.dueDateThai}
             </p>
             {invoice.isOverdue && (
@@ -306,37 +304,37 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
         {/* Invoice Items Breakdown (BR-05) */}
         <div className="space-y-3">
           <div className="flex items-center justify-between text-xs">
-            <h3 className="font-bold text-violet-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-fuchsia-400" />
+            <h3 className="font-bold text-blue-300 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-blue-400" />
               รายละเอียดรายการในใบแจ้งหนี้ (คำนวณตามสูตร BR-05)
             </h3>
             {canEditOther && (
               <button
                 type="button"
                 onClick={() => setIsEditOtherOpen(true)}
-                className="text-xs font-bold text-violet-400 hover:text-violet-300 flex items-center gap-1"
+                className="text-xs font-bold text-blue-400 hover:text-blue-300 flex items-center gap-1"
               >
                 <Edit3 className="w-3.5 h-3.5" /> แก้ไขค่าใช้จ่ายอื่น ๆ
               </button>
             )}
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-violet-950/80 bg-[#0c0a18]">
+          <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-[#080c15]">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-violet-950/80 bg-[#07050f] text-zinc-400 font-bold">
+                <tr className="border-b border-slate-800 bg-[#0f172a] text-slate-400 font-bold">
                   <th className="py-2.5 px-4 w-12 text-center">ลำดับ</th>
                   <th className="py-2.5 px-4">รายการ</th>
                   <th className="py-2.5 px-4 text-center">รายละเอียด / การคำนวณ</th>
                   <th className="py-2.5 px-4 text-right">จำนวนเงิน (บาท)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-violet-950/50">
+              <tbody className="divide-y divide-slate-800/60">
                 {/* 1. ค่าเช่าห้อง */}
                 <tr>
-                  <td className="py-3 px-4 text-center font-mono text-zinc-500">1</td>
+                  <td className="py-3 px-4 text-center font-mono text-slate-500">1</td>
                   <td className="py-3 px-4 font-bold text-white">ค่าเช่าห้องพักประจำเดือน</td>
-                  <td className="py-3 px-4 text-center text-zinc-400">
+                  <td className="py-3 px-4 text-center text-slate-400">
                     อัตราตามสัญญาเช่า (ห้อง {invoice.room.roomNo})
                   </td>
                   <td className="py-3 px-4 text-right font-mono font-bold text-white">
@@ -346,27 +344,27 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
 
                 {/* 2. ค่าน้ำประปา */}
                 <tr>
-                  <td className="py-3 px-4 text-center font-mono text-zinc-500">2</td>
-                  <td className="py-3 px-4 font-bold text-cyan-300 flex items-center gap-1.5">
-                    <Droplet className="w-3.5 h-3.5 text-cyan-400" /> ค่าน้ำประปา
+                  <td className="py-3 px-4 text-center font-mono text-slate-500">2</td>
+                  <td className="py-3 px-4 font-bold text-blue-300 flex items-center gap-1.5">
+                    <Droplet className="w-3.5 h-3.5 text-blue-400" /> ค่าน้ำประปา
                   </td>
-                  <td className="py-3 px-4 text-center text-zinc-400 font-mono text-[11px]">
+                  <td className="py-3 px-4 text-center text-slate-400 font-mono text-[11px]">
                     มิเตอร์: {invoice.waterPrev} → {invoice.waterCurr} ={" "}
-                    <strong className="text-cyan-300">{invoice.waterUnits} หน่วย</strong> @฿
+                    <strong className="text-blue-300">{invoice.waterUnits} หน่วย</strong> @฿
                     {invoice.waterRate}
                   </td>
-                  <td className="py-3 px-4 text-right font-mono font-bold text-cyan-300">
+                  <td className="py-3 px-4 text-right font-mono font-bold text-blue-300">
                     ฿{invoice.waterAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </td>
                 </tr>
 
                 {/* 3. ค่าไฟฟ้า */}
                 <tr>
-                  <td className="py-3 px-4 text-center font-mono text-zinc-500">3</td>
+                  <td className="py-3 px-4 text-center font-mono text-slate-500">3</td>
                   <td className="py-3 px-4 font-bold text-amber-300 flex items-center gap-1.5">
                     <Zap className="w-3.5 h-3.5 text-amber-400" /> ค่ากระแสไฟฟ้า
                   </td>
-                  <td className="py-3 px-4 text-center text-zinc-400 font-mono text-[11px]">
+                  <td className="py-3 px-4 text-center text-slate-400 font-mono text-[11px]">
                     มิเตอร์: {invoice.elecPrev} → {invoice.elecCurr} ={" "}
                     <strong className="text-amber-300">{invoice.electricUnits} หน่วย</strong> @฿
                     {invoice.electricRate}
@@ -379,12 +377,12 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
                 {/* 4. ค่าอื่น ๆ (ถ้ามี) */}
                 {invoice.otherAmount > 0 && (
                   <tr>
-                    <td className="py-3 px-4 text-center font-mono text-zinc-500">4</td>
-                    <td className="py-3 px-4 font-bold text-violet-300">
+                    <td className="py-3 px-4 text-center font-mono text-slate-500">4</td>
+                    <td className="py-3 px-4 font-bold text-blue-300">
                       ค่าใช้จ่ายอื่น ๆ {invoice.otherNote ? `(${invoice.otherNote})` : ""}
                     </td>
-                    <td className="py-3 px-4 text-center text-zinc-400">ค่าบริการเพิ่มเติม</td>
-                    <td className="py-3 px-4 text-right font-mono font-bold text-violet-300">
+                    <td className="py-3 px-4 text-center text-slate-400">ค่าบริการเพิ่มเติม</td>
+                    <td className="py-3 px-4 text-right font-mono font-bold text-blue-300">
                       ฿{invoice.otherAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </td>
                   </tr>
@@ -393,7 +391,7 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
                 {/* 5. ค่าปรับล่าช้า (ถ้ามี) */}
                 {invoice.lateFee > 0 && (
                   <tr className="bg-amber-950/20">
-                    <td className="py-3 px-4 text-center font-mono text-zinc-500">#</td>
+                    <td className="py-3 px-4 text-center font-mono text-slate-500">#</td>
                     <td className="py-3 px-4 font-bold text-amber-400">ค่าปรับชำระล่าช้า (BR-09)</td>
                     <td className="py-3 px-4 text-center text-amber-400/80">
                       เนื่องจากเลยวันครบกำหนดชำระ
@@ -405,11 +403,11 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
                 )}
 
                 {/* Grand Total Row */}
-                <tr className="border-t-2 border-violet-950 bg-[#16122d]/60 font-black text-sm">
+                <tr className="border-t-2 border-slate-800 bg-[#0f172a] font-black text-sm">
                   <td colSpan={3} className="py-3.5 px-4 text-right text-white">
                     ยอดรวมสุทธิทั้งสิ้น (Total Amount)
                   </td>
-                  <td className="py-3.5 px-4 text-right text-emerald-400 font-mono text-base">
+                  <td className="py-3.5 px-4 text-right text-blue-400 font-mono text-base">
                     ฿{invoice.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </td>
                 </tr>
@@ -421,34 +419,34 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
         {/* Room, Tenant, & Payment Channel Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
           {/* Tenant Details */}
-          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-2">
-            <span className="text-[11px] font-bold text-violet-400 flex items-center gap-1.5">
+          <div className="p-4 rounded-2xl bg-[#080c15] border border-slate-800 space-y-2">
+            <span className="text-[11px] font-bold text-blue-400 flex items-center gap-1.5">
               <User className="w-3.5 h-3.5" /> ข้อมูลผู้เช่า
             </span>
             <div className="space-y-1">
               <Link
                 href={`/tenants/${invoice.tenant.id}`}
-                className="font-bold text-white text-sm hover:text-violet-300 transition-colors block"
+                className="font-bold text-white text-sm hover:text-blue-400 transition-colors block"
               >
                 คุณ {invoice.tenant.firstName} {invoice.tenant.lastName}
               </Link>
-              <p className="text-zinc-400">เบอร์โทรศัพท์: {invoice.tenant.phone}</p>
-              <p className="text-zinc-500 font-mono">เลขบัตร ปชช.: {invoice.tenant.idCardNoMasked}</p>
+              <p className="text-slate-400">เบอร์โทรศัพท์: {invoice.tenant.phone}</p>
+              <p className="text-slate-500 font-mono">เลขบัตร ปชช.: {invoice.tenant.idCardNoMasked}</p>
               {invoice.tenant.coTenantName && (
-                <p className="text-violet-300/80">รูมเมท: {invoice.tenant.coTenantName}</p>
+                <p className="text-blue-300/80">รูมเมท: {invoice.tenant.coTenantName}</p>
               )}
               {invoice.tenant.vehicleInfo && (
-                <p className="text-cyan-300/80">ยานพาหนะ: {invoice.tenant.vehicleInfo}</p>
+                <p className="text-slate-400">ยานพาหนะ: {invoice.tenant.vehicleInfo}</p>
               )}
             </div>
           </div>
 
           {/* Dormitory Bank / PromptPay Details */}
-          <div className="p-4 rounded-2xl bg-[#0c0a18] border border-violet-950/60 space-y-2">
+          <div className="p-4 rounded-2xl bg-[#080c15] border border-slate-800 space-y-2">
             <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1.5">
               <Landmark className="w-3.5 h-3.5" /> ช่องทางการชำระเงินของหอพัก
             </span>
-            <div className="space-y-1 text-zinc-300">
+            <div className="space-y-1 text-slate-300">
               <p className="font-bold text-white">{invoice.dormSettings.dormName}</p>
               {invoice.dormSettings.bankName && (
                 <p>
@@ -459,12 +457,12 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
                 </p>
               )}
               {invoice.dormSettings.bankAccountName && (
-                <p className="text-zinc-400 text-[11px]">
+                <p className="text-slate-400 text-[11px]">
                   ชื่อบัญชี: {invoice.dormSettings.bankAccountName}
                 </p>
               )}
               {invoice.dormSettings.promptpayId && (
-                <p className="text-cyan-300 font-mono text-[11px]">
+                <p className="text-blue-300 font-mono text-[11px]">
                   พร้อมเพย์ (PromptPay): {invoice.dormSettings.promptpayId}
                 </p>
               )}
@@ -474,26 +472,26 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
 
         {/* Payment History List (If any) */}
         {invoice.payments.length > 0 && (
-          <div className="space-y-3 pt-3 border-t border-violet-950/60">
+          <div className="space-y-3 pt-3 border-t border-slate-800">
             <h3 className="font-bold text-emerald-400 text-xs flex items-center gap-1.5">
               <Receipt className="w-4 h-4" /> ประวัติการรับชำระเงินในบิลนี้ ({invoice.payments.length} รายการ)
             </h3>
-            <div className="overflow-x-auto rounded-2xl border border-violet-950 bg-[#0c0a18]">
+            <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-[#080c15]">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-violet-950 bg-[#080612] text-zinc-400 font-bold">
+                  <tr className="border-b border-slate-800 bg-[#0f172a] text-slate-400 font-bold">
                     <th className="py-2 px-4">เลขที่ใบเสร็จ</th>
                     <th className="py-2 px-4">วิธีชำระ</th>
                     <th className="py-2 px-4">วันเวลาที่รับเงิน</th>
                     <th className="py-2 px-4 text-right">จำนวนเงิน</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-violet-950/40">
+                <tbody className="divide-y divide-slate-800/40">
                   {invoice.payments.map((p) => (
                     <tr key={p.id}>
                       <td className="py-2.5 px-4 font-mono font-bold text-white">{p.receiptNo}</td>
-                      <td className="py-2.5 px-4 text-zinc-300 capitalize">{p.method}</td>
-                      <td className="py-2.5 px-4 text-zinc-400">{new Date(p.paidAt).toLocaleString("th-TH")}</td>
+                      <td className="py-2.5 px-4 text-slate-300 capitalize">{p.method}</td>
+                      <td className="py-2.5 px-4 text-slate-400">{new Date(p.paidAt).toLocaleString("th-TH")}</td>
                       <td className="py-2.5 px-4 text-right font-mono font-bold text-emerald-400">
                         ฿{p.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </td>
@@ -509,11 +507,11 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
       {/* Modal: แก้ไขค่าใช้จ่ายอื่น ๆ */}
       {isEditOtherOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#120f24] rounded-3xl border border-violet-950/80 max-w-md w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-[#0b1120] rounded-3xl border border-slate-800 max-w-md w-full p-6 shadow-2xl space-y-4">
             <h3 className="text-base font-black text-white flex items-center gap-2">
-              <Edit3 className="w-5 h-5 text-violet-400" /> แก้ไขค่าใช้จ่ายอื่น ๆ
+              <Edit3 className="w-5 h-5 text-blue-400" /> แก้ไขค่าใช้จ่ายอื่น ๆ
             </h3>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-slate-400">
               กำหนดค่าบริการเพิ่มเติม เช่น ค่าส่วนกลาง, ค่าจอดรถ, ค่าคีย์การ์ด (สามารถแก้ได้ขณะสถานะยังไม่ชำระ)
             </p>
 
@@ -531,7 +529,7 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
               className="space-y-4 pt-2"
             >
               <div className="space-y-1">
-                <label className="text-xs font-bold text-zinc-300">จำนวนเงิน (บาท)</label>
+                <label className="text-xs font-bold text-slate-300">จำนวนเงิน (บาท)</label>
                 <input
                   type="number"
                   step="0.01"
@@ -539,32 +537,33 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
                   name="otherAmount"
                   defaultValue={invoice.otherAmount}
                   required
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#090714] border border-violet-950 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#080c15] border border-slate-800 text-sm font-bold text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-zinc-300">รายละเอียด / หมายเหตุ</label>
+                <label className="text-xs font-bold text-slate-300">รายละเอียด / หมายเหตุ</label>
                 <input
                   type="text"
                   name="otherNote"
                   defaultValue={invoice.otherNote || ""}
                   placeholder="เช่น ค่าส่วนกลาง, ค่าจอดรถยนต์"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#090714] border border-violet-950 text-xs text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                  onInput={handleEmojiInput}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#080c15] border border-slate-800 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-violet-950">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setIsEditOtherOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-bold text-zinc-300 border border-zinc-700"
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-slate-300 border border-slate-800"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white text-xs font-black shadow-lg"
+                  className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-black shadow-lg shadow-blue-950/50"
                 >
                   บันทึก
                 </button>
@@ -577,31 +576,32 @@ export default function InvoiceDetailClient({ invoice }: { invoice: InvoiceDetai
       {/* Modal: ยืนยันยกเลิกใบแจ้งหนี้ */}
       {isCancelOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-[#120f24] rounded-3xl border border-red-950/80 max-w-md w-full p-6 shadow-2xl space-y-4">
+          <div className="bg-[#0b1120] rounded-3xl border border-red-950/80 max-w-md w-full p-6 shadow-2xl space-y-4">
             <h3 className="text-base font-black text-red-300 flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-red-400" /> ยืนยันยกเลิกใบแจ้งหนี้
             </h3>
-            <p className="text-xs text-zinc-300">
+            <p className="text-xs text-slate-300">
               การยกเลิกใบแจ้งหนี้จะเปลี่ยนสถานะเป็น <strong className="text-red-400">cancelled</strong> และทำการ{" "}
               <strong>ปลดล็อกมิเตอร์น้ำ-ไฟ</strong> ของรอบเดือนนี้ เพื่อให้ออกใบแจ้งหนี้ใหม่ได้
             </p>
 
             <div className="space-y-1">
-              <label className="text-xs font-bold text-zinc-300">ระบุเหตุผลการยกเลิก (ถ้ามี)</label>
+              <label className="text-xs font-bold text-slate-300">ระบุเหตุผลการยกเลิก (ถ้ามี)</label>
               <input
                 type="text"
                 placeholder="เช่น จดมิเตอร์ผิด, ออกบิลซ้ำซ้อน"
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-[#090714] border border-violet-950 text-xs text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                onInput={handleEmojiInput}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#080c15] border border-slate-800 text-xs text-white focus:outline-none focus:ring-2 focus:ring-red-500"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-violet-950">
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
               <button
                 type="button"
                 onClick={() => setIsCancelOpen(false)}
-                className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-bold text-zinc-300 border border-zinc-700"
+                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-xs font-bold text-slate-300 border border-slate-800"
               >
                 ย้อนกลับ
               </button>

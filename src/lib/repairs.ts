@@ -1,20 +1,21 @@
 // -----------------------------------------------------------------------------
 // Helper functions & Labels สำหรับระบบแจ้งซ่อมแซม (Repairs Management)
+// ปรับปรุงธีม ฟ้า-ดำ-ขาว และไม่ใช้ Emoji ใดๆ ในข้อความ
 // -----------------------------------------------------------------------------
 
 export function formatRepairCategory(category: string): { label: string; icon: string } {
   switch (category) {
     case "electric":
-      return { label: "ระบบไฟฟ้า", icon: "⚡" };
+      return { label: "ระบบไฟฟ้า", icon: "" };
     case "plumbing":
-      return { label: "ประปา / สุขภัณฑ์", icon: "🚿" };
+      return { label: "ประปา / สุขภัณฑ์", icon: "" };
     case "aircon":
-      return { label: "เครื่องปรับอากาศ", icon: "❄️" };
+      return { label: "เครื่องปรับอากาศ", icon: "" };
     case "furniture":
-      return { label: "เฟอร์นิเจอร์ / ประตูหน้าต่าง", icon: "🪑" };
+      return { label: "เฟอร์นิเจอร์ / ประตูหน้าต่าง", icon: "" };
     case "other":
     default:
-      return { label: "อื่น ๆ", icon: "🔧" };
+      return { label: "อื่น ๆ", icon: "" };
   }
 }
 
@@ -25,19 +26,19 @@ export function formatRepairPriority(priority: string): {
   switch (priority) {
     case "urgent":
       return {
-        label: "ด่วนมาก 🚨",
-        badgeClass: "bg-red-500/20 text-red-300 border-red-500/40",
+        label: "ด่วนมาก",
+        badgeClass: "bg-rose-500/10 text-rose-300 border border-rose-500/30",
       };
     case "low":
       return {
         label: "ไม่ด่วน",
-        badgeClass: "bg-zinc-800 text-zinc-400 border-zinc-700",
+        badgeClass: "bg-slate-800 text-slate-400 border border-slate-700",
       };
     case "normal":
     default:
       return {
         label: "ปกติ",
-        badgeClass: "bg-violet-500/20 text-violet-300 border-violet-500/40",
+        badgeClass: "bg-blue-500/10 text-blue-300 border border-blue-500/30",
       };
   }
 }
@@ -49,24 +50,24 @@ export function formatRepairStatus(status: string): {
   switch (status) {
     case "in_progress":
       return {
-        label: "กำลังดำเนินการ 🔧",
-        badgeClass: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+        label: "กำลังดำเนินการ",
+        badgeClass: "bg-amber-500/10 text-amber-300 border border-amber-500/30",
       };
     case "done":
       return {
-        label: "เสร็จสิ้นแล้ว ✅",
-        badgeClass: "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+        label: "เสร็จสิ้นแล้ว",
+        badgeClass: "bg-emerald-500/10 text-emerald-300 border border-emerald-500/30",
       };
     case "cancelled":
       return {
         label: "ยกเลิกแล้ว",
-        badgeClass: "bg-zinc-800 text-zinc-400 border-zinc-700",
+        badgeClass: "bg-slate-800 text-slate-400 border border-slate-700",
       };
     case "open":
     default:
       return {
-        label: "รอดำเนินการ ⏳",
-        badgeClass: "bg-cyan-500/20 text-cyan-300 border-cyan-500/40",
+        label: "รอดำเนินการ",
+        badgeClass: "bg-sky-500/10 text-sky-300 border border-sky-500/30",
       };
   }
 }

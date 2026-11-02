@@ -19,6 +19,9 @@ import {
   CreditCard,
 } from "lucide-react";
 import { loginTenant, loginStaff } from "@/actions/auth";
+import { handleEmojiInput } from "@/lib/emoji";
+import { ThemeToggle } from "@/components/ThemeProvider";
+import { useToast } from "@/components/ToastProvider";
 
 export type DemoTenant = {
   id: number;
@@ -46,6 +49,7 @@ export default function LoginClient({
   const [password, setPassword] = useState("");
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   // Handle Tenant Login submit
   const handleTenantSubmit = (e: React.FormEvent) => {
@@ -61,6 +65,7 @@ export default function LoginClient({
       const res = await loginTenant({}, fd);
       if (res?.error) {
         setErrorMessage(res.error);
+        showToast(res.error, "error");
       }
     });
   };
@@ -80,22 +85,7 @@ export default function LoginClient({
       const res = await loginTenant({}, fd);
       if (res?.error) {
         setErrorMessage(res.error);
-      }
-    });
-  };
-
-  // Handle Staff Login submit
-  const handleStaffSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
-
-    startTransition(async () => {
-      const fd = new FormData();
-      fd.append("email", email);
-
-      const res = await loginStaff({}, fd);
-      if (res?.error) {
-        setErrorMessage(res.error);
+        showToast(res.error, "error");
       }
     });
   };
@@ -110,6 +100,7 @@ export default function LoginClient({
       const res = await loginStaff({}, fd);
       if (res?.error) {
         setErrorMessage(res.error);
+        showToast(res.error, "error");
       }
     });
   };
@@ -124,19 +115,42 @@ export default function LoginClient({
       const res = await loginStaff({}, fd);
       if (res?.error) {
         setErrorMessage(res.error);
+        showToast(res.error, "error");
+      }
+    });
+  };
+
+  // Handle Staff Login submit
+  const handleStaffSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+    startTransition(async () => {
+      const fd = new FormData();
+      fd.append("email", email);
+      fd.append("password", password);
+
+      const res = await loginStaff({}, fd);
+      if (res?.error) {
+        setErrorMessage(res.error);
+        showToast(res.error, "error");
       }
     });
   };
 
   return (
-    <div className="min-h-screen bg-[#0c0a18] text-slate-100 flex flex-col justify-center items-center p-4 selection:bg-violet-600 selection:text-white">
+    <div className="min-h-screen bg-[#080c15] text-slate-100 flex flex-col justify-center items-center p-4 selection:bg-blue-600 selection:text-white relative transition-colors duration-200">
+      {/* Theme Toggle Button */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
+
       {/* Background glow */}
-      <div className="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-violet-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="relative z-10 max-w-md w-full space-y-6">
         {/* Logo and Brand */}
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3 rounded-2xl bg-gradient-to-tr from-violet-600 via-purple-600 to-indigo-600 text-white shadow-xl shadow-violet-900/40 border border-violet-400/30">
+          <div className="inline-flex p-3 rounded-2xl bg-gradient-to-tr from-blue-600 via-blue-500 to-sky-400 text-white shadow-xl shadow-blue-900/40 border border-blue-400/30">
             <Building2 className="w-8 h-8" />
           </div>
           <h1 className="text-2xl font-black text-white tracking-tight">หอพักสุขสบาย เพลส</h1>
@@ -146,7 +160,7 @@ export default function LoginClient({
         </div>
 
         {/* Tab Switcher: Tenant vs Staff */}
-        <div className="p-1 rounded-2xl bg-[#120f24] border border-violet-900/30 flex">
+        <div className="p-1 rounded-2xl bg-[#0b1120] border border-slate-800 flex">
           <button
             onClick={() => {
               setActiveTab("tenant");
@@ -154,7 +168,7 @@ export default function LoginClient({
             }}
             className={`flex-1 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
               activeTab === "tenant"
-                ? "bg-violet-600 text-white shadow-md shadow-violet-600/30"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-900/40"
                 : "text-slate-400 hover:text-white"
             }`}
           >
@@ -169,7 +183,7 @@ export default function LoginClient({
             }}
             className={`flex-1 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
               activeTab === "staff"
-                ? "bg-violet-600 text-white shadow-md shadow-violet-600/30"
+                ? "bg-blue-600 text-white shadow-md shadow-blue-900/40"
                 : "text-slate-400 hover:text-white"
             }`}
           >
@@ -187,13 +201,13 @@ export default function LoginClient({
         )}
 
         {/* Form Container Card */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-[#120f24] border border-violet-900/30 shadow-2xl space-y-6">
+        <div className="p-6 sm:p-8 rounded-3xl bg-[#0b1120] border border-slate-800 shadow-2xl space-y-6">
           {/* TAB 1: TENANT LOGIN */}
           {activeTab === "tenant" && (
             <div className="space-y-5">
               <div className="space-y-1">
                 <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <Home className="w-4 h-4 text-violet-400" /> เข้าสู่ระบบพอร์ทัลผู้เช่า
+                  <Home className="w-4 h-4 text-blue-400" /> เข้าสู่ระบบพอร์ทัลผู้เช่า
                 </h2>
                 <p className="text-xs text-slate-400">
                   ตรวจสอบบิลค่าเช่า ค่าน้ำ-ไฟ และติดตามงานแจ้งซ่อมบำรุง
@@ -211,9 +225,10 @@ export default function LoginClient({
                       type="text"
                       value={roomNo}
                       onChange={(e) => setRoomNo(e.target.value)}
+                      onInput={handleEmojiInput}
                       placeholder="เช่น 101, 201"
                       required
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-semibold placeholder:text-slate-500 focus:outline-none focus:border-violet-500"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white text-xs font-semibold placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -228,9 +243,10 @@ export default function LoginClient({
                       type="tel"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
+                      onInput={handleEmojiInput}
                       placeholder="เช่น 0812345678"
                       required
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-violet-500"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -240,8 +256,8 @@ export default function LoginClient({
                     <label className="text-xs font-semibold text-slate-300">
                       เลขท้าย 4 หลักของบัตรประชาชน
                     </label>
-                    <span className="text-[10px] text-emerald-400 font-medium">
-                      🔒 ปลอดภัยสูงสุด
+                    <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-medium">
+                      <ShieldCheck className="w-3 h-3" /> ยืนยันตัวตนรัดกุม
                     </span>
                   </div>
                   <div className="relative">
@@ -254,7 +270,7 @@ export default function LoginClient({
                       onChange={(e) => setIdCardLast4(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))}
                       placeholder="•••• (ตัวเลข 4 หลัก)"
                       required
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono tracking-widest placeholder:text-slate-500 focus:outline-none focus:border-violet-500"
+                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white text-xs font-mono tracking-widest placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
                     />
                   </div>
                   <p className="text-[10px] text-slate-500 mt-1">
@@ -265,7 +281,7 @@ export default function LoginClient({
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-lg shadow-violet-600/30 flex items-center justify-center gap-1.5 transition-all"
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-semibold text-xs shadow-lg shadow-blue-900/40 flex items-center justify-center gap-1.5 transition-all"
                 >
                   {isPending ? (
                     <>
@@ -282,9 +298,9 @@ export default function LoginClient({
 
               {/* Quick Demo Logins for Testing */}
               {demoTenants.length > 0 && (
-                <div className="pt-4 border-t border-white/5 space-y-2">
+                <div className="pt-4 border-t border-slate-800 space-y-2">
                   <div className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-violet-400" />
+                    <Sparkles className="w-3 h-3 text-blue-400" />
                     <span>คลิกเพื่อทดสอบในฐานะผู้เช่าจริง (Demo Quick Login):</span>
                   </div>
 
@@ -295,18 +311,18 @@ export default function LoginClient({
                         type="button"
                         onClick={() => handleQuickTenantLogin(t)}
                         disabled={isPending}
-                        className="p-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/5 text-left text-xs transition-colors flex items-center justify-between"
+                        className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800 border border-slate-800 text-left text-xs transition-colors flex items-center justify-between"
                       >
                         <div>
                           <div className="font-semibold text-white">ห้อง {t.roomNo}</div>
                           <div className="text-[10px] text-slate-400 truncate">{t.name}</div>
                           {t.idCardLast4 && (
-                            <div className="text-[9px] text-violet-300/80 font-mono">
+                            <div className="text-[9px] text-sky-400/80 font-mono">
                               บัตรท้าย: ••••{t.idCardLast4}
                             </div>
                           )}
                         </div>
-                        <ArrowRight className="w-3 h-3 text-violet-400" />
+                        <ArrowRight className="w-3 h-3 text-blue-400" />
                       </button>
                     ))}
                   </div>
@@ -320,7 +336,7 @@ export default function LoginClient({
             <div className="space-y-5">
               <div className="space-y-1">
                 <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <KeyRound className="w-4 h-4 text-violet-400" /> เข้าสู่ระบบผู้ดูแลหอพัก
+                  <KeyRound className="w-4 h-4 text-blue-400" /> เข้าสู่ระบบผู้ดูแลหอพัก
                 </h2>
                 <p className="text-xs text-slate-400">
                   สำหรับเจ้าหน้าที่นิติบุคคล ผู้ดูแลระบบ และช่างซ่อมบำรุง
@@ -336,9 +352,10 @@ export default function LoginClient({
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onInput={handleEmojiInput}
                     placeholder="admin@webhotel.com"
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-violet-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
@@ -351,14 +368,14 @@ export default function LoginClient({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-violet-500"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold text-xs shadow-lg shadow-violet-600/30 flex items-center justify-center gap-1.5 transition-all"
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-semibold text-xs shadow-lg shadow-blue-900/40 flex items-center justify-center gap-1.5 transition-all"
                 >
                   {isPending ? (
                     <>
@@ -374,25 +391,25 @@ export default function LoginClient({
               </form>
 
               {/* Quick Admin & Staff Demo Buttons */}
-              <div className="pt-4 border-t border-white/5 space-y-2">
+              <div className="pt-4 border-t border-slate-800 space-y-2">
                 <div className="text-[11px] text-slate-400 font-medium flex items-center gap-1 mb-1">
-                  <Sparkles className="w-3 h-3 text-violet-400" />
+                  <Sparkles className="w-3 h-3 text-blue-400" />
                   <span>คลิกเพื่อทดสอบตามระดับสิทธิ์ (Demo Quick Login):</span>
                 </div>
                 <button
                   type="button"
                   onClick={handleQuickAdminLogin}
                   disabled={isPending}
-                  className="w-full py-2.5 rounded-xl bg-violet-950/40 hover:bg-violet-900/40 text-violet-300 border border-violet-800/40 text-xs font-medium flex items-center justify-center gap-1.5 transition-all"
+                  className="w-full py-2.5 rounded-xl bg-blue-950/40 hover:bg-blue-900/50 text-blue-200 border border-blue-800/40 text-xs font-medium flex items-center justify-center gap-1.5 transition-all"
                 >
-                  <ShieldCheck className="w-3.5 h-3.5 text-violet-400" />
+                  <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
                   <span>เข้าสู่ระบบด่วนในฐานะ Admin (ผู้ดูแลสูงสุด)</span>
                 </button>
                 <button
                   type="button"
                   onClick={handleQuickStaffLogin}
                   disabled={isPending}
-                  className="w-full py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] text-slate-300 border border-white/10 text-xs font-medium flex items-center justify-center gap-1.5 transition-all"
+                  className="w-full py-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-700/80 text-xs font-medium flex items-center justify-center gap-1.5 transition-all"
                 >
                   <User className="w-3.5 h-3.5 text-emerald-400" />
                   <span>เข้าสู่ระบบด่วนในฐานะ Staff (เจ้าหน้าที่ทั่วไป)</span>

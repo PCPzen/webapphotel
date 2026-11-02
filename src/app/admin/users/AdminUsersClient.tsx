@@ -30,6 +30,7 @@ import {
   updateSystemSettings,
 } from "@/actions/users";
 import { formatThaiDate } from "@/lib/invoices";
+import { handleEmojiInput } from "@/lib/emoji";
 
 export type ProfileItem = {
   id: string;
@@ -214,8 +215,8 @@ export default function AdminUsersClient({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-violet-400" />
+          <h1 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+            <ShieldCheck className="w-6 h-6 text-blue-400" />
             การจัดการผู้ใช้และตั้งค่าระบบ
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
@@ -226,7 +227,7 @@ export default function AdminUsersClient({
         {activeTab === "users" && (
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium text-xs shadow-lg shadow-violet-600/30 transition-all self-start sm:self-auto"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-950/50 transition-all self-start sm:self-auto"
           >
             <UserPlus className="w-3.5 h-3.5" />
             <span>เพิ่มเจ้าหน้าที่</span>
@@ -236,7 +237,7 @@ export default function AdminUsersClient({
 
       {/* Notifications */}
       {errorMessage && (
-        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-sm flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
             <span>{errorMessage}</span>
@@ -247,7 +248,7 @@ export default function AdminUsersClient({
         </div>
       )}
       {successMessage && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-sm flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
             <span>{successMessage}</span>
@@ -259,13 +260,13 @@ export default function AdminUsersClient({
       )}
 
       {/* Main Sub-Tabs */}
-      <div className="flex items-center gap-2 border-b border-white/5 pb-3">
+      <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
         <button
           onClick={() => setActiveTab("users")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
             activeTab === "users"
-              ? "bg-violet-600 text-white shadow-md shadow-violet-600/30"
-              : "bg-white/[0.03] text-slate-400 hover:text-white hover:bg-white/[0.08]"
+              ? "bg-blue-600 text-white shadow-md shadow-blue-950/60"
+              : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
           }`}
         >
           <Users className="w-4 h-4" />
@@ -274,28 +275,28 @@ export default function AdminUsersClient({
 
         <button
           onClick={() => setActiveTab("settings")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
             activeTab === "settings"
-              ? "bg-violet-600 text-white shadow-md shadow-violet-600/30"
-              : "bg-white/[0.03] text-slate-400 hover:text-white hover:bg-white/[0.08]"
+              ? "bg-blue-600 text-white shadow-md shadow-blue-950/60"
+              : "bg-[#0b1120] text-slate-400 hover:text-white border border-slate-800"
           }`}
         >
           <Settings className="w-4 h-4" />
-          <span>ตั้งค่าระบบหอพัก & อัตราบริการ</span>
+          <span>ตั้งค่าระบบหอพัก และอัตราบริการ</span>
         </button>
       </div>
 
       {/* TAB 1: USER ACCOUNTS */}
       {activeTab === "users" && (
-        <div className="p-5 sm:p-6 rounded-2xl bg-[#120f24] border border-violet-900/30 space-y-4">
+        <div className="p-5 sm:p-6 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-white">รายชื่อผู้ใช้งานทั้งหมดในระบบ</h2>
+            <h2 className="text-sm font-bold text-white">รายชื่อผู้ใช้งานทั้งหมดในระบบ</h2>
             <span className="text-xs text-slate-400">บทบาท: Admin, Staff, Tenant</span>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-white/5">
+          <div className="overflow-x-auto rounded-xl border border-slate-800">
             <table className="w-full text-xs text-left">
-              <thead className="bg-black/40 text-slate-400 border-b border-white/5 font-semibold">
+              <thead className="bg-[#0f172a] text-slate-300 border-b border-slate-800 font-bold">
                 <tr>
                   <th className="py-3 px-3">ชื่อ-นามสกุล</th>
                   <th className="py-3 px-3">อีเมล</th>
@@ -306,11 +307,11 @@ export default function AdminUsersClient({
                   <th className="py-3 px-3 text-center">จัดการ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-slate-800/80">
                 {profiles.map((p) => (
-                  <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
-                    <td className="py-3 px-3 font-semibold text-white flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-violet-600/20 text-violet-300 flex items-center justify-center font-bold text-xs">
+                  <tr key={p.id} className="hover:bg-[#0f172a]/60 transition-colors">
+                    <td className="py-3 px-3 font-bold text-white flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold text-xs">
                         {p.fullName.charAt(0)}
                       </div>
                       <span>{p.fullName}</span>
@@ -319,28 +320,28 @@ export default function AdminUsersClient({
                     <td className="py-3 px-3 text-slate-400 font-mono">{p.phone || "-"}</td>
                     <td className="py-3 px-3 text-center">
                       {p.role === "admin" && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-violet-500/20 text-violet-300 border border-violet-500/40">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
                           Admin (ผู้ดูแลระบบ)
                         </span>
                       )}
                       {p.role === "staff" && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/20">
                           Staff (เจ้าหน้าที่)
                         </span>
                       )}
                       {p.role === "tenant" && (
-                        <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                           Tenant (ผู้เช่า)
                         </span>
                       )}
                     </td>
                     <td className="py-3 px-3 text-center">
                       {p.isActive ? (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/20 text-emerald-300">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                           เปิดใช้งาน
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-800 text-slate-500">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700">
                           ระงับใช้งาน
                         </span>
                       )}
@@ -350,7 +351,7 @@ export default function AdminUsersClient({
                       <div className="flex items-center justify-center gap-1.5">
                         <button
                           onClick={() => openEdit(p)}
-                          className="p-1 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+                          className="p-1.5 rounded-lg bg-[#080c15] hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition-colors"
                           title="แก้ไขข้อมูล"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -360,7 +361,7 @@ export default function AdminUsersClient({
                             setSelectedProfile(p);
                             setShowDeleteModal(true);
                           }}
-                          className="p-1 rounded-lg bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 transition-colors"
+                          className="p-1.5 rounded-lg bg-[#080c15] hover:bg-rose-500/20 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-500/30 transition-colors"
                           title="ลบผู้ใช้"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -372,7 +373,7 @@ export default function AdminUsersClient({
 
                 {profiles.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="py-8 text-center text-slate-500">
+                    <td colSpan={7} className="py-8 text-center text-slate-400">
                       ไม่พบข้อมูลผู้ใช้งาน
                     </td>
                   </tr>
@@ -388,93 +389,100 @@ export default function AdminUsersClient({
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Dormitory Info */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-[#120f24] border border-violet-900/30 space-y-4">
-              <h2 className="text-sm font-semibold text-white flex items-center gap-2">
-                <Building className="w-4 h-4 text-violet-400" /> ข้อมูลทั่วไปของหอพัก
+            <div className="p-5 sm:p-6 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-4">
+              <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                <Building className="w-4 h-4 text-blue-400" /> ข้อมูลทั่วไปของหอพัก
               </h2>
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">ชื่อหอพัก / อาคาร</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">ชื่อหอพัก / อาคาร</label>
                   <input
                     type="text"
                     value={dormName}
+                    onInput={handleEmojiInput}
                     onChange={(e) => setDormName(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-violet-500"
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">ที่อยู่หอพัก</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">ที่อยู่หอพัก</label>
                   <textarea
                     rows={2}
                     value={dormAddress}
+                    onInput={handleEmojiInput}
                     onChange={(e) => setDormAddress(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-violet-500"
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">เบอร์โทรศัพท์สำนักงาน</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">เบอร์โทรศัพท์สำนักงาน</label>
                   <input
                     type="text"
                     value={dormPhone}
+                    onInput={handleEmojiInput}
                     onChange={(e) => setDormPhone(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-violet-500"
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
             </div>
 
             {/* Bank & Payment Info */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-[#120f24] border border-violet-900/30 space-y-4">
-              <h2 className="text-sm font-semibold text-white flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-violet-400" /> ข้อมูลบัญชีรับชำระเงิน
+            <div className="p-5 sm:p-6 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-4">
+              <h2 className="text-sm font-bold text-white flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-blue-400" /> ข้อมูลบัญชีรับชำระเงิน
               </h2>
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">ชื่อธนาคาร</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">ชื่อธนาคาร</label>
                   <input
                     type="text"
                     value={bankName}
+                    onInput={handleEmojiInput}
                     onChange={(e) => setBankName(e.target.value)}
                     placeholder="เช่น ธนาคารกสิกรไทย"
-                    className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-violet-500"
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs focus:outline-none focus:border-blue-500"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1">เลขที่บัญชี</label>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">เลขที่บัญชี</label>
                     <input
                       type="text"
                       value={bankAccountNo}
+                      onInput={handleEmojiInput}
                       onChange={(e) => setBankAccountNo(e.target.value)}
                       placeholder="xxx-x-xxxxx-x"
-                      className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-violet-500"
+                      className="w-full px-3.5 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs font-mono focus:outline-none focus:border-blue-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-400 mb-1">พร้อมเพย์ ID</label>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">พร้อมเพย์ ID</label>
                     <input
                       type="text"
                       value={promptpayId}
+                      onInput={handleEmojiInput}
                       onChange={(e) => setPromptpayId(e.target.value)}
                       placeholder="เบอร์โทรหรือเลขบัตร"
-                      className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-violet-500"
+                      className="w-full px-3.5 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs font-mono focus:outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1">ชื่อบัญชีรับโอน</label>
+                  <label className="block text-xs font-bold text-slate-300 mb-1">ชื่อบัญชีรับโอน</label>
                   <input
                     type="text"
                     value={bankAccountName}
+                    onInput={handleEmojiInput}
                     onChange={(e) => setBankAccountName(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-violet-500"
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -482,29 +490,29 @@ export default function AdminUsersClient({
           </div>
 
           {/* Rates & Billing Policy */}
-          <div className="p-5 sm:p-6 rounded-2xl bg-[#120f24] border border-violet-900/30 space-y-4">
-            <h2 className="text-sm font-semibold text-white flex items-center gap-2">
-              <Zap className="w-4 h-4 text-amber-400" /> อัตราค่าน้ำ-ไฟ และกำหนดการออกบิลเริ่มต้น
+          <div className="p-5 sm:p-6 rounded-2xl bg-[#0b1120] border border-slate-800 space-y-4">
+            <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              <Zap className="w-4 h-4 text-blue-400" /> อัตราค่าน้ำ-ไฟ และกำหนดการออกบิลเริ่มต้น
             </h2>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">ค่าน้ำประปา (บาท/หน่วย)</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">ค่าน้ำประปา (บาท/หน่วย)</label>
                 <div className="relative">
-                  <Droplet className="w-3.5 h-3.5 absolute left-3 top-2.5 text-cyan-400" />
+                  <Droplet className="w-3.5 h-3.5 absolute left-3 top-2.5 text-sky-400" />
                   <input
                     type="number"
                     step="0.5"
                     min="0"
                     value={defaultWaterRate}
                     onChange={(e) => setDefaultWaterRate(e.target.value)}
-                    className="w-full pl-8 pr-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-violet-500"
+                    className="w-full pl-8 pr-3 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs font-mono focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">ค่าไฟฟ้า (บาท/หน่วย)</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">ค่าไฟฟ้า (บาท/หน่วย)</label>
                 <div className="relative">
                   <Zap className="w-3.5 h-3.5 absolute left-3 top-2.5 text-amber-400" />
                   <input
@@ -513,13 +521,13 @@ export default function AdminUsersClient({
                     min="0"
                     value={defaultElectricRate}
                     onChange={(e) => setDefaultElectricRate(e.target.value)}
-                    className="w-full pl-8 pr-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-violet-500"
+                    className="w-full pl-8 pr-3 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs font-mono focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">ค่าปรับชำระล่าช้า (บาท)</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">ค่าปรับชำระล่าช้า (บาท)</label>
                 <div className="relative">
                   <span className="text-xs absolute left-3 top-2 text-rose-400">฿</span>
                   <input
@@ -527,25 +535,25 @@ export default function AdminUsersClient({
                     min="0"
                     value={defaultLateFee}
                     onChange={(e) => setDefaultLateFee(e.target.value)}
-                    className="w-full pl-7 pr-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-violet-500"
+                    className="w-full pl-7 pr-3 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs font-mono focus:outline-none focus:border-blue-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">วันครบกำหนด (Due Day)</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">วันครบกำหนด (Due Day)</label>
                 <div className="relative">
-                  <Calendar className="w-3.5 h-3.5 absolute left-3 top-2.5 text-violet-400" />
+                  <Calendar className="w-3.5 h-3.5 absolute left-3 top-2.5 text-blue-400" />
                   <input
                     type="number"
                     min="1"
                     max="28"
                     value={defaultDueDay}
                     onChange={(e) => setDefaultDueDay(e.target.value)}
-                    className="w-full pl-8 pr-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-violet-500"
+                    className="w-full pl-8 pr-3 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs font-mono focus:outline-none focus:border-blue-500"
                   />
                 </div>
-                <p className="text-[10px] text-slate-500 mt-1">วันที่ของเดือนถัดไป (เช่น 5)</p>
+                <p className="text-[10px] text-slate-400 mt-1">วันที่ของเดือนถัดไป (เช่น 5)</p>
               </div>
             </div>
 
@@ -554,7 +562,7 @@ export default function AdminUsersClient({
                 type="button"
                 onClick={handleSaveSettings}
                 disabled={isPending}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-medium text-xs shadow-lg shadow-violet-600/30 transition-all"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-950/50 transition-all"
               >
                 {isPending ? (
                   <>
@@ -574,54 +582,57 @@ export default function AdminUsersClient({
       {/* MODAL 1: ADD STAFF */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#16122d] border border-violet-500/30 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+          <div className="bg-[#0b1120] border border-slate-800 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <UserPlus className="w-5 h-5 text-violet-400" /> เพิ่มเจ้าหน้าที่ / ผู้ดูแลใหม่
+              <UserPlus className="w-5 h-5 text-blue-400" /> เพิ่มเจ้าหน้าที่ / ผู้ดูแลใหม่
             </h3>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">ชื่อ-นามสกุล</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">ชื่อ-นามสกุล</label>
                 <input
                   type="text"
                   value={newFullName}
+                  onInput={handleEmojiInput}
                   onChange={(e) => setNewFullName(e.target.value)}
                   placeholder="เช่น สมชาย ใจดี"
-                  className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-violet-500"
+                  className="w-full px-3 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">อีเมลสำหรับเข้าสู่ระบบ</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">อีเมลสำหรับเข้าสู่ระบบ</label>
                 <input
                   type="email"
                   value={newEmail}
+                  onInput={handleEmojiInput}
                   onChange={(e) => setNewEmail(e.target.value)}
                   placeholder="staff@dormitory.com"
-                  className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-violet-500"
+                  className="w-full px-3 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs font-mono focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">เบอร์โทรศัพท์</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">เบอร์โทรศัพท์</label>
                 <input
                   type="text"
                   value={newPhone}
+                  onInput={handleEmojiInput}
                   onChange={(e) => setNewPhone(e.target.value)}
                   placeholder="0812345678"
-                  className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-violet-500"
+                  className="w-full px-3 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs font-mono focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">บทบาท (Role)</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">บทบาท (Role)</label>
                 <select
                   value={newRole}
                   onChange={(e) => setNewRole(e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-violet-500"
+                  className="w-full px-3 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs focus:outline-none focus:border-blue-500"
                 >
-                  <option value="staff" className="bg-[#16122d]">Staff (เจ้าหน้าที่ทั่วไป)</option>
-                  <option value="admin" className="bg-[#16122d]">Admin (ผู้ดูแลระบบสูงสุด)</option>
+                  <option value="staff" className="bg-[#0b1120]">Staff (เจ้าหน้าที่ทั่วไป)</option>
+                  <option value="admin" className="bg-[#0b1120]">Admin (ผู้ดูแลระบบสูงสุด)</option>
                 </select>
               </div>
             </div>
@@ -631,7 +642,7 @@ export default function AdminUsersClient({
                 type="button"
                 onClick={() => setShowAddModal(false)}
                 disabled={isPending}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium"
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
               >
                 ยกเลิก
               </button>
@@ -639,7 +650,7 @@ export default function AdminUsersClient({
                 type="button"
                 onClick={handleAddUser}
                 disabled={isPending}
-                className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium flex items-center gap-1.5 shadow-md shadow-violet-600/30"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-blue-950/50"
               >
                 {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "บันทึก"}
               </button>
@@ -651,52 +662,54 @@ export default function AdminUsersClient({
       {/* MODAL 2: EDIT USER */}
       {showEditModal && selectedProfile && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#16122d] border border-violet-500/30 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+          <div className="bg-[#0b1120] border border-slate-800 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl">
             <h3 className="text-base font-bold text-white flex items-center gap-2">
-              <Edit2 className="w-5 h-5 text-violet-400" /> แก้ไขข้อมูลผู้ใช้
+              <Edit2 className="w-5 h-5 text-blue-400" /> แก้ไขข้อมูลผู้ใช้
             </h3>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">อีเมล</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">อีเมล</label>
                 <input
                   type="text"
                   disabled
                   value={selectedProfile.email}
-                  className="w-full px-3 py-2 rounded-xl bg-white/5 border border-white/5 text-slate-400 text-xs font-mono cursor-not-allowed"
+                  className="w-full px-3 py-2 rounded-xl bg-[#080c15] border border-slate-800 text-slate-500 text-xs font-mono cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">ชื่อ-นามสกุล</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">ชื่อ-นามสกุล</label>
                 <input
                   type="text"
                   value={editFullName}
+                  onInput={handleEmojiInput}
                   onChange={(e) => setEditFullName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-violet-500"
+                  className="w-full px-3 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">เบอร์โทรศัพท์</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">เบอร์โทรศัพท์</label>
                 <input
                   type="text"
                   value={editPhone}
+                  onInput={handleEmojiInput}
                   onChange={(e) => setEditPhone(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-violet-500"
+                  className="w-full px-3 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs font-mono focus:outline-none focus:border-blue-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1">บทบาท (Role)</label>
+                <label className="block text-xs font-bold text-slate-300 mb-1">บทบาท (Role)</label>
                 <select
                   value={editRole}
                   onChange={(e) => setEditRole(e.target.value as any)}
-                  className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-violet-500"
+                  className="w-full px-3 py-2 rounded-xl bg-[#080c15] border border-slate-700/80 text-white text-xs focus:outline-none focus:border-blue-500"
                 >
-                  <option value="admin" className="bg-[#16122d]">Admin (ผู้ดูแลระบบ)</option>
-                  <option value="staff" className="bg-[#16122d]">Staff (เจ้าหน้าที่)</option>
-                  <option value="tenant" className="bg-[#16122d]">Tenant (ผู้เช่า)</option>
+                  <option value="admin" className="bg-[#0b1120]">Admin (ผู้ดูแลระบบ)</option>
+                  <option value="staff" className="bg-[#0b1120]">Staff (เจ้าหน้าที่)</option>
+                  <option value="tenant" className="bg-[#0b1120]">Tenant (ผู้เช่า)</option>
                 </select>
               </div>
 
@@ -706,9 +719,9 @@ export default function AdminUsersClient({
                   id="editIsActive"
                   checked={editIsActive}
                   onChange={(e) => setEditIsActive(e.target.checked)}
-                  className="w-4 h-4 rounded bg-black/40 border-white/10 text-violet-600 focus:ring-violet-500"
+                  className="w-4 h-4 rounded bg-[#080c15] border-slate-700 text-blue-600 focus:ring-blue-500"
                 />
-                <label htmlFor="editIsActive" className="text-xs text-slate-200">
+                <label htmlFor="editIsActive" className="text-xs text-slate-200 font-medium">
                   เปิดให้เข้าใช้งานระบบ (Active)
                 </label>
               </div>
@@ -719,7 +732,7 @@ export default function AdminUsersClient({
                 type="button"
                 onClick={() => setShowEditModal(false)}
                 disabled={isPending}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium"
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
               >
                 ยกเลิก
               </button>
@@ -727,7 +740,7 @@ export default function AdminUsersClient({
                 type="button"
                 onClick={handleEditUser}
                 disabled={isPending}
-                className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-medium flex items-center gap-1.5 shadow-md shadow-violet-600/30"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-blue-950/50"
               >
                 {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "บันทึกการแก้ไข"}
               </button>
@@ -739,7 +752,7 @@ export default function AdminUsersClient({
       {/* MODAL 3: DELETE USER */}
       {showDeleteModal && selectedProfile && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#16122d] border border-rose-500/30 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+          <div className="bg-[#0b1120] border border-slate-800 rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
             <h3 className="text-base font-bold text-white flex items-center gap-2 text-rose-400">
               <Trash2 className="w-5 h-5" /> ยืนยันการลบผู้ใช้
             </h3>
@@ -753,7 +766,7 @@ export default function AdminUsersClient({
                 type="button"
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isPending}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium"
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold"
               >
                 ยกเลิก
               </button>
@@ -761,7 +774,7 @@ export default function AdminUsersClient({
                 type="button"
                 onClick={handleDeleteUser}
                 disabled={isPending}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-medium flex items-center gap-1.5 shadow-md shadow-rose-600/30"
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-rose-950/50"
               >
                 {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "ยืนยันลบผู้ใช้"}
               </button>

@@ -54,7 +54,7 @@ export default async function PrintSingleInvoicePage({
   const issuedDateThai = formatThaiDate(invoice.issuedAt);
 
   return (
-    <div className="min-h-screen bg-[#07050f] text-zinc-100 print:bg-white print:text-black print:min-h-0 print:p-0">
+    <div className="min-h-screen bg-[#080c15] text-slate-100 print:bg-white print:text-black print:min-h-0 print:p-0">
       <PrintInvoiceClient
         invoiceId={invoice.id}
         invoiceNo={invoice.invoiceNo}
@@ -242,7 +242,7 @@ export default async function PrintSingleInvoicePage({
         {/* Bank Transfer Details & Notice Box */}
         <div className="grid grid-cols-2 gap-4 border border-zinc-300 rounded p-4 text-xs mb-8">
           <div>
-            <p className="font-bold text-zinc-900 mb-1">🏦 ช่องทางการชำระเงิน (โอนผ่านธนาคาร):</p>
+            <p className="font-bold text-zinc-900 mb-1">ช่องทางการชำระเงิน (โอนผ่านธนาคาร):</p>
             <p>
               ธนาคาร: <strong>{bankName}</strong>
             </p>
@@ -260,7 +260,7 @@ export default async function PrintSingleInvoicePage({
           </div>
 
           <div className="border-l border-zinc-200 pl-4 text-zinc-600 space-y-1">
-            <p className="font-bold text-zinc-900">⚠️ หมายเหตุและข้อกำหนด:</p>
+            <p className="font-bold text-zinc-900">หมายเหตุและข้อกำหนด:</p>
             <p>• กรุณาชำระเงินภายในวันที่ <strong>{dueDateThai}</strong></p>
             <p>• หากชำระล่าช้ากว่ากำหนด จะมีค่าปรับวันละ {Number(invoice.contract.lateFee)} บาท ตามที่ระบุในสัญญาเช่า</p>
             <p>• เมื่อโอนเงินแล้ว กรุณาส่งสลิปหลักฐานการโอนมายังสำนักงานหอพัก หรือแจ้งผ่านไลน์</p>

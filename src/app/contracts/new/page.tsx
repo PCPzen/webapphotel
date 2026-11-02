@@ -65,7 +65,7 @@ async function NewContractContent({
       <div className="flex items-center justify-between">
         <Link
           href="/contracts"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-400 hover:text-violet-300 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> กลับหน้ารายการสัญญา
         </Link>
@@ -92,7 +92,7 @@ export default function NewContractPage({
       <div className="p-6 md:p-10 max-w-3xl mx-auto space-y-6">
         <Suspense
           fallback={
-            <div className="h-96 bg-violet-950/20 rounded-3xl border border-violet-900/20 animate-pulse"></div>
+            <div className="h-96 bg-slate-900/40 rounded-3xl border border-slate-800 animate-pulse"></div>
           }
         >
           <NewContractContent searchParams={searchParams} />

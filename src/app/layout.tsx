@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import AppProviders from "@/components/AppProviders";
 
 export const dynamic = "force-dynamic";
 
@@ -15,9 +16,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-[#0c0a18] text-slate-100">
-        {children}
+    <html lang="th" className="h-full antialiased" data-theme="dark">
+      <body className="min-h-full flex flex-col bg-[#080c15] text-slate-100 transition-colors duration-200">
+        <AppProviders>
+          {children}
+        </AppProviders>
       </body>
     </html>
   );

@@ -55,9 +55,9 @@ export default function RoomsPage() {
         <Suspense
           fallback={
             <div className="space-y-6 animate-pulse">
-              <div className="h-20 bg-violet-950/20 rounded-2xl border border-violet-900/20"></div>
-              <div className="h-28 bg-violet-950/20 rounded-2xl border border-violet-900/20"></div>
-              <div className="h-96 bg-violet-950/20 rounded-2xl border border-violet-900/20"></div>
+              <div className="h-20 bg-slate-900/40 rounded-2xl border border-slate-800"></div>
+              <div className="h-28 bg-slate-900/40 rounded-2xl border border-slate-800"></div>
+              <div className="h-96 bg-slate-900/40 rounded-2xl border border-slate-800"></div>
             </div>
           }
         >

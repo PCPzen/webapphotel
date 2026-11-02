@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { parseReadingMonth } from "@/lib/meters";
 import { roundHalfUp, computeDueDate, generateInvoiceNo } from "@/lib/invoices";
 import { requireStaffOrAdmin } from "@/lib/auth-guard";
+import { stripEmoji } from "@/lib/emoji";
+import { setToastCookie } from "@/lib/toast";
 
 export type InvoiceActionResult = {
   success?: boolean;
@@ -109,7 +111,8 @@ export async function generateInvoicesBatch(
         const rentAmount = Number(contract.monthlyRent);
 
         const otherAmount = roundHalfUp(Math.max(0, item.otherAmount || 0), 2);
-        const otherNote = item.otherNote?.trim() || null;
+        const rawItemNote = item.otherNote?.trim();
+        const otherNote = rawItemNote ? stripEmoji(rawItemNote) : null;
         const lateFee = 0; // ค่าปรับเริ่มต้น 0 (คิดเมื่อเกินกำหนดตาม BR-09)
 
         const totalAmount = roundHalfUp(
@@ -161,6 +164,7 @@ export async function generateInvoicesBatch(
     revalidatePath("/dashboard");
     revalidatePath("/");
 
+    await setToastCookie(`ออกใบแจ้งหนี้สำเร็จเรียบร้อย ${createdInvoiceIds.length} ฉบับ`, "success");
     return {
       success: true,
       message: `ออกใบแจ้งหนี้สำเร็จเรียบร้อย ${createdInvoiceIds.length} ฉบับ`,
@@ -183,7 +187,8 @@ export async function updateInvoiceOtherFee(
   if (!auth.authorized) return { error: auth.error };
 
   const otherAmount = parseFloat(formData.get("otherAmount")?.toString() || "0");
-  const otherNote = formData.get("otherNote")?.toString().trim() || null;
+  const rawOtherNote = formData.get("otherNote")?.toString().trim();
+  const otherNote = rawOtherNote ? stripEmoji(rawOtherNote) : null;
 
   if (isNaN(otherAmount) || otherAmount < 0) {
     return { error: "จำนวนค่าใช้จ่ายอื่น ๆ ต้องไม่ติดลบ (0 บาทขึ้นไป)" };
@@ -341,7 +346,7 @@ export async function cancelInvoice(
       where: { id: invoiceId },
       data: {
         status: "cancelled",
-        otherNote: reason ? `${invoice.otherNote || ""} [ยกเลิก: ${reason}]`.trim() : invoice.otherNote,
+        otherNote: reason ? `${invoice.otherNote || ""} [ยกเลิก: ${stripEmoji(reason)}]`.trim() : invoice.otherNote,
       },
     });
 

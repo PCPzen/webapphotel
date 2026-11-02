@@ -10,6 +10,8 @@ import {
   calculateAge,
 } from "@/lib/thaiId";
 import { requireStaffOrAdmin } from "@/lib/auth-guard";
+import { stripEmoji } from "@/lib/emoji";
+import { setToastCookie } from "@/lib/toast";
 
 export type TenantFormState = {
   error?: string;
@@ -29,19 +31,23 @@ export async function createTenant(
   const auth = await requireStaffOrAdmin();
   if (!auth.authorized) return { error: auth.error };
 
-  const firstName = formData.get("firstName")?.toString().trim() || "";
-  const lastName = formData.get("lastName")?.toString().trim() || "";
+  const firstName = stripEmoji(formData.get("firstName")?.toString().trim() || "");
+  const lastName = stripEmoji(formData.get("lastName")?.toString().trim() || "");
   const rawIdCardNo = formData.get("idCardNo")?.toString().trim() || "";
   const idCardNo = rawIdCardNo.replace(/\D/g, "");
   const birthDateStr = formData.get("birthDate")?.toString().trim() || "";
   const rawPhone = formData.get("phone")?.toString().trim() || "";
   const phone = cleanPhoneNumber(rawPhone);
-  const email = formData.get("email")?.toString().trim() || null;
-  const lineId = formData.get("lineId")?.toString().trim() || null;
-  const vehicleInfo = formData.get("vehicleInfo")?.toString().trim() || null;
-  const coTenantName = formData.get("coTenantName")?.toString().trim() || null;
-  const address = formData.get("address")?.toString().trim() || "";
-  const emergencyName = formData.get("emergencyName")?.toString().trim() || "";
+  const rawEmail = formData.get("email")?.toString().trim();
+  const email = rawEmail ? stripEmoji(rawEmail) : null;
+  const rawLineId = formData.get("lineId")?.toString().trim();
+  const lineId = rawLineId ? stripEmoji(rawLineId) : null;
+  const rawVehicleInfo = formData.get("vehicleInfo")?.toString().trim();
+  const vehicleInfo = rawVehicleInfo ? stripEmoji(rawVehicleInfo) : null;
+  const rawCoTenantName = formData.get("coTenantName")?.toString().trim();
+  const coTenantName = rawCoTenantName ? stripEmoji(rawCoTenantName) : null;
+  const address = stripEmoji(formData.get("address")?.toString().trim() || "");
+  const emergencyName = stripEmoji(formData.get("emergencyName")?.toString().trim() || "");
   const rawEmergencyPhone = formData.get("emergencyPhone")?.toString().trim() || "";
   const emergencyPhone = cleanPhoneNumber(rawEmergencyPhone);
   const actionType = formData.get("_action")?.toString() || "save";
@@ -133,6 +139,8 @@ export async function createTenant(
   revalidatePath("/dashboard");
   revalidatePath("/");
 
+  await setToastCookie("ลงทะเบียนผู้เช่าใหม่สำเร็จ", "success");
+
   // ถ้าเลือก "บันทึกและไปทำสัญญาเช่าทันที" ให้วาร์ปไปหน้าทำสัญญาพร้อมแนบ ID ผู้เช่า
   if (actionType === "save_and_contract") {
     redirect(`/contracts/new?tenantId=${createdId}`);
@@ -152,16 +160,20 @@ export async function updateTenant(
   const auth = await requireStaffOrAdmin();
   if (!auth.authorized) return { error: auth.error };
 
-  const firstName = formData.get("firstName")?.toString().trim() || "";
-  const lastName = formData.get("lastName")?.toString().trim() || "";
+  const firstName = stripEmoji(formData.get("firstName")?.toString().trim() || "");
+  const lastName = stripEmoji(formData.get("lastName")?.toString().trim() || "");
   const rawPhone = formData.get("phone")?.toString().trim() || "";
   const phone = cleanPhoneNumber(rawPhone);
-  const email = formData.get("email")?.toString().trim() || null;
-  const lineId = formData.get("lineId")?.toString().trim() || null;
-  const vehicleInfo = formData.get("vehicleInfo")?.toString().trim() || null;
-  const coTenantName = formData.get("coTenantName")?.toString().trim() || null;
-  const address = formData.get("address")?.toString().trim() || "";
-  const emergencyName = formData.get("emergencyName")?.toString().trim() || "";
+  const rawEmail = formData.get("email")?.toString().trim();
+  const email = rawEmail ? stripEmoji(rawEmail) : null;
+  const rawLineId = formData.get("lineId")?.toString().trim();
+  const lineId = rawLineId ? stripEmoji(rawLineId) : null;
+  const rawVehicleInfo = formData.get("vehicleInfo")?.toString().trim();
+  const vehicleInfo = rawVehicleInfo ? stripEmoji(rawVehicleInfo) : null;
+  const rawCoTenantName = formData.get("coTenantName")?.toString().trim();
+  const coTenantName = rawCoTenantName ? stripEmoji(rawCoTenantName) : null;
+  const address = stripEmoji(formData.get("address")?.toString().trim() || "");
+  const emergencyName = stripEmoji(formData.get("emergencyName")?.toString().trim() || "");
   const rawEmergencyPhone = formData.get("emergencyPhone")?.toString().trim() || "";
   const emergencyPhone = cleanPhoneNumber(rawEmergencyPhone);
 
@@ -204,6 +216,7 @@ export async function updateTenant(
 
   revalidatePath("/tenants");
   revalidatePath(`/tenants/${id}`);
+  await setToastCookie("แก้ไขข้อมูลผู้เช่าสำเร็จ", "success");
   redirect(`/tenants/${id}`);
 }
 
@@ -235,5 +248,6 @@ export async function deleteTenant(id: number): Promise<TenantFormState> {
   }
 
   revalidatePath("/tenants");
+  await setToastCookie("ลบข้อมูลผู้เช่าสำเร็จ", "info");
   redirect("/tenants");
 }
