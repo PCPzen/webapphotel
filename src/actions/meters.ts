@@ -1,5 +1,7 @@
 "use server";
 
+import { toSafeErrorMessage } from "@/lib/safe-error";
+
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { parseReadingMonth } from "@/lib/meters";
@@ -128,7 +130,7 @@ export async function saveMeterReading(
     return { success: true, message: "บันทึกเลขมิเตอร์เรียบร้อยแล้ว" };
   } catch (err: any) {
     console.error("saveMeterReading error:", err);
-    return { error: err.message || "เกิดข้อผิดพลาดในการบันทึกเลขมิเตอร์" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการบันทึกเลขมิเตอร์") };
   }
 }
 
@@ -247,7 +249,7 @@ export async function saveMeterReadingsBatch(
     };
   } catch (err: any) {
     console.error("saveMeterReadingsBatch error:", err);
-    return { error: err.message || "เกิดข้อผิดพลาดในการบันทึกมิเตอร์ทั้งตาราง" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการบันทึกมิเตอร์ทั้งตาราง") };
   }
 }
 
@@ -283,6 +285,6 @@ export async function deleteMeterReading(meterReadingId: number): Promise<MeterA
     revalidatePath("/dashboard");
     return { success: true, message: "ลบรายการมิเตอร์เรียบร้อยแล้ว" };
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการลบรายการมิเตอร์" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการลบรายการมิเตอร์") };
   }
 }

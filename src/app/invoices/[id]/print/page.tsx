@@ -1,8 +1,9 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import PrintInvoiceClient from "./PrintInvoiceClient";
 import { getThaiMonthName } from "@/lib/meters";
 import { formatThaiDate } from "@/lib/invoices";
+import { getServerSession } from "@/lib/session";
 
 export default async function PrintSingleInvoicePage({
   params,
@@ -14,6 +15,11 @@ export default async function PrintSingleInvoicePage({
 
   if (isNaN(invoiceId)) {
     notFound();
+  }
+
+  const session = await getServerSession();
+  if (!session) {
+    redirect("/login");
   }
 
   const invoice = await prisma.invoice.findUnique({
@@ -34,6 +40,13 @@ export default async function PrintSingleInvoicePage({
 
   if (!invoice) {
     notFound();
+  }
+
+  // IDOR Protection: หากผู้ใช้เป็น Tenant ต้องเป็นบิลของสัญญาเช่าตนเองเท่านั้น
+  if (session.role === "tenant") {
+    if (invoice.contract.tenantId !== session.tenantId) {
+      notFound();
+    }
   }
 
   const settings = await prisma.systemSetting.findFirst();

@@ -3,8 +3,10 @@ import prisma from "@/lib/prisma";
 import TenantListClient from "./TenantListClient";
 import AppLayout from "@/components/AppLayout";
 import { maskThaiId } from "@/lib/thaiId";
+import { requireStaffOrAdmin } from "@/lib/auth-guard";
 
 async function TenantsData() {
+  await requireStaffOrAdmin();
   const tenants = await prisma.tenant.findMany({
     orderBy: { createdAt: "desc" },
     include: {

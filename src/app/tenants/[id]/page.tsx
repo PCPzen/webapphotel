@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
 import prisma from "@/lib/prisma";
+import { requireStaffOrAdmin } from "@/lib/auth-guard";
 import {
   User,
   ArrowLeft,
@@ -24,6 +25,7 @@ import AppLayout from "@/components/AppLayout";
 import { calculateAge } from "@/lib/thaiId";
 
 async function TenantDetailContent({ params }: { params: Promise<{ id: string }> }) {
+  await requireStaffOrAdmin();
   const { id } = await params;
   const tenantId = parseInt(id, 10);
 

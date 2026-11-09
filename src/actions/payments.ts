@@ -1,5 +1,7 @@
 "use server";
 
+import { toSafeErrorMessage } from "@/lib/safe-error";
+
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { PaymentMethod } from "@prisma/client";
@@ -189,7 +191,7 @@ export async function recordPayment(formData: FormData): Promise<PaymentActionRe
     };
   } catch (err: any) {
     console.error("recordPayment error:", err);
-    return { error: err.message || "เกิดข้อผิดพลาดในการบันทึกการชำระเงิน" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการบันทึกการชำระเงิน") };
   }
 }
 
@@ -282,6 +284,6 @@ export async function voidPayment(
     };
   } catch (err: any) {
     console.error("voidPayment error:", err);
-    return { error: err.message || "เกิดข้อผิดพลาดในการยกเลิกการชำระเงิน" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการยกเลิกการชำระเงิน") };
   }
 }

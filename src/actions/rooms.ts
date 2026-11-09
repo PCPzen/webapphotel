@@ -1,5 +1,7 @@
 "use server";
 
+import { toSafeErrorMessage } from "@/lib/safe-error";
+
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -63,7 +65,7 @@ export async function createRoom(prevState: FormState, formData: FormData): Prom
       },
     });
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการบันทึกห้องพัก" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการบันทึกห้องพัก") };
   }
 
   revalidatePath("/rooms");
@@ -140,7 +142,7 @@ export async function createRoomsBatch(prevState: FormState, formData: FormData)
       message: msg,
     };
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการสร้างห้องพักแบบชุด" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการสร้างห้องพักแบบชุด") };
   }
 }
 
@@ -221,7 +223,7 @@ export async function updateRoom(
       },
     });
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการอัปเดตข้อมูล" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการอัปเดตข้อมูล") };
   }
 
   revalidatePath("/rooms");
@@ -256,7 +258,7 @@ export async function deleteRoom(id: number): Promise<FormState> {
 
     await prisma.room.delete({ where: { id } });
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการลบห้องพัก" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการลบห้องพัก") };
   }
 
   revalidatePath("/rooms");

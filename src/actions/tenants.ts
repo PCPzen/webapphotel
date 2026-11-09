@@ -1,5 +1,7 @@
 "use server";
 
+import { toSafeErrorMessage } from "@/lib/safe-error";
+
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -132,7 +134,7 @@ export async function createTenant(
 
     createdId = newTenant.id;
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการบันทึกข้อมูลผู้เช่า" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการบันทึกข้อมูลผู้เช่า") };
   }
 
   revalidatePath("/tenants");
@@ -211,7 +213,7 @@ export async function updateTenant(
       },
     });
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการอัปเดตข้อมูลผู้เช่า" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการอัปเดตข้อมูลผู้เช่า") };
   }
 
   revalidatePath("/tenants");
@@ -244,7 +246,7 @@ export async function deleteTenant(id: number): Promise<TenantFormState> {
 
     await prisma.tenant.delete({ where: { id } });
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการลบข้อมูลผู้เช่า" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการลบข้อมูลผู้เช่า") };
   }
 
   revalidatePath("/tenants");

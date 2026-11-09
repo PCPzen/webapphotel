@@ -1,9 +1,10 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import PrintReceiptClient from "./PrintReceiptClient";
 import { thaiBahtText, formatPaymentMethod } from "@/lib/payments";
 import { getThaiMonthName } from "@/lib/meters";
 import { formatThaiDate } from "@/lib/invoices";
+import { getServerSession } from "@/lib/session";
 
 export default async function ReceiptPrintPage({
   params,
@@ -15,6 +16,11 @@ export default async function ReceiptPrintPage({
 
   if (isNaN(paymentId)) {
     notFound();
+  }
+
+  const session = await getServerSession();
+  if (!session) {
+    redirect("/login");
   }
 
   const payment = await prisma.payment.findUnique({
@@ -38,6 +44,13 @@ export default async function ReceiptPrintPage({
 
   if (!payment) {
     notFound();
+  }
+
+  // IDOR Protection: หากผู้ใช้เป็น Tenant ต้องเป็นใบเสร็จของสัญญาเช่าตนเองเท่านั้น
+  if (session.role === "tenant") {
+    if (payment.invoice.contract.tenantId !== session.tenantId) {
+      notFound();
+    }
   }
 
   const settings = await prisma.systemSetting.findFirst();

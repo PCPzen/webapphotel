@@ -1,5 +1,7 @@
 "use server";
 
+import { toSafeErrorMessage } from "@/lib/safe-error";
+
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { UserRole } from "@prisma/client";
@@ -56,7 +58,7 @@ export async function createStaffProfile(
     revalidatePath("/admin/users");
     return { success: true, message: `เพิ่มผู้ใช้งาน ${fullName} เรียบร้อยแล้ว` };
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการสร้างบัญชีผู้ใช้" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการสร้างบัญชีผู้ใช้") };
   }
 }
 
@@ -108,7 +110,7 @@ export async function updateUserProfile(
     await setToastCookie("อัปเดตข้อมูลผู้ใช้งานสำเร็จ", "success");
     return { success: true, message: "อัปเดตข้อมูลผู้ใช้งานสำเร็จ" };
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการอัปเดตผู้ใช้") };
   }
 }
 
@@ -143,7 +145,7 @@ export async function deleteUserProfile(userId: string): Promise<UserActionState
     revalidatePath("/admin/users");
     return { success: true, message: "ลบบัญชีผู้ใช้งานสำเร็จ" };
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการลบบัญชีผู้ใช้" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการลบบัญชีผู้ใช้") };
   }
 }
 
@@ -221,6 +223,6 @@ export async function updateSystemSettings(
     revalidatePath("/");
     return { success: true, message: "บันทึกการตั้งค่าระบบเรียบร้อยแล้ว" };
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการบันทึกการตั้งค่า" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการบันทึกการตั้งค่า") };
   }
 }

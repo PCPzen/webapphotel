@@ -1,7 +1,8 @@
 import prisma from "@/lib/prisma";
-import { cookies } from "next/headers";
+import { notFound, redirect } from "next/navigation";
 import TenantLayout, { TenantOption } from "@/components/TenantLayout";
 import TenantRepairsClient, { TenantRepairItem } from "./TenantRepairsClient";
+import { getServerSession } from "@/lib/session";
 
 export default async function TenantRepairsPage({
   searchParams,
@@ -10,43 +11,68 @@ export default async function TenantRepairsPage({
 }) {
   const { tenantId: tenantIdParam } = await searchParams;
 
-  const allActiveContracts = await prisma.contract.findMany({
-    where: { status: "active" },
-    include: {
-      tenant: true,
-      room: true,
-    },
-    orderBy: [
-      { room: { roomNo: "asc" } },
-    ],
-  });
-
-  const allTenants: TenantOption[] = allActiveContracts.map((c) => ({
-    id: c.tenant.id,
-    name: `${c.tenant.firstName} ${c.tenant.lastName}`.trim(),
-    roomNo: c.room.roomNo,
-  }));
-
-  if (allActiveContracts.length === 0) {
-    return (
-      <TenantLayout currentTenant={null} allTenants={[]}>
-        <div className="p-12 text-center text-slate-400">ยังไม่มีข้อมูลผู้เช่า</div>
-      </TenantLayout>
-    );
+  const session = await getServerSession();
+  if (!session) {
+    redirect("/login");
   }
 
-  const cookieStore = await cookies();
-  const roleCookie = cookieStore.get("webhotel_user_role")?.value;
-  const cookieTenantId = cookieStore.get("webhotel_tenant_id")?.value;
-  const isAdminPreview = roleCookie === "admin" || roleCookie === "staff";
+  const isAdminPreview = session.role === "admin" || session.role === "staff";
 
-  const targetId = isAdminPreview && tenantIdParam
-    ? parseInt(tenantIdParam, 10)
-    : cookieTenantId
-    ? parseInt(cookieTenantId, 10)
-    : allActiveContracts[0].tenant.id;
-  const currentContract =
-    allActiveContracts.find((c) => c.tenant.id === targetId) || allActiveContracts[0];
+  let currentContract;
+  let allTenants: TenantOption[] = [];
+
+  if (isAdminPreview) {
+    // โหมด Admin/Staff Preview: อนุญาตให้ดึงรายชื่อผู้เช่าทั้งหมดเพื่อตรวจดูพอร์ทัล
+    const allActiveContracts = await prisma.contract.findMany({
+      where: { status: "active" },
+      include: {
+        tenant: true,
+        room: true,
+      },
+      orderBy: [{ room: { roomNo: "asc" } }],
+    });
+
+    if (allActiveContracts.length === 0) {
+      return (
+        <TenantLayout currentTenant={null} allTenants={[]} isAdminPreview={true}>
+          <div className="p-12 text-center text-slate-400">ยังไม่มีข้อมูลผู้เช่า</div>
+        </TenantLayout>
+      );
+    }
+
+    allTenants = allActiveContracts.map((c) => ({
+      id: c.tenant.id,
+      name: `${c.tenant.firstName} ${c.tenant.lastName}`.trim(),
+      roomNo: c.room.roomNo,
+    }));
+
+    const targetId = tenantIdParam ? parseInt(tenantIdParam, 10) : allActiveContracts[0].tenant.id;
+    currentContract = allActiveContracts.find((c) => c.tenant.id === targetId) || allActiveContracts[0];
+  } else {
+    // โหมดผู้เช่าจริง (Tenant): คิวรีเฉพาะสัญญาของตนเอง ป้องกัน PII Leakage
+    if (!session.tenantId) {
+      redirect("/login");
+    }
+
+    currentContract = await prisma.contract.findFirst({
+      where: {
+        tenantId: session.tenantId,
+        status: "active",
+      },
+      include: {
+        tenant: true,
+        room: true,
+      },
+    });
+
+    if (!currentContract) {
+      return (
+        <TenantLayout currentTenant={null} allTenants={[]} isAdminPreview={false}>
+          <div className="p-12 text-center text-slate-400">ไม่พบสัญญาเช่าที่เปิดใช้งาน</div>
+        </TenantLayout>
+      );
+    }
+  }
 
   const rawRepairs = await prisma.repairRequest.findMany({
     where: { roomId: currentContract.room.id },

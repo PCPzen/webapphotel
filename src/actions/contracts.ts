@@ -7,6 +7,7 @@ import { ContractStatus } from "@prisma/client";
 import { requireStaffOrAdmin } from "@/lib/auth-guard";
 import { stripEmoji } from "@/lib/emoji";
 import { setToastCookie } from "@/lib/toast";
+import { toSafeErrorMessage } from "@/lib/safe-error";
 
 export type ContractFormState = {
   error?: string;
@@ -131,7 +132,7 @@ export async function createContract(
 
     createdContractId = result.id;
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการสร้างสัญญาเช่า" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการสร้างสัญญาเช่า") };
   }
 
   revalidatePath("/contracts");
@@ -262,7 +263,7 @@ export async function endContract(
       });
     });
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการสิ้นสุดสัญญาเช่า" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการสิ้นสุดสัญญาเช่า") };
   }
 
   revalidatePath("/contracts");
@@ -309,7 +310,7 @@ export async function cancelContract(contractId: number): Promise<ContractFormSt
       });
     });
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการยกเลิกสัญญา" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการยกเลิกสัญญา") };
   }
 
   revalidatePath("/contracts");
@@ -416,7 +417,7 @@ export async function renewContract(
 
     newContractId = result.id;
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการต่ออายุสัญญา" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการต่ออายุสัญญา") };
   }
 
   revalidatePath("/contracts");

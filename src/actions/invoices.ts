@@ -1,5 +1,7 @@
 "use server";
 
+import { toSafeErrorMessage } from "@/lib/safe-error";
+
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { parseReadingMonth } from "@/lib/meters";
@@ -172,7 +174,7 @@ export async function generateInvoicesBatch(
     };
   } catch (err: any) {
     console.error("generateInvoicesBatch error:", err);
-    return { error: err.message || "เกิดข้อผิดพลาดในการออกใบแจ้งหนี้" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการออกใบแจ้งหนี้") };
   }
 }
 
@@ -237,7 +239,7 @@ export async function updateInvoiceOtherFee(
     revalidatePath("/invoices");
     return { success: true, message: "อัปเดตค่าใช้จ่ายอื่น ๆ สำเร็จ" };
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการอัปเดตค่าใช้จ่าย" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการอัปเดตค่าใช้จ่าย") };
   }
 }
 
@@ -303,7 +305,7 @@ export async function applyLateFee(invoiceId: number): Promise<InvoiceActionResu
       message: `บันทึกค่าปรับล่าช้า ฿${newLateFee.toLocaleString()} สำเร็จ`,
     };
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการคิดค่าปรับล่าช้า" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการคิดค่าปรับล่าช้า") };
   }
 }
 
@@ -357,6 +359,6 @@ export async function cancelInvoice(
 
     return { success: true, message: "ยกเลิกใบแจ้งหนี้สำเร็จ ปลดล็อกมิเตอร์เรียบร้อย" };
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการยกเลิกใบแจ้งหนี้" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการยกเลิกใบแจ้งหนี้") };
   }
 }

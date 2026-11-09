@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma";
-import { cookies } from "next/headers";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import TenantLayout, { TenantOption } from "@/components/TenantLayout";
 import TenantHomeClient, {
   TenantProfileData,
@@ -10,6 +9,7 @@ import TenantHomeClient, {
 } from "./TenantHomeClient";
 import { getThaiMonthName } from "@/lib/meters";
 import { isInvoiceOverdue } from "@/lib/invoices";
+import { getServerSession } from "@/lib/session";
 
 export default async function TenantPortalHomePage({
   searchParams,
@@ -18,49 +18,76 @@ export default async function TenantPortalHomePage({
 }) {
   const { tenantId: tenantIdParam } = await searchParams;
 
-  // ดึงผู้เช่าทั้งหมดที่มีสัญญา active
-  const allActiveContracts = await prisma.contract.findMany({
-    where: { status: "active" },
-    include: {
-      tenant: true,
-      room: true,
-    },
-    orderBy: [
-      { room: { roomNo: "asc" } },
-    ],
-  });
-
-  const allTenants: TenantOption[] = allActiveContracts.map((c) => ({
-    id: c.tenant.id,
-    name: `${c.tenant.firstName} ${c.tenant.lastName}`.trim(),
-    roomNo: c.room.roomNo,
-  }));
-
-  // หากไม่มีผู้เช่าที่มีสัญญา active เลย
-  if (allActiveContracts.length === 0) {
-    return (
-      <TenantLayout currentTenant={null} allTenants={[]}>
-        <div className="p-12 text-center text-slate-400 space-y-4">
-          <h2 className="text-xl font-bold text-white">ยังไม่มีข้อมูลผู้เช่าที่ทำสัญญาในระบบ</h2>
-          <p className="text-sm">กรุณาสร้างสัญญาเช่าห้องพักในระบบจัดการหอพักก่อนเข้าใช้งานพอร์ทัล</p>
-        </div>
-      </TenantLayout>
-    );
+  const session = await getServerSession();
+  if (!session) {
+    redirect("/login");
   }
 
-  // ตรวจสอบสิทธิ์จาก session cookie: หากเป็นผู้เช่า (tenant) จะล็อกให้เห็นเฉพาะห้องตนเองเท่านั้น
-  const cookieStore = await cookies();
-  const roleCookie = cookieStore.get("webhotel_user_role")?.value;
-  const cookieTenantId = cookieStore.get("webhotel_tenant_id")?.value;
-  const isAdminPreview = roleCookie === "admin" || roleCookie === "staff";
+  const isAdminPreview = session.role === "admin" || session.role === "staff";
 
-  const targetId = isAdminPreview && tenantIdParam
-    ? parseInt(tenantIdParam, 10)
-    : cookieTenantId
-    ? parseInt(cookieTenantId, 10)
-    : allActiveContracts[0].tenant.id;
-  const currentContract =
-    allActiveContracts.find((c) => c.tenant.id === targetId) || allActiveContracts[0];
+  let currentContract;
+  let allTenants: TenantOption[] = [];
+
+  if (isAdminPreview) {
+    // โหมด Admin/Staff Preview: อนุญาตให้ดึงรายชื่อผู้เช่าทั้งหมดเพื่อทดสอบและตรวจดูพอร์ทัล
+    const allActiveContracts = await prisma.contract.findMany({
+      where: { status: "active" },
+      include: {
+        tenant: true,
+        room: true,
+      },
+      orderBy: [{ room: { roomNo: "asc" } }],
+    });
+
+    if (allActiveContracts.length === 0) {
+      return (
+        <TenantLayout currentTenant={null} allTenants={[]} isAdminPreview={true}>
+          <div className="p-12 text-center text-slate-400 space-y-4">
+            <h2 className="text-xl font-bold text-white">ยังไม่มีข้อมูลผู้เช่าที่ทำสัญญาในระบบ</h2>
+            <p className="text-sm">กรุณาสร้างสัญญาเช่าห้องพักในระบบจัดการหอพักก่อนเข้าใช้งานพอร์ทัล</p>
+          </div>
+        </TenantLayout>
+      );
+    }
+
+    allTenants = allActiveContracts.map((c) => ({
+      id: c.tenant.id,
+      name: `${c.tenant.firstName} ${c.tenant.lastName}`.trim(),
+      roomNo: c.room.roomNo,
+    }));
+
+    const targetId = tenantIdParam ? parseInt(tenantIdParam, 10) : allActiveContracts[0].tenant.id;
+    currentContract = allActiveContracts.find((c) => c.tenant.id === targetId) || allActiveContracts[0];
+  } else {
+    // โหมดผู้เช่าจริง (Tenant): คิวรีเฉพาะสัญญาของผู้เช่าคนนี้เท่านั้น ป้องกัน PII Leakage
+    if (!session.tenantId) {
+      redirect("/login");
+    }
+
+    currentContract = await prisma.contract.findFirst({
+      where: {
+        tenantId: session.tenantId,
+        status: "active",
+      },
+      include: {
+        tenant: true,
+        room: true,
+      },
+    });
+
+    if (!currentContract) {
+      return (
+        <TenantLayout currentTenant={null} allTenants={[]} isAdminPreview={false}>
+          <div className="p-12 text-center text-slate-400 space-y-4">
+            <h2 className="text-xl font-bold text-white">ไม่พบสัญญาเช่าที่เปิดใช้งาน</h2>
+            <p className="text-sm">กรุณาติดต่อสำนักงานหอพักเพื่อตรวจสอบสถานะสัญญาเช่าของคุณ</p>
+          </div>
+        </TenantLayout>
+      );
+    }
+
+    allTenants = []; // ไม่ส่งข้อมูลผู้เช่าคนอื่นไปให้ Client
+  }
 
   const today = new Date();
   const diffDays = Math.max(
@@ -118,7 +145,7 @@ export default async function TenantPortalHomePage({
       totalAmount: total,
       paidAmount: paid,
       balance,
-      status: rawInvoice.status as TenantInvoiceSummary["status"],
+      status: rawInvoice.status,
       dueDate: rawInvoice.dueDate.toISOString(),
       isOverdue: overdue,
     };
@@ -128,7 +155,7 @@ export default async function TenantPortalHomePage({
   const rawRepairs = await prisma.repairRequest.findMany({
     where: { roomId: currentContract.room.id },
     orderBy: { reportedAt: "desc" },
-    take: 5,
+    take: 3,
   });
 
   const recentRepairs: TenantRepairSummary[] = rawRepairs.map((r) => ({
@@ -142,11 +169,11 @@ export default async function TenantPortalHomePage({
     resolutionNote: r.resolutionNote,
   }));
 
-  // ดึงการตั้งค่าระบบสำหรับข้อมูลธนาคาร
+  // ดึงข้อมูลบัญชีธนาคารสำหรับชำระเงิน
   const rawSettings = await prisma.systemSetting.findFirst();
   const bankInfo: TenantBankInfo = {
-    dormName: rawSettings?.dormName || "หอพักสุขสบาย",
-    dormPhone: rawSettings?.dormPhone || "02-123-4567",
+    dormName: rawSettings?.dormName || "หอพักสุขสบาย เพลส",
+    dormPhone: rawSettings?.dormPhone || "081-234-5678",
     bankName: rawSettings?.bankName || "ธนาคารกสิกรไทย",
     bankAccountNo: rawSettings?.bankAccountNo || "123-4-56789-0",
     bankAccountName: rawSettings?.bankAccountName || "หอพักสุขสบาย",

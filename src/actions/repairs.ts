@@ -1,5 +1,7 @@
 "use server";
 
+import { toSafeErrorMessage } from "@/lib/safe-error";
+
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -23,11 +25,25 @@ export async function createRepairRequest(
   prevState: RepairFormState,
   formData: FormData
 ): Promise<RepairFormState> {
-  const roomId = parseInt(formData.get("roomId")?.toString() || "0", 10);
+  let roomId = parseInt(formData.get("roomId")?.toString() || "0", 10);
   let tenantId = parseInt(formData.get("tenantId")?.toString() || "0", 10);
 
-  const auth = await requireRepairAccess(tenantId);
+  const auth = await requireRepairAccess(tenantId, roomId);
   if (!auth.authorized) return { error: auth.error };
+
+  // IDOR & Authorization Hardening: หากเป็น Tenant ให้ล็อก tenantId และ roomId ตามสัญญาของตนเองเสมอ
+  if (auth.role === "tenant" && auth.tenantId) {
+    tenantId = auth.tenantId;
+    const tenantContract = await prisma.contract.findFirst({
+      where: { tenantId: auth.tenantId, status: "active" },
+      select: { roomId: true },
+    });
+    if (!tenantContract) {
+      return { error: "ไม่พบสัญญาเช่าที่เปิดใช้งานสำหรับบัญชีของคุณ" };
+    }
+    roomId = tenantContract.roomId;
+  }
+
   const title = stripEmoji(formData.get("title")?.toString().trim() || "");
   const description = stripEmoji(formData.get("description")?.toString().trim() || "");
   const categoryStr = formData.get("category")?.toString() || "other";
@@ -98,7 +114,7 @@ export async function createRepairRequest(
     createdId = newRepair.id;
   } catch (err: any) {
     console.error("createRepairRequest error:", err);
-    return { error: err.message || "เกิดข้อผิดพลาดในการบันทึกการแจ้งซ่อม" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการบันทึกการแจ้งซ่อม") };
   }
 
   const fromTenantPortal = formData.get("fromTenantPortal")?.toString() === "true";
@@ -212,7 +228,7 @@ export async function updateRepairStatus(
     return { success: true, message: "อัปเดตสถานะงานซ่อมเรียบร้อยแล้ว" };
   } catch (err: any) {
     console.error("updateRepairStatus error:", err);
-    return { error: err.message || "เกิดข้อผิดพลาดในการอัปเดตสถานะงานซ่อม" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการอัปเดตสถานะงานซ่อม") };
   }
 }
 
@@ -261,6 +277,6 @@ export async function updateRepairDetails(
     revalidatePath(`/repairs/${repairId}`);
     return { success: true, message: "แก้ไขรายละเอียดงานซ่อมสำเร็จ" };
   } catch (err: any) {
-    return { error: err.message || "เกิดข้อผิดพลาดในการแก้ไข" };
+    return { error: toSafeErrorMessage(err, "เกิดข้อผิดพลาดในการแก้ไข") };
   }
 }
