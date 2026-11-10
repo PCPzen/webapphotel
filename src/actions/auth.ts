@@ -66,12 +66,12 @@ export async function loginTenant(
   const idCardLast4 = formData.get("idCardLast4")?.toString().trim() || "";
   const tenantIdStr = formData.get("tenantId")?.toString().trim() || "";
 
-  const isDev = process.env.NODE_ENV !== "production";
+  const isDemoDisabled = process.env.DISABLE_DEMO_LOGIN === "true";
 
-  // Quick Demo Login: อนุญาตเฉพาะในโหมด Development เท่านั้น
+  // Quick Demo Login: อนุญาตให้ใช้งานทดสอบระบบได้ เว้นแต่จะระบุ DISABLE_DEMO_LOGIN=true
   if (tenantIdStr) {
-    if (!isDev) {
-      return { error: "ปฏิเสธการเข้าถึง: ฟังก์ชัน Quick Demo ปิดใช้งานในโหมด Production" };
+    if (isDemoDisabled) {
+      return { error: "ปฏิเสธการเข้าถึง: ฟังก์ชัน Quick Demo ถูกปิดใช้งานในระบบนี้" };
     }
 
     const tenantId = parseInt(tenantIdStr, 10);
@@ -206,14 +206,15 @@ export async function loginStaff(
   const isDemoStaff = formData.get("isDemoStaff")?.toString() === "true";
 
   const isDev = process.env.NODE_ENV !== "production";
+  const isDemoDisabled = process.env.DISABLE_DEMO_LOGIN === "true";
 
   try {
     let profile;
 
-    // Quick Demo Logins: ป้องกันไม่ให้รันใน Production โดยเด็ดขาด
+    // Quick Demo Logins: อนุญาตให้ทดสอบระบบได้ เว้นแต่จะระบุ DISABLE_DEMO_LOGIN=true
     if (isDemoAdmin) {
-      if (!isDev) {
-        return { error: "ฟังก์ชัน Demo Admin ปิดใช้งานในระบบ Production" };
+      if (isDemoDisabled) {
+        return { error: "ฟังก์ชัน Demo Admin ถูกปิดใช้งานในระบบนี้" };
       }
 
       profile = await prisma.profile.findFirst({
@@ -232,8 +233,8 @@ export async function loginStaff(
         });
       }
     } else if (isDemoStaff) {
-      if (!isDev) {
-        return { error: "ฟังก์ชัน Demo Staff ปิดใช้งานในระบบ Production" };
+      if (isDemoDisabled) {
+        return { error: "ฟังก์ชัน Demo Staff ถูกปิดใช้งานในระบบนี้" };
       }
 
       profile = await prisma.profile.findFirst({

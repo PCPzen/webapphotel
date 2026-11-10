@@ -73,6 +73,11 @@ export default function LoginClient({
   // Handle Quick Tenant Login
   const handleQuickTenantLogin = (t: DemoTenant) => {
     setErrorMessage(null);
+    setRoomNo(t.roomNo);
+    setPhone(t.phone);
+    if (t.idCardLast4) {
+      setIdCardLast4(t.idCardLast4);
+    }
     startTransition(async () => {
       const fd = new FormData();
       fd.append("tenantId", t.id.toString());
