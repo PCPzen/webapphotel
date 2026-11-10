@@ -201,12 +201,12 @@ export default function LoginClient({
           </div>
         </div>
 
-        {/* Unified Glass Card */}
+        {/* Unified Glass Card (Optimized: Fast blur & GPU layer isolation) */}
         <div
-          className={`backdrop-blur-2xl rounded-3xl p-6 sm:p-7 space-y-5 transition-all duration-300 ${
+          className={`backdrop-blur-md rounded-3xl p-6 sm:p-7 space-y-5 transition-all duration-300 transform-gpu will-change-transform ${
             isDark
-              ? "bg-slate-950/80 border border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.85)] ring-1 ring-white/5"
-              : "bg-white/85 border border-white/80 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.18)] ring-1 ring-slate-900/5"
+              ? "bg-slate-950/90 border border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.85)] ring-1 ring-white/5"
+              : "bg-white/92 border border-white/80 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.18)] ring-1 ring-slate-900/5"
           }`}
         >
           {/* Segmented Control (Tabs) */}
