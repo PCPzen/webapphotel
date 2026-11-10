@@ -280,11 +280,14 @@ export default function CinematicCityBackground() {
           dctx.fill();
         }
 
-        // Far Buildings (Dark)
-        dctx.fillStyle = "#0c1524";
-        for (const b of farBuildings) {
+        // Far Buildings (Dark Obsidian & Slate Silhouette)
+        const darkFarPalettes = ["#09111e", "#0c1626", "#0e1a2d", "#080e1a"];
+        for (let i = 0; i < farBuildings.length; i++) {
+          const b = farBuildings[i];
           const topY = roadY - b.height;
+          dctx.fillStyle = darkFarPalettes[i % darkFarPalettes.length];
           dctx.fillRect(b.x, topY, b.width, b.height);
+
           if (b.roofType === "antenna") {
             dctx.strokeStyle = "#16253b";
             dctx.lineWidth = 1.5;
@@ -292,6 +295,8 @@ export default function CinematicCityBackground() {
             dctx.moveTo(b.x + b.width / 2, topY);
             dctx.lineTo(b.x + b.width / 2, topY - 24 * dpr);
             dctx.stroke();
+
+            // Subtle red beacon dot (carefully isolated)
             dctx.fillStyle = "#f43f5e";
             dctx.beginPath();
             dctx.arc(b.x + b.width / 2, topY - 24 * dpr, 2 * dpr, 0, Math.PI * 2);
@@ -299,12 +304,18 @@ export default function CinematicCityBackground() {
           }
         }
 
-        // Mid Buildings (Dark with Glowing Windows)
-        dctx.fillStyle = "#080e18";
-        for (const b of midBuildings) {
+        // Mid Buildings (Dark Midnight Architectural Tone with Glowing Windows)
+        const darkMidPalettes = ["#060a12", "#080e1a", "#0a1220", "#070c17"];
+        for (let i = 0; i < midBuildings.length; i++) {
+          const b = midBuildings[i];
           const topY = roadY - b.height;
+          const bColor = darkMidPalettes[i % darkMidPalettes.length];
+
+          // Building Body
+          dctx.fillStyle = bColor;
           dctx.fillRect(b.x, topY, b.width, b.height);
 
+          // Neon Accent Trim
           if (b.neonColor) {
             dctx.strokeStyle = b.neonColor;
             dctx.lineWidth = 2;
@@ -314,16 +325,33 @@ export default function CinematicCityBackground() {
             dctx.stroke();
           }
 
+          // Roof Shapes (Explicit fillStyle each time)
           if (b.roofType === "spire") {
-            dctx.fillStyle = "#080e18";
+            dctx.fillStyle = bColor;
             dctx.beginPath();
             dctx.moveTo(b.x + 8 * dpr, topY);
             dctx.lineTo(b.x + b.width / 2, topY - 28 * dpr);
             dctx.lineTo(b.x + b.width - 8 * dpr, topY);
             dctx.fill();
+          } else if (b.roofType === "stepped") {
+            dctx.fillStyle = bColor;
+            dctx.fillRect(b.x + 10 * dpr, topY - 10 * dpr, b.width - 20 * dpr, 10 * dpr);
+            dctx.fillRect(b.x + 20 * dpr, topY - 18 * dpr, b.width - 40 * dpr, 8 * dpr);
+          } else if (b.roofType === "antenna") {
+            dctx.strokeStyle = "#1e293b";
+            dctx.lineWidth = 1.5;
+            dctx.beginPath();
+            dctx.moveTo(b.x + b.width * 0.35, topY);
+            dctx.lineTo(b.x + b.width * 0.35, topY - 20 * dpr);
+            dctx.stroke();
+
+            dctx.fillStyle = "#f43f5e";
+            dctx.beginPath();
+            dctx.arc(b.x + b.width * 0.35, topY - 20 * dpr, 1.8 * dpr, 0, Math.PI * 2);
+            dctx.fill();
           }
 
-          // Windows
+          // Windows (Strictly scoped)
           for (const w of b.windows) {
             dctx.fillStyle = w.litNight ? w.colorNight : "rgba(15, 23, 42, 0.4)";
             dctx.fillRect(b.x + w.x, topY + w.y, w.w, w.h);
@@ -416,30 +444,40 @@ export default function CinematicCityBackground() {
         lctx.fill();
 
         // Far Buildings (Daytime Slate)
-        lctx.fillStyle = "#94a3b8";
-        for (const b of farBuildings) {
+        const lightFarPalettes = ["#94a3b8", "#a1a1aa", "#9ca3af", "#8da2b5"];
+        for (let i = 0; i < farBuildings.length; i++) {
+          const b = farBuildings[i];
           const topY = roadY - b.height;
+          lctx.fillStyle = lightFarPalettes[i % lightFarPalettes.length];
           lctx.fillRect(b.x, topY, b.width, b.height);
         }
 
         // Mid Buildings (Daytime Architectural Slate)
-        lctx.fillStyle = "#cbd5e1";
-        for (const b of midBuildings) {
+        const lightMidPalettes = ["#cbd5e1", "#d4d4d8", "#e2e8f0", "#c8d3e0"];
+        for (let i = 0; i < midBuildings.length; i++) {
+          const b = midBuildings[i];
           const topY = roadY - b.height;
+          const bColor = lightMidPalettes[i % lightMidPalettes.length];
+
+          lctx.fillStyle = bColor;
           lctx.fillRect(b.x, topY, b.width, b.height);
 
           if (b.roofType === "spire") {
-            lctx.fillStyle = "#cbd5e1";
+            lctx.fillStyle = bColor;
             lctx.beginPath();
             lctx.moveTo(b.x + 8 * dpr, topY);
             lctx.lineTo(b.x + b.width / 2, topY - 28 * dpr);
             lctx.lineTo(b.x + b.width - 8 * dpr, topY);
             lctx.fill();
+          } else if (b.roofType === "stepped") {
+            lctx.fillStyle = bColor;
+            lctx.fillRect(b.x + 10 * dpr, topY - 10 * dpr, b.width - 20 * dpr, 10 * dpr);
+            lctx.fillRect(b.x + 20 * dpr, topY - 18 * dpr, b.width - 40 * dpr, 8 * dpr);
           }
 
           // Day Windows (Sunlit Glass)
-          lctx.fillStyle = "rgba(241, 245, 249, 0.8)";
           for (const w of b.windows) {
+            lctx.fillStyle = "rgba(241, 245, 249, 0.85)";
             lctx.fillRect(b.x + w.x, topY + w.y, w.w, w.h);
           }
         }
