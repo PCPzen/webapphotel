@@ -1,27 +1,24 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import {
   Building2,
   User,
   ShieldCheck,
-  Lock,
   Phone,
   DoorOpen,
   ArrowRight,
   Loader2,
   AlertCircle,
-  Sparkles,
-  Home,
-  CheckCircle2,
   KeyRound,
   CreditCard,
+  Sparkles,
 } from "lucide-react";
 import { loginTenant, loginStaff } from "@/actions/auth";
 import { handleEmojiInput } from "@/lib/emoji";
 import { ThemeToggle } from "@/components/ThemeProvider";
 import { useToast } from "@/components/ToastProvider";
+import CinematicCityBackground from "@/components/CinematicCityBackground";
 
 export type DemoTenant = {
   id: number;
@@ -78,6 +75,7 @@ export default function LoginClient({
     if (t.idCardLast4) {
       setIdCardLast4(t.idCardLast4);
     }
+
     startTransition(async () => {
       const fd = new FormData();
       fd.append("tenantId", t.id.toString());
@@ -98,9 +96,14 @@ export default function LoginClient({
   // Handle Quick Admin Login
   const handleQuickAdminLogin = () => {
     setErrorMessage(null);
+    setEmail("admin@webhotel.com");
+    setPassword("admin1234");
+
     startTransition(async () => {
       const fd = new FormData();
       fd.append("isDemoAdmin", "true");
+      fd.append("email", "admin@webhotel.com");
+      fd.append("password", "admin1234");
 
       const res = await loginStaff({}, fd);
       if (res?.error) {
@@ -113,9 +116,14 @@ export default function LoginClient({
   // Handle Quick Staff Login
   const handleQuickStaffLogin = () => {
     setErrorMessage(null);
+    setEmail("staff@webhotel.com");
+    setPassword("staff1234");
+
     startTransition(async () => {
       const fd = new FormData();
       fd.append("isDemoStaff", "true");
+      fd.append("email", "staff@webhotel.com");
+      fd.append("password", "staff1234");
 
       const res = await loginStaff({}, fd);
       if (res?.error) {
@@ -129,6 +137,7 @@ export default function LoginClient({
   const handleStaffSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
     startTransition(async () => {
       const fd = new FormData();
       fd.append("email", email);
@@ -143,292 +152,311 @@ export default function LoginClient({
   };
 
   return (
-    <div className="min-h-screen bg-[#080c15] text-slate-100 flex flex-col justify-center items-center p-4 selection:bg-blue-600 selection:text-white relative transition-colors duration-200">
-      {/* Theme Toggle Button */}
-      <div className="absolute top-4 right-4 z-20">
+    <div className="relative min-h-screen w-full flex flex-col justify-center items-center p-4 sm:p-6 overflow-x-clip bg-[#04070d] text-slate-100 selection:bg-amber-400 selection:text-slate-950">
+      {/* 1. Cinematic 2D City & Traffic Animation Background */}
+      <CinematicCityBackground />
+
+      {/* 2. Top Bar Utilities */}
+      <header className="absolute top-4 right-4 z-20 flex items-center gap-3">
         <ThemeToggle />
-      </div>
+      </header>
 
-      {/* Background glow */}
-      <div className="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" />
-
-      <div className="relative z-10 max-w-md w-full space-y-6">
-        {/* Logo and Brand */}
+      {/* 3. Main Login Monolith (Anti-Slop: Clean, Frosted Glass, High Contrast) */}
+      <main className="relative z-10 w-full max-w-[420px] my-auto space-y-5">
+        {/* Brand & Identity */}
         <div className="text-center space-y-2">
-          <div className="inline-flex p-3 rounded-2xl bg-gradient-to-tr from-blue-600 via-blue-500 to-sky-400 text-white shadow-xl shadow-blue-900/40 border border-blue-400/30">
-            <Building2 className="w-8 h-8" />
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-900/90 text-amber-300 ring-1 ring-amber-400/30 shadow-lg shadow-black/40">
+            <Building2 className="w-6 h-6 stroke-[1.75]" />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">หอพักสุขสบาย เพลส</h1>
-          <p className="text-xs text-slate-400">
-            ระบบบริหารจัดการหอพักและพอร์ทัลผู้เช่าออนไลน์ (SRD v1.0)
-          </p>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">
+              หอพักสุขสบาย เพลส
+            </h1>
+            <p className="text-xs text-slate-400 mt-0.5">
+              ระบบบริหารจัดการหอพักและพอร์ทัลผู้เช่า
+            </p>
+          </div>
         </div>
 
-        {/* Tab Switcher: Tenant vs Staff */}
-        <div className="p-1 rounded-2xl bg-[#0b1120] border border-slate-800 flex">
-          <button
-            onClick={() => {
-              setActiveTab("tenant");
-              setErrorMessage(null);
-            }}
-            className={`flex-1 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-              activeTab === "tenant"
-                ? "bg-blue-600 text-white shadow-md shadow-blue-900/40"
-                : "text-slate-400 hover:text-white"
-            }`}
+        {/* Unified Glass Card */}
+        <div className="backdrop-blur-2xl bg-slate-950/80 border border-white/10 rounded-3xl p-6 sm:p-7 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.85)] ring-1 ring-white/5 space-y-5">
+          {/* Segmented Control (Tabs) */}
+          <div
+            role="tablist"
+            aria-label="ประเภทผู้ใช้งาน"
+            className="grid grid-cols-2 p-1 rounded-xl bg-slate-900/80 border border-slate-800/80 text-xs font-medium"
           >
-            <User className="w-3.5 h-3.5" />
-            <span>สำหรับผู้เช่า (Tenant)</span>
-          </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "tenant"}
+              onClick={() => {
+                setActiveTab("tenant");
+                setErrorMessage(null);
+              }}
+              className={`py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                activeTab === "tenant"
+                  ? "bg-slate-800 text-white font-semibold shadow-sm"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>ผู้เช่าห้องพัก</span>
+            </button>
 
-          <button
-            onClick={() => {
-              setActiveTab("staff");
-              setErrorMessage(null);
-            }}
-            className={`flex-1 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-              activeTab === "staff"
-                ? "bg-blue-600 text-white shadow-md shadow-blue-900/40"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <ShieldCheck className="w-3.5 h-3.5" />
-            <span>ผู้ดูแล & เจ้าหน้าที่ (Admin)</span>
-          </button>
-        </div>
-
-        {/* Error notification */}
-        {errorMessage && (
-          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
-            <span>{errorMessage}</span>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "staff"}
+              onClick={() => {
+                setActiveTab("staff");
+                setErrorMessage(null);
+              }}
+              className={`py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                activeTab === "staff"
+                  ? "bg-slate-800 text-white font-semibold shadow-sm"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>เจ้าหน้าที่ / นิติ</span>
+            </button>
           </div>
-        )}
 
-        {/* Form Container Card */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-[#0b1120] border border-slate-800 shadow-2xl space-y-6">
-          {/* TAB 1: TENANT LOGIN */}
-          {activeTab === "tenant" && (
-            <div className="space-y-5">
-              <div className="space-y-1">
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <Home className="w-4 h-4 text-blue-400" /> เข้าสู่ระบบพอร์ทัลผู้เช่า
-                </h2>
-                <p className="text-xs text-slate-400">
-                  ตรวจสอบบิลค่าเช่า ค่าน้ำ-ไฟ และติดตามงานแจ้งซ่อมบำรุง
-                </p>
-              </div>
-
-              <form onSubmit={handleTenantSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    หมายเลขห้องพัก (Room No.)
-                  </label>
-                  <div className="relative">
-                    <DoorOpen className="w-4 h-4 absolute left-3.5 top-3 text-slate-500" />
-                    <input
-                      type="text"
-                      value={roomNo}
-                      onChange={(e) => setRoomNo(e.target.value)}
-                      onInput={handleEmojiInput}
-                      placeholder="เช่น 101, 201"
-                      required
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white text-xs font-semibold placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    เบอร์โทรศัพท์ที่ลงทะเบียนในสัญญาเช่า
-                  </label>
-                  <div className="relative">
-                    <Phone className="w-4 h-4 absolute left-3.5 top-3 text-slate-500" />
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      onInput={handleEmojiInput}
-                      placeholder="เช่น 0812345678"
-                      required
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-slate-300">
-                      เลขท้าย 4 หลักของบัตรประชาชน
-                    </label>
-                    <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-medium">
-                      <ShieldCheck className="w-3 h-3" /> ยืนยันตัวตนรัดกุม
-                    </span>
-                  </div>
-                  <div className="relative">
-                    <CreditCard className="w-4 h-4 absolute left-3.5 top-3 text-slate-500" />
-                    <input
-                      type="password"
-                      maxLength={4}
-                      inputMode="numeric"
-                      value={idCardLast4}
-                      onChange={(e) => setIdCardLast4(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))}
-                      placeholder="•••• (ตัวเลข 4 หลัก)"
-                      required
-                      className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white text-xs font-mono tracking-widest placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
-                    />
-                  </div>
-                  <p className="text-[10px] text-slate-500 mt-1">
-                    ระบุตัวเลข 4 หลักสุดท้ายของบัตร ปชช. ที่ลงทะเบียนไว้กับสัญญาเช่า
-                  </p>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-semibold text-xs shadow-lg shadow-blue-900/40 flex items-center justify-center gap-1.5 transition-all"
-                >
-                  {isPending ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> กำลังตรวจสอบ...
-                    </>
-                  ) : (
-                    <>
-                      <span>เข้าสู่พอร์ทัลผู้เช่า</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </>
-                  )}
-                </button>
-              </form>
-
-              {/* Quick Demo Logins for Testing */}
-              {demoTenants.length > 0 && (
-                <div className="pt-4 border-t border-slate-800 space-y-2">
-                  <div className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-blue-400" />
-                    <span>คลิกเพื่อทดสอบในฐานะผู้เช่าจริง (Demo Quick Login):</span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {demoTenants.map((t) => (
-                      <button
-                        key={t.id}
-                        type="button"
-                        onClick={() => handleQuickTenantLogin(t)}
-                        disabled={isPending}
-                        className="p-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800 border border-slate-800 text-left text-xs transition-colors flex items-center justify-between"
-                      >
-                        <div>
-                          <div className="font-semibold text-white">ห้อง {t.roomNo}</div>
-                          <div className="text-[10px] text-slate-400 truncate">{t.name}</div>
-                          {t.idCardLast4 && (
-                            <div className="text-[9px] text-sky-400/80 font-mono">
-                              บัตรท้าย: ••••{t.idCardLast4}
-                            </div>
-                          )}
-                        </div>
-                        <ArrowRight className="w-3 h-3 text-blue-400" />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+          {/* Error Message */}
+          {errorMessage && (
+            <div
+              role="alert"
+              className="p-3 rounded-xl bg-rose-950/60 border border-rose-800/60 text-rose-200 text-xs flex items-start gap-2.5 animate-fadeIn"
+            >
+              <AlertCircle className="w-4 h-4 shrink-0 text-rose-400 mt-0.5" />
+              <span className="leading-relaxed">{errorMessage}</span>
             </div>
           )}
 
-          {/* TAB 2: STAFF LOGIN */}
-          {activeTab === "staff" && (
-            <div className="space-y-5">
-              <div className="space-y-1">
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <KeyRound className="w-4 h-4 text-blue-400" /> เข้าสู่ระบบผู้ดูแลหอพัก
-                </h2>
-                <p className="text-xs text-slate-400">
-                  สำหรับเจ้าหน้าที่นิติบุคคล ผู้ดูแลระบบ และช่างซ่อมบำรุง
-                </p>
-              </div>
-
-              <form onSubmit={handleStaffSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    อีเมลเจ้าหน้าที่ (Email)
-                  </label>
+          {/* TAB 1: TENANT FORM */}
+          {activeTab === "tenant" ? (
+            <form onSubmit={handleTenantSubmit} className="space-y-4">
+              {/* Room No */}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="roomNoInput"
+                  className="block text-xs font-medium text-slate-300"
+                >
+                  หมายเลขห้องพัก
+                </label>
+                <div className="relative">
+                  <DoorOpen className="w-4 h-4 absolute left-3.5 top-3 text-slate-500 pointer-events-none" />
                   <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    id="roomNoInput"
+                    type="text"
+                    value={roomNo}
+                    onChange={(e) => setRoomNo(e.target.value)}
                     onInput={handleEmojiInput}
-                    placeholder="admin@webhotel.com"
+                    placeholder="เช่น 403, 101"
                     required
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
+                    autoComplete="off"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/70 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                    รหัสผ่าน (Password)
-                  </label>
+              {/* Phone */}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="phoneInput"
+                  className="block text-xs font-medium text-slate-300"
+                >
+                  เบอร์โทรศัพท์ที่ลงทะเบียน
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 absolute left-3.5 top-3 text-slate-500 pointer-events-none" />
                   <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-blue-500"
+                    id="phoneInput"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    onInput={handleEmojiInput}
+                    placeholder="เช่น 0812345678"
+                    required
+                    autoComplete="tel"
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/70 text-white text-xs font-mono placeholder:text-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors"
                   />
                 </div>
+              </div>
 
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-semibold text-xs shadow-lg shadow-blue-900/40 flex items-center justify-center gap-1.5 transition-all"
+              {/* Citizen ID Last 4 */}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="idCardLast4Input"
+                  className="block text-xs font-medium text-slate-300"
                 >
-                  {isPending ? (
-                    <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> กำลังตรวจสอบ...
-                    </>
-                  ) : (
-                    <>
-                      <span>เข้าสู่ระบบหลังบ้าน</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </>
-                  )}
-                </button>
-              </form>
-
-              {/* Quick Admin & Staff Demo Buttons */}
-              <div className="pt-4 border-t border-slate-800 space-y-2">
-                <div className="text-[11px] text-slate-400 font-medium flex items-center gap-1 mb-1">
-                  <Sparkles className="w-3 h-3 text-blue-400" />
-                  <span>คลิกเพื่อทดสอบตามระดับสิทธิ์ (Demo Quick Login):</span>
+                  เลขท้าย 4 หลักของบัตรประชาชน
+                </label>
+                <div className="relative">
+                  <CreditCard className="w-4 h-4 absolute left-3.5 top-3 text-slate-500 pointer-events-none" />
+                  <input
+                    id="idCardLast4Input"
+                    type="password"
+                    maxLength={4}
+                    inputMode="numeric"
+                    value={idCardLast4}
+                    onChange={(e) =>
+                      setIdCardLast4(e.target.value.replace(/[^0-9]/g, "").slice(0, 4))
+                    }
+                    placeholder="•••• (4 หลัก)"
+                    required
+                    className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/70 text-white text-xs font-mono tracking-widest placeholder:text-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors"
+                  />
                 </div>
+              </div>
+
+              {/* Submit CTA */}
+              <button
+                type="submit"
+                disabled={isPending}
+                className="w-full py-2.5 mt-2 rounded-xl bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-950 font-semibold text-xs transition-colors flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:opacity-60"
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>กำลังเข้าสู่ระบบ...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>เข้าสู่พอร์ทัลผู้เช่า</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+            </form>
+          ) : (
+            /* TAB 2: STAFF FORM */
+            <form onSubmit={handleStaffSubmit} className="space-y-4">
+              {/* Email */}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="staffEmailInput"
+                  className="block text-xs font-medium text-slate-300"
+                >
+                  อีเมลเจ้าหน้าที่
+                </label>
+                <input
+                  id="staffEmailInput"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onInput={handleEmojiInput}
+                  placeholder="admin@webhotel.com"
+                  required
+                  autoComplete="email"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/70 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors"
+                />
+              </div>
+
+              {/* Password */}
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="staffPasswordInput"
+                  className="block text-xs font-medium text-slate-300"
+                >
+                  รหัสผ่าน
+                </label>
+                <input
+                  id="staffPasswordInput"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  autoComplete="current-password"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900/90 border border-slate-700/70 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 transition-colors"
+                />
+              </div>
+
+              {/* Submit CTA */}
+              <button
+                type="submit"
+                disabled={isPending}
+                className="w-full py-2.5 mt-2 rounded-xl bg-amber-400 hover:bg-amber-300 active:bg-amber-500 text-slate-950 font-semibold text-xs transition-colors flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 disabled:opacity-60"
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>กำลังเข้าสู่ระบบ...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>เข้าสู่ระบบหลังบ้าน</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </>
+                )}
+              </button>
+            </form>
+          )}
+
+          {/* Quick Demo Section (Anti-Slop: Minimalist, Tactile Pills) */}
+          <div className="pt-4 border-t border-slate-800/80 space-y-2.5">
+            <div className="flex items-center justify-between text-[11px] text-slate-400">
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="w-3 h-3 text-amber-300" />
+                <span>คลิกเพื่อทดสอบระบบ (Quick Demo)</span>
+              </span>
+              <span className="text-[10px] text-slate-500">Auto-fill</span>
+            </div>
+
+            {activeTab === "tenant" ? (
+              /* Tenant Demo Pills */
+              <div className="flex flex-wrap gap-2">
+                {demoTenants.slice(0, 4).map((t) => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    disabled={isPending}
+                    onClick={() => handleQuickTenantLogin(t)}
+                    className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-left text-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400 flex items-center gap-2"
+                  >
+                    <span className="font-semibold text-amber-300">
+                      ห้อง {t.roomNo}
+                    </span>
+                    <span className="text-[11px] text-slate-400 truncate max-w-[100px]">
+                      {t.name}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              /* Staff & Admin Demo Pills */
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
+                  disabled={isPending}
                   onClick={handleQuickAdminLogin}
-                  disabled={isPending}
-                  className="w-full py-2.5 rounded-xl bg-blue-950/40 hover:bg-blue-900/50 text-blue-200 border border-blue-800/40 text-xs font-medium flex items-center justify-center gap-1.5 transition-all"
+                  className="px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-xs transition-colors flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400"
                 >
-                  <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
-                  <span>เข้าสู่ระบบด่วนในฐานะ Admin (ผู้ดูแลสูงสุด)</span>
+                  <KeyRound className="w-3.5 h-3.5 text-amber-300" />
+                  <span className="font-medium text-slate-200">Admin Demo</span>
                 </button>
+
                 <button
                   type="button"
-                  onClick={handleQuickStaffLogin}
                   disabled={isPending}
-                  className="w-full py-2.5 rounded-xl bg-slate-900/60 hover:bg-slate-800 text-slate-300 border border-slate-700/80 text-xs font-medium flex items-center justify-center gap-1.5 transition-all"
+                  onClick={handleQuickStaffLogin}
+                  className="px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-xs transition-colors flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400"
                 >
-                  <User className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>เข้าสู่ระบบด่วนในฐานะ Staff (เจ้าหน้าที่ทั่วไป)</span>
+                  <User className="w-3.5 h-3.5 text-slate-300" />
+                  <span className="font-medium text-slate-200">Staff Demo</span>
                 </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
-        {/* Footer Info */}
-        <div className="text-center text-xs text-slate-500">
-          ระบบบริหารจัดการหอพักครบวงจร • Dormitory Management System
-        </div>
-      </div>
+        {/* Quiet Footer */}
+        <footer className="text-center text-[11px] text-slate-500">
+          หอพักสุขสบาย เพลส ระบบพอร์ทัลออนไลน์
+        </footer>
+      </main>
     </div>
   );
 }
