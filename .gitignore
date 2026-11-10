@@ -40,3 +40,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# agent skills binaries & local configs
+*.exe
+.claude/
+.devin/
+.gemini/
+
